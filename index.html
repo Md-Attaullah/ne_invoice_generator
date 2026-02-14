@@ -8,8 +8,6 @@
   :root{
     --brand:#b91c1c;--brand-2:#7f1d1d;--bg:#fafafa;--text:#111827;--muted:#6b7280;
     --card:#fff;--border:#e5e7eb;--soft:#fff1f2;
-    --ig:#db2777; --ig-hover:#be185d; --ig-ring:#f472b6;
-    --wa:#16a34a; --wa-hover:#15803d; --wa-ring:#86efac;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
@@ -40,22 +38,6 @@
   @media(max-width:900px){.hide-mobile{display:none}}
   @media print{header{display:none!important} .card{border:none;box-shadow:none}}
   .error{color:#b91c1c;font-size:.85rem;margin-top:4px;display:none}
-
-  /* Social (Follow Us) buttons */
-  .social-card .social-wrap{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  .social-btn{
-    display:inline-flex;align-items:center;gap:8px;
-    border-radius:10px;padding:10px 12px;color:#fff;
-    font-weight:700;font-size:.92rem;text-decoration:none;
-    box-shadow:0 2px 8px rgba(0,0,0,.12); outline:0;
-  }
-  .social-btn .social-icon{width:18px;height:18px;display:inline-block}
-  .social-btn.ig{background:var(--ig)}
-  .social-btn.ig:hover{background:var(--ig-hover)}
-  .social-btn.ig:focus{box-shadow:0 0 0 3px var(--ig-ring)}
-  .social-btn.wa{background:var(--wa)}
-  .social-btn.wa:hover{background:var(--wa-hover)}
-  .social-btn.wa:focus{box-shadow:0 0 0 3px var(--wa-ring)}
 
   /* Small print header block for preview/print */
   .print-header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
@@ -161,38 +143,17 @@
       </div>
     </div>
   </div>
-
-  <!-- Follow Us card (now visible in PRINT/PDF too) -->
-  <div class="card social-card" style="margin-top:12px">
-    <h2>Follow Nusrat Enterprises</h2>
-    <div class="social-wrap" aria-label="Follow Nusrat Enterprises on social">
-      <!-- Instagram -->
-      <a href="https://www.instagram.com/nusrat_enterprises?igsh=Y3hzeHgzdnF5dThq&utm_source=website&utm_medium=header&utm_campaign=social"
-         target="_blank" rel="noopener"
-         aria-label="Follow Nusrat Enterprises on Instagram"
-         class="social-btn ig">
-        <svg xmlns="http://www.w3.org/2000/svg" class="social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm5.25-.75a1.25 1.25 0 11-2.5 0 1.25 1.25 0 012.5 0zM12 9a3 3 0 110 6 3 3 0 010-6z"></path>
-        </svg>
-        <span>Instagram</span>
-      </a>
-
-      <!-- WhatsApp Channel -->
-      <a href="https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06?utm_source=website&utm_medium=header&utm_campaign=social"
-         target="_blank" rel="noopener"
-         aria-label="Follow Nusrat Enterprises WhatsApp Channel"
-         class="social-btn wa">
-        <svg xmlns="http://www.w3.org/2000/svg" class="social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 0C5.37 0 0 5.37 0 12c0 2.12.55 4.15 1.6 5.97L0 24l6.26-1.64A12 12 0 1012 0zm0 22c-1.82 0-3.58-.49-5.12-1.41l-.37-.22-3.51.92.94-3.41-.23-.36A9.96 9.96 0 1122 12c0 5.52-4.48 10-10 10zm5.28-7.33c-.29-.15-1.7-.84-1.97-.94-.27-.1-.47-.15-.66.15-.2.29-.76.94-.93 1.13-.17.19-.34.22-.63.07-.29-.15-1.16-.43-2.22-1.39-.82-.73-1.38-1.62-1.54-1.89-.17-.29-.02-.42.13-.56.14-.14.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.15-.63-1.52-.86-2.08-.23-.55-.43-.47-.59-.48l-.51-.01c-.18 0-.47.07-.72.34-.25.27-.95.92-.95 2.24 0 1.32.99 2.61 1.13 2.81.14.19 1.95 2.93 4.71 4.11.66.28 1.17.45 1.57.57.66.2 1.26.18 1.74.11.53-.08 1.64-.66 1.87-1.29.23-.63.23-1.18.16-1.29-.07-.11-.25-.18-.53-.32z"></path>
-        </svg>
-        <span>WhatsApp</span>
-      </a>
-    </div>
-  </div>
 </div>
 
 <script>
 (function(){
+  // ====== Config: social/review links to append in WhatsApp invoice ======
+  const LINKS = {
+    instagram: "https://www.instagram.com/nusrat_enterprises?igsh=Y3hzeHgzdnF5dThq&utm_source=website&utm_medium=header&utm_campaign=social",
+    waChannel: "https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06?utm_source=website&utm_medium=header&utm_campaign=social",
+    googleFeedback: "https://www.google.com/search?client=mobilesearchapp&sca_esv=0091f1adde5afd41&channel=iss&hl=en_GB&rlz=1MDAPLA_en-GBIN1088IN1088&v=381.1.792835455&cs=1&sxsrf=AE3TifO8mOSczRGtVay16jB5kaY8IZjSzQ:1759773230659&si=AMgyJEtREmoPL4P1I5IDCfuA8gybfVI2d5Uj7QMwYCZHKDZ-E4oWdu000SHpY4Qos8xxSfSjCHF57FFTWnkNH7WvXmptla-PnW9oswknadLRSHjnVMo_oPyZ6HO7oH0Sc4RKyTGYfCW9u9xAcpr-I38jtVtOkuoCJg%3D%3D&q=NUSRAT+ENTERPRISES+Reviews&sa=X&ved=2ahUKEwi50LGSkpCQAxWaoa8BHQXxD3MQ0bkNegQIJhAE&biw=980&bih=1844&dpr=3"
+  };
+
   const ITEM_OPTIONS=["Shirt","T-shirt","Jean","Formal Pant","Track","Half Pant"];
   const els={
     itemsList:document.getElementById('itemsList'),
@@ -348,7 +309,7 @@
   }
 
   // ===== Persistence =====
-  const LS='nusrat.designC.items.v8';
+  const LS='nusrat.designC.items.v9';
   function persist(){ localStorage.setItem(LS, JSON.stringify(getItems())); }
   function load(){
     const raw=localStorage.getItem(LS);
@@ -412,7 +373,7 @@
       </div>`;
   }
 
-  // ===== Monospace WhatsApp message (with address) =====
+  // ===== Monospace WhatsApp message (with address + FOLLOW/FEEDBACK) =====
   function summaryMonospace(){
     const items=getItems();
     const COLS = { idx:3, name:18, qty:3, rate:8, disc:5, amt:10 };
@@ -455,6 +416,12 @@
       kv('Due', `₹${due.toFixed(2)}`)
     ];
 
+    // FOLLOW + FEEDBACK lines (plain after the code block for tappable links)
+    const followTitle = 'Follow & Feedback:';
+    const igLine  = `Instagram: ${LINKS.instagram}`;
+    const waLine  = `WhatsApp Channel: ${LINKS.waChannel}`;
+    const gLine   = `Google Feedback: ${LINKS.googleFeedback}`;
+
     const lines=[
       store1, store2, store3, '',
       invLine + (dateLine ? ' | ' + dateLine : ''),
@@ -464,10 +431,13 @@
       'Thank you for shopping with Nusrat Enterprises!'
     ];
 
-    return '```' + '\n' + lines.join('\n') + '\n' + '```';
+    // WhatsApp preserves monospace only inside the backticks; links are more tappable outside.
+    const codeBlock = '```' + '\n' + lines.join('\n') + '\n' + '```';
+    const followBlock = `\n\n${followTitle}\n${igLine}\n${waLine}\n${gLine}`;
+    return codeBlock + followBlock;
   }
 
-  // Human-readable (for Copy button)
+  // Human-readable (for Copy button) — also include follow/feedback at the end.
   function summaryReadable(){
     const items=getItems(); const lines=[];
     lines.push(`Nusrat Enterprises`);
@@ -493,6 +463,11 @@
     lines.push(`Due: ₹${due.toFixed(2)}`);
     lines.push('');
     lines.push('Thank you for shopping with Nusrat Enterprises!');
+    lines.push('');
+    lines.push('Follow & Feedback:');
+    lines.push(`Instagram: ${LINKS.instagram}`);
+    lines.push(`WhatsApp Channel: ${LINKS.waChannel}`);
+    lines.push(`Google Feedback: ${LINKS.googleFeedback}`);
     return lines.join('\n');
   }
 
@@ -516,7 +491,7 @@
   });
   document.getElementById('printBtn').addEventListener('click', ()=>window.print());
 
-  // WhatsApp monospace sending
+  // WhatsApp monospace sending (with follow/feedback appended)
   document.getElementById('whatsAppBtn').addEventListener('click', ()=>{
     if(!validatePhone()){ alert('Please enter a valid 10-digit WhatsApp number.'); return; }
     const phone = `91${els.customerPhone.value}`; // India code
@@ -524,7 +499,7 @@
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
   });
 
-  // Copy human-readable to clipboard
+  // Copy human-readable (with follow/feedback) to clipboard
   document.getElementById('copyTextBtn').addEventListener('click', ()=>{
     navigator.clipboard.writeText(summaryReadable()).then(()=>alert('Copied')).catch(()=>alert('Copy failed'));
   });
@@ -536,3 +511,4 @@
 </script>
 </body>
 </html>
+``
