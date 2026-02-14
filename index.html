@@ -44,6 +44,10 @@
   .print-title{font-size:1.15rem;font-weight:800;color:#7f1d1d}
   .print-meta{font-size:.92rem;color:#374151}
 </style>
+
+<!-- PDF dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
 <header>
@@ -131,10 +135,14 @@
 
       <div class="card">
         <h2>Actions</h2>
-        <button class="btn" id="printBtn">🖨️ Print / Save PDF</button>
-        <button class="btn link" id="previewBtn">👁️ Preview</button>
-        <button class="btn" id="whatsAppBtn">💬 WhatsApp</button>
-        <button class="btn link" id="copyTextBtn">Copy Summary</button>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="btn" id="printMonospaceBtn">🖨️ Print (WhatsApp-style)</button>
+          <button class="btn" id="pdfBtn">📄 Invoice as PDF</button>
+          <button class="btn" id="sendPdfBtn">💬 Send PDF to Customer</button>
+          <button class="btn link" id="previewBtn">👁️ Preview</button>
+          <button class="btn" id="whatsAppBtn">💬 WhatsApp (Text)</button>
+          <button class="btn link" id="copyTextBtn">Copy Summary</button>
+        </div>
       </div>
 
       <div class="card" id="previewCard" style="display:none">
@@ -144,6 +152,9 @@
     </div>
   </div>
 </div>
+
+<!-- Hidden render target for monospace WhatsApp-style invoice (for PDF/Print) -->
+<div id="monoRender" style="position:fixed;left:-9999px;top:-9999px;visibility:hidden"></div>
 
 <script>
 (function(){
@@ -169,7 +180,8 @@
     paymentMode:document.getElementById('paymentMode'),
     paidAmount:document.getElementById('paidAmount'),
     dueAmount:document.getElementById('dueAmount'),
-    invoicePreview:document.getElementById('invoicePreview')
+    invoicePreview:document.getElementById('invoicePreview'),
+    monoRender:document.getElementById('monoRender')
   };
 
   // ===== Helpers =====
@@ -416,7 +428,6 @@
       kv('Due', `₹${due.toFixed(2)}`)
     ];
 
-    // FOLLOW + FEEDBACK lines (plain after the code block for tappable links)
     const followTitle = 'Follow & Feedback:';
     const igLine  = `Instagram: ${LINKS.instagram}`;
     const waLine  = `WhatsApp Channel: ${LINKS.waChannel}`;
@@ -431,13 +442,12 @@
       'Thank you for shopping with Nusrat Enterprises!'
     ];
 
-    // WhatsApp preserves monospace only inside the backticks; links are more tappable outside.
     const codeBlock = '```' + '\n' + lines.join('\n') + '\n' + '```';
     const followBlock = `\n${followTitle}\n\n${igLine}\n\n${waLine}\n\n${gLine}`;
     return codeBlock + followBlock;
   }
 
-  // Human-readable (for Copy button) — also include follow/feedback at the end.
+  // Human-readable (for Copy button)
   function summaryReadable(){
     const items=getItems(); const lines=[];
     lines.push(`Nusrat Enterprises`);
@@ -471,6 +481,135 @@
     return lines.join('\n');
   }
 
+  // ===== NEW: Build monospace HTML block (same content as WhatsApp message) =====
+  function buildMonospaceHTML() {
+    // Reuse the same content as WhatsApp monospace (without the backticks wrapper)
+    const items=getItems();
+    const COLS = { idx:3, name:18, qty:3, rate:8, disc:5, amt:10 };
+    const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.disc+1+COLS.amt);
+    const header = fit("#",COLS.idx)+" "+fit("ITEM",COLS.name)+" "+fit("QTY",COLS.qty)+" "+fit("RATE",COLS.rate)+" "+fit("DISC",COLS.disc)+" "+fit("AMOUNT",COLS.amt);
+
+    const rows = items.map((it,i)=>{
+      const idx=String(i+1).padStart(COLS.idx,' ');
+      const nm =fit(it.name,COLS.name);
+      const qt =String(toNumber(it.qty)).padStart(COLS.qty,' ');
+      const rt =p2(toNumber(it.rate),COLS.rate);
+      const dc =(toNumber(it.disc).toFixed(0)+'%').padStart(COLS.disc,' ');
+      const am =p2(toNumber(it.amount),COLS.amt);
+      return `${idx} ${nm} ${qt} ${rt} ${dc} ${am}`;
+    });
+
+    const subtotal=toNumber(els.subtotal.value);
+    const gstRate=toNumber(els.taxRate.value);
+    const gstAmt=subtotal*(gstRate/100);
+    const flat=toNumber(els.flatDiscount.value);
+    const grand=toNumber(els.grandTotal.value);
+    const paid=toNumber(els.paidAmount.value);
+    const due =toNumber(els.dueAmount.value);
+
+    const store1='Nusrat Enterprises';
+    const store2='Phones: 7978830017, 9330066455, 9040366455';
+    const store3='Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014';
+    const invLine=`Invoice: ${els.invoiceNumber.value}`;
+    const dateLine=els.invoiceDate.value?`Date: ${els.invoiceDate.value}`:'';
+    const custLine=els.customerName.value?`Customer: ${els.customerName.value}`:'';
+    const payMode =els.paymentMode.value?`Payment Mode: ${els.paymentMode.value}`:'';
+
+    function kv(k,v){ const key=(k+':').padEnd(13,' '); const val=v.toString().padStart(12,' '); return key+val; }
+    const totals=[
+      kv('Subtotal', `₹${subtotal.toFixed(2)}`),
+      kv(`GST ${gstRate}%`, `₹${gstAmt.toFixed(2)}`),
+      kv('Discount', `-₹${flat.toFixed(2)}`),
+      kv('Grand Total', `₹${grand.toFixed(2)}`),
+      kv('Paid', `₹${paid.toFixed(2)}`),
+      kv('Due', `₹${due.toFixed(2)}`)
+    ];
+
+    const lines=[
+      store1, store2, store3, '',
+      invLine + (dateLine ? ' | ' + dateLine : ''),
+      custLine, '',
+      header, lineSep, ...rows, lineSep,
+      ...totals, payMode, '',
+      'Thank you for shopping with Nusrat Enterprises!'
+    ];
+
+    const html = `
+      <div style="
+        width: 900px;
+        padding: 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #111827;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+        font-size: 13px;
+        line-height: 1.4;
+        ">
+        <pre style="margin:0; white-space:pre-wrap;">${lines.join('\n')}</pre>
+        <div style="height:12px"></div>
+        <div style="font-size:12px;color:#374151">
+          Follow & Feedback:
+          <div>Instagram: ${LINKS.instagram}</div>
+          <div>WhatsApp Channel: ${LINKS.waChannel}</div>
+          <div>Google Feedback: ${LINKS.googleFeedback}</div>
+        </div>
+      </div>`;
+    return html;
+  }
+
+  // ===== NEW: Print the monospace block (exactly like WhatsApp text) =====
+  function printMonospace() {
+    const html = buildMonospaceHTML();
+    const win = window.open('', '_blank');
+    win.document.write(`
+      <html>
+        <head>
+          <title>Invoice ${els.invoiceNumber.value}</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1"/>
+          <style>
+            @page { size: A4; margin: 16mm; }
+            body { margin: 0; padding: 0; background: #fff; }
+          </style>
+        </head>
+        <body>${html}</body>
+      </html>
+    `);
+    win.document.close();
+    win.onload = () => { win.focus(); win.print(); };
+  }
+
+  // ===== NEW: Generate PDF from the same monospace block (fit to one A4 page) =====
+  async function generatePdf() {
+    els.monoRender.innerHTML = buildMonospaceHTML();
+    await new Promise(r => setTimeout(r, 50)); // allow layout
+
+    const node = els.monoRender.firstElementChild;
+    const canvas = await html2canvas(node, { scale: 2, backgroundColor: '#ffffff' });
+    const imgData = canvas.toDataURL('image/png');
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const maxW = pageWidth - 48;   // 24pt margins
+    const maxH = pageHeight - 48;
+
+    const scale = Math.min(maxW / canvas.width, maxH / canvas.height);
+    const w = canvas.width * scale;
+    const h = canvas.height * scale;
+
+    const x = (pageWidth - w) / 2;
+    const y = (pageHeight - h) / 2;
+
+    pdf.addImage(imgData, 'PNG', x, y, w, h, undefined, 'FAST');
+
+    const cust = (els.customerName.value || 'Customer').replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'_');
+    const filename = `Invoice_${els.invoiceNumber.value}_${cust}.pdf`;
+    pdf.save(filename);
+  }
+
   // ===== Actions =====
   document.getElementById('addItemBtn').addEventListener('click', ()=>{ addItem(); recalc(); });
   document.getElementById('clearItemsBtn').addEventListener('click', ()=>{
@@ -489,13 +628,53 @@
     document.getElementById('previewCard').style.display='block';
     renderPreview();
   });
-  document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+
+  // NEW buttons
+  document.getElementById('printMonospaceBtn').addEventListener('click', ()=>{
+    renderPreview();
+    printMonospace();
+  });
+
+  document.getElementById('pdfBtn').addEventListener('click', async ()=>{
+    try { await generatePdf(); }
+    catch (e) {
+      alert('PDF generation failed. Please try again.');
+      console.error(e);
+    }
+  });
 
   // WhatsApp monospace sending (with follow/feedback appended)
   document.getElementById('whatsAppBtn').addEventListener('click', ()=>{
     if(!validatePhone()){ alert('Please enter a valid 10-digit WhatsApp number.'); return; }
     const phone = `91${els.customerPhone.value}`; // India code
     const msg = summaryMonospace();
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
+  });
+
+  // NEW: Send PDF to customer (creates PDF locally, opens WA chat with message)
+  document.getElementById('sendPdfBtn').addEventListener('click', async ()=>{
+    if(!validatePhone()){ alert('Please enter a valid 10-digit WhatsApp number.'); return; }
+
+    // 1) Create & save PDF locally (user will attach in WhatsApp)
+    try {
+      await generatePdf();
+    } catch (e) {
+      alert('Could not create PDF. Please try again.');
+      console.error(e);
+      return;
+    }
+
+    // 2) Open WhatsApp chat with a helpful message
+    const phone = `91${els.customerPhone.value}`;
+    const msg = [
+      `Hello ${els.customerName.value || ''}`.trim() + ',',
+      `We have sent your invoice PDF (Invoice #${els.invoiceNumber.value}).`,
+      `If it is not attached automatically, please attach the saved PDF here.`,
+      '',
+      'Summary:',
+      summaryReadable()
+    ].join('\n');
+
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
   });
 
@@ -511,4 +690,3 @@
 </script>
 </body>
 </html>
-``
