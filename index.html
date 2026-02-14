@@ -6,7 +6,8 @@
 <title>Nusrat Enterprises — Invoice (Design C)</title>
 <style>
   :root{--brand:#b91c1c;--brand-2:#7f1d1d;--bg:#fafafa;--text:#111827;--muted:#6b7280;--card:#fff;--border:#e5e7eb;--soft:#fff1f2}
-  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
   header{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;padding:16px}
   h1{margin:0;font-weight:800;font-size:1.2rem}
   .container{max-width:1080px;margin:-16px auto 20px;padding:0 12px}
@@ -22,6 +23,7 @@
   @media(max-width:700px){.cols-2{grid-template-columns:1fr}}
   .btn{display:inline-flex;align-items:center;gap:8px;background:var(--brand);color:#fff;border:none;padding:10px 12px;border-radius:10px;font-weight:700;cursor:pointer}
   .btn.link{background:#fff;border:1px solid var(--border);color:#111827}
+  .btn.danger{background:#991b1b}
   /* Items grid line */
   .item-line{display:grid;grid-template-columns:1.2fr .6fr .6fr .6fr .6fr auto;gap:8px;margin-bottom:8px}
   .item-line > div{display:flex;flex-direction:column}
@@ -34,7 +36,10 @@
 </style>
 </head>
 <body>
-<header><h1>Nusrat Enterprises — Invoice</h1><div>📞 7978830017 • 9330066455 • 9040366455</div></header>
+<header>
+  <h1>Nusrat Enterprises — Invoice</h1>
+  <div>📞 7978830017 • 9330066455 • 9040366455</div>
+</header>
 
 <div class="container">
   <div class="grid">
@@ -58,7 +63,8 @@
           </div>
           <div>
             <label>Customer WhatsApp (10 digits)</label>
-            <input id="customerPhone" inputmode="numeric" pattern="[0-9]*" maxlength="10" placeholder="e.g., 9876543210"/>
+            <!-- Force dial pad + numeric only + 10 digits -->
+            <input id="customerPhone" type="tel" inputmode="tel" autocomplete="tel" pattern="[0-9]*" maxlength="10" placeholder="e.g., 9876543210"/>
             <div id="phoneError" class="error">Enter exactly 10 digits.</div>
           </div>
         </div>
@@ -86,8 +92,32 @@
             <div><label>Discount (₹)</label><input id="flatDiscount" type="number" min="0" step="0.01" value="0"/></div>
           </div>
           <div><label>Grand Total (₹)</label><input id="grandTotal" disabled/></div>
+
+          <!-- New: Payment Section -->
+          <div class="row cols-2" style="margin-top:8px">
+            <div>
+              <label>Payment Mode</label>
+              <select id="paymentMode">
+                <option value="">Select</option>
+                <option>Cash</option>
+                <option>UPI</option>
+                <option>Card</option>
+                <option>Wallet</option>
+                <option>Bank Transfer</option>
+              </select>
+            </div>
+            <div>
+              <label>Paid (₹)</label>
+              <input id="paidAmount" type="number" min="0" step="0.01" value="0"/>
+            </div>
+          </div>
+          <div>
+            <label>Due (₹)</label>
+            <input id="dueAmount" disabled/>
+          </div>
         </div>
       </div>
+
       <div class="card no-print">
         <h2>Actions</h2>
         <button class="btn" id="printBtn">🖨️ Print / Save PDF</button>
@@ -117,23 +147,29 @@
     subtotal:document.getElementById('subtotal'),
     taxRate:document.getElementById('taxRate'),
     flatDiscount:document.getElementById('flatDiscount'),
-    grandTotal:document.getElementById('grandTotal')
+    grandTotal:document.getElementById('grandTotal'),
+    paymentMode:document.getElementById('paymentMode'),
+    paidAmount:document.getElementById('paidAmount'),
+    dueAmount:document.getElementById('dueAmount')
   };
 
-  // Helpers
+  // ===== Helpers =====
   const pad2=n=>String(n).padStart(2,'0');
-  function genInvoice(){ const d=new Date(); return `${pad2(d.getDate())}${pad2(d.getMonth()+1)}${d.getFullYear()}${pad2(d.getHours())}${pad2(d.getMinutes())}`; }
-  function toNumber(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+  function genInvoice(){
+    const d=new Date();
+    return `${pad2(d.getDate())}${pad2(d.getMonth()+1)}${d.getFullYear()}${pad2(d.getHours())}${pad2(d.getMinutes())}`;
+  }
+  function toNumber(v){
+    const n=parseFloat(v);
+    return Number.isFinite(n) ? n : 0;
+  }
 
-  // Init: lock invoice & date
+  // ===== Init: lock invoice & date =====
   els.invoiceNumber.value = genInvoice();
   const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = pad2(today.getMonth()+1);
-  const dd = pad2(today.getDate());
-  els.invoiceDate.value = `${yyyy}-${mm}-${dd}`;
+  els.invoiceDate.value = `${today.getFullYear()}-${pad2(today.getMonth()+1)}-${pad2(today.getDate())}`;
 
-  // Sanitize phone input to digits only and max 10
+  // ===== Phone: enforce 10 digits and trigger dial pad =====
   els.customerPhone.addEventListener('input', (e)=>{
     e.target.value = e.target.value.replace(/\D/g,'').slice(0,10);
     validatePhone();
@@ -144,11 +180,13 @@
     return ok;
   }
 
+  // ===== Items =====
   function qtySelect(v=1){
     const s=document.createElement('select');
     for(let i=1;i<=10;i++){
       const o=document.createElement('option');
-      o.value=i; o.textContent=i; if(i===v) o.selected=true;
+      o.value=i; o.textContent=i;
+      if(i===v) o.selected=true;
       s.appendChild(o);
     }
     return s;
@@ -182,12 +220,13 @@
 
     const cAct=document.createElement('div'); cAct.className='hide-mobile';
     const l7=document.createElement('label'); l7.textContent=' ';
-    const del=document.createElement('button'); del.className='btn'; del.style.background='#991b1b'; del.textContent='Delete';
+    const del=document.createElement('button'); del.className='btn danger'; del.textContent='Delete';
     cAct.appendChild(l7); cAct.appendChild(del);
 
     line.appendChild(cItem); line.appendChild(cName); line.appendChild(cQty); line.appendChild(cRate); line.appendChild(cDisc); line.appendChild(cAmt); line.appendChild(cAct);
     els.itemsList.appendChild(line);
 
+    // Compute amount and totals
     function compute(){
       const q=toNumber(qty.value), r=toNumber(rate.value), d=toNumber(disc.value);
       const gross=q*r, a=gross-(gross*d/100);
@@ -201,52 +240,74 @@
     }));
     del.addEventListener('click', ()=>{ line.remove(); recalc(); persist(); });
 
+    // serialize: always recompute from inputs (don’t trust UI text)
+    attachSerialize(line, {sel, name, qty, rate, disc});
+
     // initial compute
     compute();
-
-    line._ser=()=>({
-      type:sel.value,
-      name:name.value.trim()||sel.value||'Item',
-      qty:toNumber(qty.value)||1,
-      rate:toNumber(rate.value)||0,
-      disc:toNumber(disc.value)||0,
-      amount:toNumber(amt.textContent)||0
-    });
   }
 
-  function getItems(){ return Array.from(els.itemsList.children).map(l=>l._ser()); }
+  function attachSerialize(line, refs){
+    const {sel, name, qty, rate, disc} = refs;
+    line._ser = () => {
+      const q=toNumber(qty.value), r=toNumber(rate.value), d=toNumber(disc.value);
+      const gross = q*r;
+      const amount = gross - (gross*d/100);
+      return {
+        type: sel.value || '',
+        name: (name.value.trim() || sel.value || 'Item'),
+        qty: q,
+        rate: r,
+        disc: d,
+        amount
+      };
+    };
+  }
 
-  // Totals
+  function getItems(){
+    return Array.from(els.itemsList.children).map(l=>l._ser());
+  }
+
+  // ===== Totals & Payment =====
   function recalc(){
     const items=getItems();
-    const subtotal = items.reduce((s,i)=> s + (toNumber(i.amount)), 0);
-    els.subtotal.value = subtotal.toFixed(2);
+    const subtotal=items.reduce((s,i)=> s + toNumber(i.amount), 0);
+    const gstRate=toNumber(els.taxRate.value);
+    const flat=toNumber(els.flatDiscount.value);
+    const gstAmt=subtotal*(gstRate/100);
+    let grand=subtotal+gstAmt-flat;
+    if(grand<0) grand=0;
 
-    const gstRate = toNumber(els.taxRate.value);
-    const flat = toNumber(els.flatDiscount.value);
-    const gstAmt = subtotal * (gstRate/100);
-    let grand = subtotal + gstAmt - flat;
-    if(grand < 0) grand = 0;
-    els.grandTotal.value = grand.toFixed(2);
+    els.subtotal.value=subtotal.toFixed(2);
+    els.grandTotal.value=grand.toFixed(2);
+
+    const paid=toNumber(els.paidAmount.value);
+    let due = grand - paid;
+    if(due < 0) due = 0;
+    els.dueAmount.value = due.toFixed(2);
   }
 
-  // Persistence
-  const LS='nusrat.designC.items.v2';
+  // ===== Persistence =====
+  const LS='nusrat.designC.items.v4';
   function persist(){ localStorage.setItem(LS, JSON.stringify(getItems())); }
   function load(){
     const raw=localStorage.getItem(LS);
-    if(!raw){ addItem(); return; }
+    if(!raw){ addItem(); recalc(); return; }
     try{
       const arr=JSON.parse(raw);
-      if(Array.isArray(arr)&&arr.length){
+      if(Array.isArray(arr) && arr.length){
         els.itemsList.innerHTML='';
         arr.forEach(addItem);
       }else{
         addItem();
       }
-    }catch(e){ addItem(); }
+    }catch(e){
+      addItem();
+    }
+    recalc();
   }
 
+  // ===== Summary & Actions =====
   function summary(){
     const items=getItems(); const lines=[];
     lines.push(`*Nusrat Enterprises*`);
@@ -259,18 +320,22 @@
     items.forEach((it,i)=>lines.push(`${i+1}. ${it.name} — Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)}${it.disc?` (Disc ${toNumber(it.disc)}% )`:''} = ₹${toNumber(it.amount).toFixed(2)}`));
     const subtotal=toNumber(els.subtotal.value), gstRate=toNumber(els.taxRate.value), flat=toNumber(els.flatDiscount.value), grand=toNumber(els.grandTotal.value);
     const gstAmt=subtotal*(gstRate/100);
+    const paid=toNumber(els.paidAmount.value);
+    const due=toNumber(els.dueAmount.value);
     lines.push('');
     lines.push(`Subtotal: ₹${subtotal.toFixed(2)}`);
     if(gstRate>0) lines.push(`GST ${gstRate}%: ₹${gstAmt.toFixed(2)}`);
     if(flat>0) lines.push(`Discount: -₹${flat.toFixed(2)}`);
     lines.push(`*Grand Total: ₹${grand.toFixed(2)}*`);
+    if(els.paymentMode.value) lines.push(`Payment Mode: ${els.paymentMode.value}`);
+    if(paid>0) lines.push(`Paid: ₹${paid.toFixed(2)}`);
+    if(due>=0) lines.push(`Due: ₹${due.toFixed(2)}`);
     lines.push('');
     lines.push('Thank you for shopping with Nusrat Enterprises!');
     return lines.join('\n');
   }
 
-  // Events
-  document.getElementById('addItemBtn').addEventListener('click', ()=>addItem());
+  document.getElementById('addItemBtn').addEventListener('click', ()=>{ addItem(); recalc(); });
   document.getElementById('clearItemsBtn').addEventListener('click', ()=>{
     if(confirm('Clear items?')){
       els.itemsList.innerHTML='';
@@ -279,38 +344,43 @@
       persist();
     }
   });
-  ['taxRate','flatDiscount'].forEach(id=>{
+  ['taxRate','flatDiscount','paidAmount','paymentMode'].forEach(id=>{
     document.getElementById(id).addEventListener('input', ()=>{ recalc(); persist(); });
+    document.getElementById(id).addEventListener('change', ()=>{ recalc(); persist(); });
   });
   document.getElementById('previewBtn').addEventListener('click', ()=>{
     const items=getItems();
     document.getElementById('previewCard').style.display='block';
-    document.getElementById('invoicePreview').innerHTML = items.map(it=>`<div style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:6px 0">
-      <div>${it.name}</div><div>Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)} = <b>₹${toNumber(it.amount).toFixed(2)}</b></div>
-    </div>`).join('') + `
+    document.getElementById('invoicePreview').innerHTML = `
+      ${items.map(it=>`<div style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:6px 0">
+        <div>${it.name}</div><div>Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)}${it.disc?` (Disc ${toNumber(it.disc)}% )`:''} = <b>₹${toNumber(it.amount).toFixed(2)}</b></div>
+      </div>`).join('')}
       <div style="display:flex;justify-content:flex-end;margin-top:8px">
         <table>
           <tr><td>Subtotal</td><td style="text-align:right">₹${toNumber(els.subtotal.value).toFixed(2)}</td></tr>
           <tr><td>GST ${toNumber(els.taxRate.value)}%</td><td style="text-align:right">₹${(toNumber(els.subtotal.value)*(toNumber(els.taxRate.value)/100)).toFixed(2)}</td></tr>
           <tr><td>Discount</td><td style="text-align:right">-₹${toNumber(els.flatDiscount.value).toFixed(2)}</td></tr>
           <tr><td><b>Grand Total</b></td><td style="text-align:right"><b>₹${toNumber(els.grandTotal.value).toFixed(2)}</b></td></tr>
+          ${els.paymentMode.value?`<tr><td>Payment Mode</td><td style="text-align:right">${els.paymentMode.value}</td></tr>`:''}
+          <tr><td>Paid</td><td style="text-align:right">₹${toNumber(els.paidAmount.value).toFixed(2)}</td></tr>
+          <tr><td><b>Due</b></td><td style="text-align:right"><b>₹${toNumber(els.dueAmount.value).toFixed(2)}</b></td></tr>
         </table>
       </div>`;
   });
   document.getElementById('printBtn').addEventListener('click', ()=>window.print());
   document.getElementById('whatsAppBtn').addEventListener('click', ()=>{
     if(!validatePhone()){ alert('Please enter a valid 10-digit WhatsApp number.'); return; }
-    const ten = els.customerPhone.value; // exactly 10 digits
-    const phone = `91${ten}`; // prefix India country code
+    const phone = `91${els.customerPhone.value}`; // add India code
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(summary())}`,'_blank');
   });
   document.getElementById('copyTextBtn').addEventListener('click', ()=>{
     navigator.clipboard.writeText(summary()).then(()=>alert('Copied')).catch(()=>alert('Copy failed'));
   });
 
-  // Load and first calc
+  // Load and initial calc
   load();
-  recalc();
+  // In case first paint delays, recalc once more
+  setTimeout(recalc, 0);
 })();
 </script>
 </body>
