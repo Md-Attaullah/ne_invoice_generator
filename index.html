@@ -1,174 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Nusrat Enterprises — Invoice Generator</title>
-  <style>
-    :root{
-      --brand:#0f766e; /* teal */
-      --brand-2:#115e59;
-      --bg:#f6f7fb;
-      --text:#0f172a;
-      --muted:#64748b;
-      --card:#ffffff;
-      --accent:#eef2ff;
-      --danger:#b91c1c;
-      --border:#e5e7eb;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-      background:var(--bg);
-      color:var(--text);
-      line-height:1.45;
-    }
-    header{
-      background:linear-gradient(120deg,var(--brand),var(--brand-2));
-      color:white;
-      padding:20px 16px;
-    }
-    .container{
-      max-width:1100px;
-      margin: -40px auto 40px;
-      padding:0 16px;
-    }
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:14px;
-      box-shadow:0 6px 24px rgba(2,8,23,.06);
-      padding:18px;
-      margin-bottom:18px;
-    }
-    h1,h2,h3{margin:0 0 10px}
-    h1{font-size:1.4rem}
-    h2{font-size:1.1rem;color:var(--brand-2)}
-    label{font-weight:600;font-size:.92rem}
-    input,select,textarea{
-      width:100%;
-      padding:10px 12px;
-      border:1px solid var(--border);
-      border-radius:10px;
-      background:white;
-      color:var(--text);
-      font-size:.98rem;
-    }
-    .row{display:grid;gap:12px}
-    .row.cols-2{grid-template-columns:repeat(2,1fr)}
-    .row.cols-3{grid-template-columns:repeat(3,1fr)}
-    .row.cols-4{grid-template-columns:repeat(4,1fr)}
-    .muted{color:var(--muted);font-size:.9rem}
-    .btn{
-      display:inline-flex;align-items:center;gap:8px;
-      background:var(--brand);color:white;border:none;
-      padding:10px 14px;border-radius:10px;cursor:pointer;
-      font-weight:600;
-    }
-    .btn.secondary{background:#334155}
-    .btn.link{background:transparent;border:1px solid var(--border);color:#0f172a}
-    .btn.danger{background:var(--danger)}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left}
-    th{background:#f8fafc;font-size:.9rem}
-    tfoot td{font-weight:700}
-    .right{text-align:right}
-    .flex{display:flex;gap:10px;flex-wrap:wrap}
-    .space-between{display:flex;align-items:center;justify-content:space-between}
-    .tag{background:var(--accent);border:1px solid #e0e7ff;color:#3730a3;padding:4px 8px;border-radius:999px;font-size:.8rem}
-    /* Print styles */
-    @media print{
-      header,.no-print{display:none!important}
-      body{background:white}
-      .container{margin:0;padding:0}
-      .card{border:none;box-shadow:none;margin:0;padding:0}
-      .print-card{display:block}
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Nusrat Enterprises — Invoice</title>
+<style>
+  :root{
+    --brand:#b91c1c;       /* red primary */
+    --brand-2:#7f1d1d;     /* darker red */
+    --bg:#fafafa;
+    --text:#111827;
+    --muted:#6b7280;
+    --card:#ffffff;
+    --border:#e5e7eb;
+    --soft:#fff1f2;        /* rose-50 */
+    --accent:#fee2e2;      /* rose-200 */
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  header{
+    background:linear-gradient(135deg,var(--brand),var(--brand-2));
+    color:#fff;padding:16px 14px 22px;border-bottom:1px solid rgba(255,255,255,.15);
+  }
+  .header-inner{max-width:860px;margin:0 auto}
+  h1{margin:0;font-size:1.25rem;font-weight:800;letter-spacing:.2px}
+  .sub{opacity:.9;font-size:.92rem;margin-top:6px}
+  .phones{margin-top:6px;font-size:.9rem;opacity:.95}
+  .container{max-width:860px;margin:-28px auto 28px;padding:0 12px}
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    box-shadow:0 8px 28px rgba(0,0,0,.05);padding:14px;margin-bottom:14px;
+  }
+  h2{margin:2px 0 10px;color:var(--brand-2);font-size:1.05rem}
+  label{display:block;font-weight:700;font-size:.92rem;margin-bottom:6px}
+  input,select,textarea{
+    width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff;color:var(--text);font-size:1rem;
+  }
+  input[disabled]{background:#f9fafb;color:#6b7280}
+  .row{display:grid;gap:10px}
+  .row.cols-2{grid-template-columns:1fr 1fr}
+  .row.cols-3{grid-template-columns:repeat(3,1fr)}
+  .row.cols-4{grid-template-columns:repeat(4,1fr)}
+  @media (max-width:720px){.row.cols-2,.row.cols-3,.row.cols-4{grid-template-columns:1fr}}
+  .muted{color:var(--muted);font-size:.88rem}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--brand);color:#fff;border:none;padding:12px 14px;border-radius:12px;cursor:pointer;font-weight:700;
+  }
+  .btn.secondary{background:#374151}
+  .btn.link{background:#fff;border:1px solid var(--border);color:#111827}
+  .btn.danger{background:#991b1b}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left}
+  th{background:var(--soft);font-size:.9rem}
+  td.right,th.right{text-align:right}
+  .no-print {}
+  @media print{
+    header,.no-print{display:none!important}
+    body{background:#fff}
+    .container{margin:0 auto;padding:0}
+    .card{border:none;box-shadow:none;margin:0;padding:0}
+    .print-card{display:block}
+  }
+  .chip{display:inline-block;background:var(--accent);border:1px solid #fecaca;color:#7f1d1d;padding:4px 10px;border-radius:999px;font-size:.8rem}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .space-between{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+</style>
 </head>
 <body>
 <header>
-  <div class="space-between" style="max-width:1100px;margin:0 auto">
-    <div>
-      <h1>Nusrat Enterprises — Invoice Generator</h1>
-      <div class="muted">Create, print, and share invoices via WhatsApp</div>
-    </div>
-    <div class="tag">Bhubaneswar • Retail Menswear</div>
+  <div class="header-inner">
+    <h1>Nusrat Enterprises</h1>
+    <div class="sub">Professional Retail Invoice • Menswear</div>
+    <div class="phones">📞 7978830017 • 9330066455 • 9040366455</div>
   </div>
 </header>
 
 <div class="container">
-  <!-- Store & Customer -->
+  <!-- Store & Invoice -->
   <div class="card">
-    <h2>Store & Customer</h2>
+    <div class="space-between">
+      <h2>Invoice Details</h2>
+      <span class="chip">Bhubaneswar • Retail</span>
+    </div>
     <div class="row cols-2">
       <div>
         <label>Store Name</label>
-        <input id="storeName" placeholder="Nusrat Enterprises" value="Nusrat Enterprises"/>
+        <input id="storeName" value="Nusrat Enterprises" disabled />
       </div>
       <div>
-        <label>Store Phone</label>
-        <input id="storePhone" placeholder="+91 9330066455" value="+91 9330066455"/>
-      </div>
-    </div>
-    <div class="row cols-2">
-      <div>
-        <label>Store Address</label>
-        <input id="storeAddress" placeholder="Street, Area, City, PIN"/>
-      </div>
-      <div>
-        <label>GSTIN (optional)</label>
-        <input id="storeGST" placeholder="e.g., 21ABCDE1234F1Z5"/>
+        <label>Store Phones</label>
+        <input id="storePhones" value="7978830017, 9330066455, 9040366455" disabled />
       </div>
     </div>
-    <hr style="border:none;border-top:1px dashed var(--border);margin:14px 0">
-    <div class="row cols-2">
+    <div class="row cols-2" style="margin-top:8px">
       <div>
-        <label>Customer Name</label>
-        <input id="customerName" placeholder="Customer full name"/>
-      </div>
-      <div>
-        <label>Customer Phone (WhatsApp)</label>
-        <input id="customerPhone" placeholder="e.g., 919876543210"/>
-        <div class="muted">Use country code (e.g., 91 for India) and no spaces or plus sign.</div>
-      </div>
-    </div>
-    <div class="row cols-2">
-      <div>
-        <label>Invoice #</label>
-        <input id="invoiceNumber" placeholder="INV-0001"/>
+        <label>Invoice # (auto)</label>
+        <input id="invoiceNumber" placeholder="ddMMyyyyHHmm" />
+        <div class="muted">Format: ddMMyyyyHHmm (e.g., 140220261022)</div>
       </div>
       <div>
         <label>Date</label>
-        <input id="invoiceDate" type="date"/>
+        <input id="invoiceDate" type="date" />
       </div>
     </div>
-    <div class="flex" style="margin-top:10px">
-      <button class="btn" id="saveDefaultsBtn">Save Defaults</button>
-      <button class="btn link" id="clearDefaultsBtn">Clear Saved</button>
+  </div>
+
+  <!-- Customer -->
+  <div class="card">
+    <h2>Customer</h2>
+    <div class="row cols-2">
+      <div>
+        <label>Customer Name</label>
+        <input id="customerName" placeholder="Full name"/>
+      </div>
+      <div>
+        <label>Customer WhatsApp</label>
+        <input id="customerPhone" placeholder="e.g., 91XXXXXXXXXX (no + or spaces)"/>
+      </div>
     </div>
   </div>
 
   <!-- Items -->
   <div class="card">
-    <h2>Line Items</h2>
-    <div class="muted" style="margin-bottom:8px">Add products (e.g., Shirt, Jeans, Kurta). Quantities auto-calc totals.</div>
-    <div class="flex no-print">
-      <button class="btn" id="addItemBtn">+ Add Item</button>
-      <button class="btn link" id="clearItemsBtn">Clear Items</button>
+    <div class="space-between">
+      <h2>Items</h2>
+      <div class="toolbar no-print">
+        <button class="btn" id="addItemBtn">+ Add Item</button>
+        <button class="btn link" id="clearItemsBtn">Clear Items</button>
+      </div>
     </div>
-    <div style="overflow-x:auto;margin-top:8px">
-      <table id="itemsTable" aria-label="Items table">
+    <div class="muted" style="margin:6px 0 10px">Use the dropdown to quickly select common products. You can also type a custom name.</div>
+    <div style="overflow-x:auto">
+      <table aria-label="Items">
         <thead>
           <tr>
-            <th style="width:28%">Item</th>
-            <th class="right" style="width:12%">Qty</th>
-            <th class="right" style="width:15%">Rate (₹)</th>
-            <th class="right" style="width:15%">Discount %</th>
-            <th class="right" style="width:15%">Amount (₹)</th>
-            <th style="width:15%">Action</th>
+            <th style="width:30%">Item</th>
+            <th class="right" style="width:14%">Qty</th>
+            <th class="right" style="width:18%">Rate (₹)</th>
+            <th class="right" style="width:18%">Discount %</th>
+            <th class="right" style="width:18%">Amount (₹)</th>
+            <th style="width:12%">Action</th>
           </tr>
         </thead>
         <tbody id="itemsBody"></tbody>
@@ -185,7 +158,7 @@
         <input id="subtotal" disabled />
       </div>
       <div>
-        <label>Tax % (GST)</label>
+        <label>GST %</label>
         <input id="taxRate" type="number" min="0" step="0.01" value="0"/>
       </div>
       <div>
@@ -202,21 +175,21 @@
   <!-- Actions -->
   <div class="card no-print">
     <div class="space-between">
-      <div class="flex">
+      <div class="toolbar">
         <button class="btn" id="printBtn">🖨️ Print / Save PDF</button>
         <button class="btn secondary" id="previewBtn">👁️ Preview</button>
       </div>
-      <div class="flex">
+      <div class="toolbar">
         <button class="btn" id="whatsAppBtn">💬 Send WhatsApp Summary</button>
-        <button class="btn link" id="copyTextBtn">Copy Summary Text</button>
+        <button class="btn link" id="copyTextBtn">Copy Summary</button>
       </div>
     </div>
     <div class="muted" style="margin-top:8px">
-      Note: WhatsApp will open with a pre-filled message. To auto-send PDFs directly from your number, you’ll need WhatsApp Business Cloud API (see below).
+      WhatsApp opens with pre-filled text; user taps <strong>Send</strong>. To auto-send PDFs from your number, you’d need WhatsApp Business Cloud API with a backend.
     </div>
   </div>
 
-  <!-- Preview / Print -->
+  <!-- Preview -->
   <div class="card print-card" id="previewCard" style="display:none">
     <div class="space-between">
       <h2>Invoice Preview</h2>
@@ -228,15 +201,15 @@
 
 <script>
 (function(){
+  const ITEM_OPTIONS = [
+    "Shirt","T-shirt","Jean","Formal Pant","Track","Half Pant"
+  ];
+
   const els = {
-    storeName: document.getElementById('storeName'),
-    storePhone: document.getElementById('storePhone'),
-    storeAddress: document.getElementById('storeAddress'),
-    storeGST: document.getElementById('storeGST'),
-    customerName: document.getElementById('customerName'),
-    customerPhone: document.getElementById('customerPhone'),
     invoiceNumber: document.getElementById('invoiceNumber'),
     invoiceDate: document.getElementById('invoiceDate'),
+    customerName: document.getElementById('customerName'),
+    customerPhone: document.getElementById('customerPhone'),
     itemsBody: document.getElementById('itemsBody'),
     subtotal: document.getElementById('subtotal'),
     taxRate: document.getElementById('taxRate'),
@@ -244,102 +217,111 @@
     grandTotal: document.getElementById('grandTotal'),
     addItemBtn: document.getElementById('addItemBtn'),
     clearItemsBtn: document.getElementById('clearItemsBtn'),
-    printBtn: document.getElementById('printBtn'),
     previewBtn: document.getElementById('previewBtn'),
     hidePreviewBtn: document.getElementById('hidePreviewBtn'),
     previewCard: document.getElementById('previewCard'),
     invoicePreview: document.getElementById('invoicePreview'),
+    printBtn: document.getElementById('printBtn'),
     whatsAppBtn: document.getElementById('whatsAppBtn'),
     copyTextBtn: document.getElementById('copyTextBtn'),
-    saveDefaultsBtn: document.getElementById('saveDefaultsBtn'),
-    clearDefaultsBtn: document.getElementById('clearDefaultsBtn'),
   };
 
-  // Initialize date
+  // === Helpers ===
+  function pad2(n){return n.toString().padStart(2,'0')}
+  function genInvoiceNumberFromNow(){
+    const d = new Date();
+    const dd = pad2(d.getDate());
+    const mm = pad2(d.getMonth()+1);
+    const yyyy = d.getFullYear();
+    const HH = pad2(d.getHours());
+    const MM = pad2(d.getMinutes());
+    return `${dd}${mm}${yyyy}${HH}${MM}`; // ddMMyyyyHHmm
+  }
+  function escapeHtml(s){
+    return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  }
+
+  // Initialize date + invoice #
   els.invoiceDate.valueAsNumber = els.invoiceDate.valueAsNumber || Date.now();
+  els.invoiceNumber.value = genInvoiceNumberFromNow();
 
-  // Local Storage helpers
-  const LS_KEYS = {
-    defaults: 'nusrat.defaults',
-    items: 'nusrat.items'
-  };
-
-  function saveDefaults(){
-    const data = {
-      storeName: els.storeName.value.trim(),
-      storePhone: els.storePhone.value.trim(),
-      storeAddress: els.storeAddress.value.trim(),
-      storeGST: els.storeGST.value.trim()
-    };
-    localStorage.setItem(LS_KEYS.defaults, JSON.stringify(data));
-    alert('Defaults saved.');
-  }
-  function loadDefaults(){
-    const raw = localStorage.getItem(LS_KEYS.defaults);
-    if(!raw) return;
-    try{
-      const d = JSON.parse(raw);
-      if(d.storeName) els.storeName.value = d.storeName;
-      if(d.storePhone) els.storePhone.value = d.storePhone;
-      if(d.storeAddress) els.storeAddress.value = d.storeAddress;
-      if(d.storeGST) els.storeGST.value = d.storeGST;
-    }catch(e){}
-  }
-  function clearDefaults(){
-    localStorage.removeItem(LS_KEYS.defaults);
-    alert('Saved defaults cleared.');
-  }
-
-  // Items management
-  function addItemRow(item = {name:'', qty:1, rate:0, disc:0}){
+  // Items
+  function addItemRow(item={type:'', name:'', qty:1, rate:0, disc:0}){
     const tr = document.createElement('tr');
 
-    const nameTd = document.createElement('td');
-    const nameInput = document.createElement('input');
-    nameInput.placeholder = 'Item name';
-    nameInput.value = item.name || '';
-    nameTd.appendChild(nameInput);
+    // Item with dropdown and custom text
+    const itemTd = document.createElement('td');
+    const wrap = document.createElement('div');
+    wrap.style.display='grid';
+    wrap.style.gridTemplateColumns='1fr';
+    wrap.style.gap='6px';
 
+    const select = document.createElement('select');
+    const placeholder = document.createElement('option');
+    placeholder.value=''; placeholder.textContent='Select item type';
+    select.appendChild(placeholder);
+    ITEM_OPTIONS.forEach(o=>{
+      const opt = document.createElement('option');
+      opt.value = o; opt.textContent = o;
+      if(item.type===o) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    const nameInput = document.createElement('input');
+    nameInput.placeholder='Item name (auto from dropdown, or type your own)';
+    nameInput.value = item.name || item.type || '';
+
+    select.addEventListener('change', ()=>{
+      if(!nameInput.value || ITEM_OPTIONS.includes(nameInput.value)){
+        nameInput.value = select.value || '';
+      }
+      recalc();
+      persistItems();
+    });
+
+    wrap.appendChild(select);
+    wrap.appendChild(nameInput);
+    itemTd.appendChild(wrap);
+
+    // Qty
     const qtyTd = document.createElement('td'); qtyTd.className='right';
     const qtyInput = document.createElement('input');
     qtyInput.type='number'; qtyInput.min='0'; qtyInput.step='1'; qtyInput.value=item.qty ?? 1;
     qtyInput.style.textAlign='right';
     qtyTd.appendChild(qtyInput);
 
+    // Rate
     const rateTd = document.createElement('td'); rateTd.className='right';
     const rateInput = document.createElement('input');
     rateInput.type='number'; rateInput.min='0'; rateInput.step='0.01'; rateInput.value=item.rate ?? 0;
     rateInput.style.textAlign='right';
     rateTd.appendChild(rateInput);
 
+    // Discount
     const discTd = document.createElement('td'); discTd.className='right';
     const discInput = document.createElement('input');
     discInput.type='number'; discInput.min='0'; discInput.max='100'; discInput.step='0.01'; discInput.value=item.disc ?? 0;
     discInput.style.textAlign='right';
     discTd.appendChild(discInput);
 
+    // Amount
     const amountTd = document.createElement('td'); amountTd.className='right';
     amountTd.textContent = '0.00';
 
+    // Action
     const actionTd = document.createElement('td');
     const delBtn = document.createElement('button'); delBtn.className='btn danger'; delBtn.textContent='Delete';
     actionTd.appendChild(delBtn);
 
-    tr.appendChild(nameTd);
+    tr.appendChild(itemTd);
     tr.appendChild(qtyTd);
     tr.appendChild(rateTd);
     tr.appendChild(discTd);
     tr.appendChild(amountTd);
     tr.appendChild(actionTd);
 
-    [nameInput, qtyInput, rateInput, discInput].forEach(inp => {
-      inp.addEventListener('input', recalc);
-    });
-    delBtn.addEventListener('click', () => {
-      tr.remove();
-      recalc();
-      persistItems();
-    });
+    [nameInput, qtyInput, rateInput, discInput].forEach(inp => inp.addEventListener('input', ()=>{recalc(); persistItems();}));
+    delBtn.addEventListener('click', ()=>{ tr.remove(); recalc(); persistItems(); });
 
     els.itemsBody.appendChild(tr);
     recalc();
@@ -348,16 +330,17 @@
   function getItems(){
     const rows = Array.from(els.itemsBody.querySelectorAll('tr'));
     return rows.map(row=>{
-      const [nameInput, qtyInput, rateInput, discInput] = row.querySelectorAll('input');
+      const selects = row.querySelectorAll('select');
+      const inputs = row.querySelectorAll('input');
+      const [nameInput, qtyInput, rateInput, discInput] = [inputs[0+0], inputs[1+0], inputs[2+0], inputs[3+0]];
+      const type = selects[0]?.value || '';
+      const name = nameInput?.value?.trim() || type || 'Item';
       const qty = parseFloat(qtyInput.value)||0;
       const rate = parseFloat(rateInput.value)||0;
       const disc = parseFloat(discInput.value)||0;
       const gross = qty*rate;
       const amount = gross - (gross*disc/100);
-      return {
-        name: nameInput.value.trim(),
-        qty, rate, disc, amount
-      };
+      return {type, name, qty, rate, disc, amount};
     });
   }
 
@@ -379,124 +362,100 @@
     let grand = subtotal + taxAmt - flatDiscount;
     if(grand < 0) grand = 0;
     els.grandTotal.value = grand.toFixed(2);
-
-    persistItems();
   }
 
+  // Local storage (keep your last items/session)
+  const LS_ITEMS = 'nusrat.red.items.v1';
   function persistItems(){
-    const items = getItems();
-    localStorage.setItem(LS_KEYS.items, JSON.stringify(items));
+    localStorage.setItem(LS_ITEMS, JSON.stringify(getItems()));
   }
   function loadItems(){
-    const raw = localStorage.getItem(LS_KEYS.items);
-    if(!raw) { addItemRow(); return; }
+    const raw = localStorage.getItem(LS_ITEMS);
+    if(!raw){ addItemRow(); return; }
     try{
       const arr = JSON.parse(raw);
       if(Array.isArray(arr) && arr.length){
-        els.itemsBody.innerHTML = '';
+        els.itemsBody.innerHTML='';
         arr.forEach(addItemRow);
       }else{
         addItemRow();
       }
-    }catch(e){
-      addItemRow();
-    }
+    }catch(e){ addItemRow(); }
   }
 
-  // Build text summary for WhatsApp / copy
+  // Invoice summary (for WhatsApp / copy)
   function buildInvoiceSummary(){
     const items = getItems();
     const lines = [];
-    const store = els.storeName.value || 'Nusrat Enterprises';
-    const inv = els.invoiceNumber.value || '(no #)';
-    const date = els.invoiceDate.value || '';
-    const cust = els.customerName.value || '';
-
-    lines.push(`*${store}*`);
-    if(els.storeAddress.value) lines.push(els.storeAddress.value);
-    if(els.storePhone.value) lines.push(`Phone: ${els.storePhone.value}`);
-    if(els.storeGST.value) lines.push(`GSTIN: ${els.storeGST.value}`);
+    lines.push(`*Nusrat Enterprises*`);
+    lines.push(`Phones: 7978830017, 9330066455, 9040366455`);
     lines.push(``);
-    lines.push(`*Invoice:* ${inv}`);
-    if(date) lines.push(`*Date:* ${date}`);
-    if(cust) lines.push(`*Customer:* ${cust}`);
+    lines.push(`*Invoice:* ${els.invoiceNumber.value||''}`);
+    if(els.invoiceDate.value) lines.push(`*Date:* ${els.invoiceDate.value}`);
+    if(els.customerName.value) lines.push(`*Customer:* ${els.customerName.value}`);
     lines.push(``);
     lines.push(`*Items:*`);
-    items.forEach((it, i)=>{
-      const amt = it.amount.toFixed(2);
-      lines.push(`${i+1}. ${it.name || 'Item'} — Qty ${it.qty} × ₹${(it.rate||0).toFixed(2)}${it.disc?` (Disc ${it.disc}% )`:''} = ₹${amt}`);
+    items.forEach((it,i)=>{
+      lines.push(`${i+1}. ${it.name} — Qty ${it.qty} × ₹${(it.rate||0).toFixed(2)}${it.disc?` (Disc ${it.disc}% )`:''} = ₹${it.amount.toFixed(2)}`);
     });
-    lines.push(``);
     const subtotal = parseFloat(els.subtotal.value)||0;
-    const taxRate = parseFloat(els.taxRate.value)||0;
-    const taxAmt = subtotal*(taxRate/100);
-    const flatDisc = parseFloat(els.flatDiscount.value)||0;
+    const gst = parseFloat(els.taxRate.value)||0;
+    const gstAmt = subtotal*(gst/100);
+    const flat = parseFloat(els.flatDiscount.value)||0;
     const grand = parseFloat(els.grandTotal.value)||0;
-
+    lines.push(``);
     lines.push(`Subtotal: ₹${subtotal.toFixed(2)}`);
-    if(taxRate>0) lines.push(`GST ${taxRate}%: ₹${taxAmt.toFixed(2)}`);
-    if(flatDisc>0) lines.push(`Discount: -₹${flatDisc.toFixed(2)}`);
+    if(gst>0) lines.push(`GST ${gst}%: ₹${gstAmt.toFixed(2)}`);
+    if(flat>0) lines.push(`Discount: -₹${flat.toFixed(2)}`);
     lines.push(`*Grand Total: ₹${grand.toFixed(2)}*`);
     lines.push(``);
-    lines.push(`Thank you for shopping with ${store}!`);
-
+    lines.push(`Thank you for shopping with Nusrat Enterprises!`);
     return lines.join('\n');
   }
 
   function openWhatsApp(){
     const phone = (els.customerPhone.value||'').replace(/\D/g,'');
-    if(!phone){
-      alert('Enter customer WhatsApp number with country code (e.g., 91XXXXXXXXXX).');
-      return;
-    }
-    const text = buildInvoiceSummary();
-    const encoded = encodeURIComponent(text);
-    // If you want to force open chat with a specific number:
-    // wa.me/<number>?text=<msg>
-    const url = `https://wa.me/${phone}?text=${encoded}`;
-    window.open(url, '_blank');
+    if(!phone){ alert('Enter customer WhatsApp number with country code (e.g., 91XXXXXXXXXX).'); return; }
+    const text = encodeURIComponent(buildInvoiceSummary());
+    window.open(`https://wa.me/${phone}?text=${text}`,'_blank');
   }
 
   function copySummary(){
     const text = buildInvoiceSummary();
-    navigator.clipboard.writeText(text)
-      .then(()=>alert('Invoice summary copied to clipboard.'))
-      .catch(()=>alert('Copy failed. You can select & copy from preview.'));
+    navigator.clipboard.writeText(text).then(()=>alert('Invoice summary copied.')).catch(()=>alert('Copy failed.'));
   }
 
-  // Build HTML preview (also used by print)
+  // Preview (also used for print)
   function renderPreview(){
     const items = getItems();
     const html = `
-      <div style="border:1px solid #e5e7eb;border-radius:10px;padding:16px">
+      <div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px">
         <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
           <div>
-            <div style="font-size:1.3rem;font-weight:800">${els.storeName.value || 'Nusrat Enterprises'}</div>
-            ${els.storeAddress.value? `<div>${escapeHtml(els.storeAddress.value)}</div>`:''}
-            ${els.storePhone.value? `<div>Phone: ${escapeHtml(els.storePhone.value)}</div>`:''}
-            ${els.storeGST.value? `<div>GSTIN: ${escapeHtml(els.storeGST.value)}</div>`:''}
+            <div style="font-size:1.3rem;font-weight:800;color:#7f1d1d">Nusrat Enterprises</div>
+            <div>Phones: 7978830017, 9330066455, 9040366455</div>
           </div>
           <div style="text-align:right">
-            <div><strong>Invoice #:</strong> ${escapeHtml(els.invoiceNumber.value || '')}</div>
-            <div><strong>Date:</strong> ${escapeHtml(els.invoiceDate.value || '')}</div>
-            <div><strong>Customer:</strong> ${escapeHtml(els.customerName.value || '')}</div>
+            <div><strong>Invoice #:</strong> ${escapeHtml(els.invoiceNumber.value||'')}</div>
+            <div><strong>Date:</strong> ${escapeHtml(els.invoiceDate.value||'')}</div>
+            <div><strong>Customer:</strong> ${escapeHtml(els.customerName.value||'')}</div>
           </div>
         </div>
-        <hr style="border:none;border-top:1px solid #e5e7eb;margin:12px 0" />
+        <hr style="border:none;border-top:1px solid #f3f4f6;margin:12px 0" />
         <table style="width:100%;border-collapse:collapse">
           <thead>
             <tr>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #e5e7eb">Item</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb">Qty</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb">Rate (₹)</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb">Disc %</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb">Amount (₹)</th>
+              <th style="text-align:left;padding:8px;border-bottom:1px solid #e5e7eb;background:#fff1f2">Item</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;background:#fff1f2">Qty</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;background:#fff1f2">Rate (₹)</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;background:#fff1f2">Disc %</th>
+              <th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;background:#fff1f2">Amount (₹)</th>
             </tr>
           </thead>
           <tbody>
             ${items.map(it=>`
               <tr>
-                <td style="padding:8px;border-bottom:1px solid #f1f5f9">${escapeHtml(it.name||'Item')}</td>
+                <td style="padding:8px;border-bottom:1px solid #f1f5f9">${escapeHtml(it.name)}</td>
                 <td style="padding:8px;text-align:right;border-bottom:1px solid #f1f5f9">${it.qty}</td>
                 <td style="padding:8px;text-align:right;border-bottom:1px solid #f1f5f9">${it.rate.toFixed(2)}</td>
                 <td style="padding:8px;text-align:right;border-bottom:1px solid #f1f5f9">${(it.disc||0).toFixed(2)}</td>
@@ -508,53 +467,38 @@
         <div style="display:flex;justify-content:flex-end;margin-top:10px">
           <table style="min-width:320px">
             <tr><td style="padding:6px 8px">Subtotal</td><td style="padding:6px 8px;text-align:right">₹${(parseFloat(els.subtotal.value)||0).toFixed(2)}</td></tr>
-            <tr><td style="padding:6px 8px">GST ${parseFloat(els.taxRate.value)||0}%</td><td style="padding:6px 8px;text-align:right">₹${((parseFloat(els.subtotal.value)||0)*(parseFloat(els.taxRate.value)||0)/100).toFixed(2)}</td></tr>
+            <tr><td style="padding:6px 8px">GST ${(parseFloat(els.taxRate.value)||0)}%</td><td style="padding:6px 8px;text-align:right">₹${((parseFloat(els.subtotal.value)||0)*(parseFloat(els.taxRate.value)||0)/100).toFixed(2)}</td></tr>
             <tr><td style="padding:6px 8px">Discount</td><td style="padding:6px 8px;text-align:right">-₹${(parseFloat(els.flatDiscount.value)||0).toFixed(2)}</td></tr>
             <tr><td style="padding:6px 8px"><strong>Grand Total</strong></td><td style="padding:6px 8px;text-align:right"><strong>₹${(parseFloat(els.grandTotal.value)||0).toFixed(2)}</strong></td></tr>
           </table>
         </div>
-        <div style="margin-top:10px;font-size:.9rem;color:#334155">Thank you for shopping with ${escapeHtml(els.storeName.value || 'Nusrat Enterprises')}.</div>
+        <div style="margin-top:10px;font-size:.92rem;color:#374151">Thank you for shopping with <strong>Nusrat Enterprises</strong>.</div>
       </div>
     `;
     els.invoicePreview.innerHTML = html;
   }
 
-  function escapeHtml(s){
-    return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-  }
-
   // Events
   els.addItemBtn.addEventListener('click', ()=>addItemRow());
   els.clearItemsBtn.addEventListener('click', ()=>{
-    if(confirm('Clear all items?')){ els.itemsBody.innerHTML=''; addItemRow(); recalc(); }
+    if(confirm('Clear all items?')){ els.itemsBody.innerHTML=''; addItemRow(); recalc(); persistItems(); }
   });
-  ['taxRate','flatDiscount'].forEach(id => {
-    document.getElementById(id).addEventListener('input', recalc);
-  });
-  els.previewBtn.addEventListener('click', ()=>{
-    renderPreview();
-    els.previewCard.style.display='block';
-    window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
-  });
+  ['taxRate','flatDiscount'].forEach(id => document.getElementById(id).addEventListener('input', ()=>{recalc(); persistItems();}));
+  els.previewBtn.addEventListener('click', ()=>{renderPreview(); els.previewCard.style.display='block';});
   els.hidePreviewBtn.addEventListener('click', ()=> els.previewCard.style.display='none');
-  els.printBtn.addEventListener('click', ()=>{
-    renderPreview();
-    els.previewCard.style.display='block';
-    window.print();
-  });
+  els.printBtn.addEventListener('click', ()=>{renderPreview(); els.previewCard.style.display='block'; window.print();});
   els.whatsAppBtn.addEventListener('click', openWhatsApp);
   els.copyTextBtn.addEventListener('click', copySummary);
-  els.saveDefaultsBtn.addEventListener('click', saveDefaults);
-  els.clearDefaultsBtn.addEventListener('click', clearDefaults);
 
-  // Auto recalc when editing header fields (to reflect in preview text)
-  ['storeName','storePhone','storeAddress','storeGST','customerName','invoiceNumber','invoiceDate']
-    .forEach(id => document.getElementById(id).addEventListener('input', ()=>{/*no-op*/}));
+  // Regenerate invoice number if user taps into it (optional)
+  els.invoiceNumber.addEventListener('focus', (e)=>{
+    if(!e.target.value){ e.target.value = genInvoiceNumberFromNow(); }
+  });
 
-  // Load saved
-  loadDefaults();
+  // Load items and start
   loadItems();
   recalc();
+
 })();
 </script>
 </body>
