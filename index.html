@@ -1,504 +1,316 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Nusrat Enterprises — Invoice</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Nusrat Enterprises — Invoice (Design C)</title>
 <style>
-  :root{
-    --brand:#b91c1c;       /* red primary */
-    --brand-2:#7f1d1d;     /* darker red */
-    --bg:#fafafa;
-    --text:#111827;
-    --muted:#6b7280;
-    --card:#ffffff;
-    --border:#e5e7eb;
-    --soft:#fff1f2;        /* rose-50 */
-    --accent:#fee2e2;      /* rose-200 */
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-  header{
-    background:linear-gradient(135deg,var(--brand),var(--brand-2));
-    color:#fff;padding:16px 14px 22px;border-bottom:1px solid rgba(255,255,255,.15);
-  }
-  .header-inner{max-width:860px;margin:0 auto}
-  h1{margin:0;font-size:1.25rem;font-weight:800;letter-spacing:.2px}
-  .sub{opacity:.9;font-size:.92rem;margin-top:6px}
-  .phones{margin-top:6px;font-size:.9rem;opacity:.95}
-  .container{max-width:860px;margin:-28px auto 28px;padding:0 12px}
-  .card{
-    background:var(--card);border:1px solid var(--border);border-radius:14px;
-    box-shadow:0 8px 28px rgba(0,0,0,.05);padding:14px;margin-bottom:14px;
-  }
-  h2{margin:2px 0 10px;color:var(--brand-2);font-size:1.05rem}
-  label{display:block;font-weight:700;font-size:.92rem;margin-bottom:6px}
-  input,select,textarea{
-    width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff;color:var(--text);font-size:1rem;
-  }
-  input[disabled]{background:#f9fafb;color:#6b7280}
+  :root{--brand:#b91c1c;--brand-2:#7f1d1d;--bg:#fafafa;--text:#111827;--muted:#6b7280;--card:#fff;--border:#e5e7eb;--soft:#fff1f2}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  header{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;padding:16px}
+  h1{margin:0;font-weight:800;font-size:1.2rem}
+  .container{max-width:1080px;margin:-16px auto 20px;padding:0 12px}
+  .grid{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.06);padding:12px}
+  h2{margin:4px 0 8px;color:var(--brand-2);font-size:1.02rem}
+  label{display:block;font-weight:700;font-size:.9rem;margin-bottom:6px}
+  input,select{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff}
+  input[disabled], input[readonly]{background:#f9fafb;color:#6b7280}
   .row{display:grid;gap:10px}
-  .row.cols-2{grid-template-columns:1fr 1fr}
-  .row.cols-3{grid-template-columns:repeat(3,1fr)}
-  .row.cols-4{grid-template-columns:repeat(4,1fr)}
-  @media (max-width:720px){.row.cols-2,.row.cols-3,.row.cols-4{grid-template-columns:1fr}}
-  .muted{color:var(--muted);font-size:.88rem}
-  .btn{
-    display:inline-flex;align-items:center;gap:8px;
-    background:var(--brand);color:#fff;border:none;padding:12px 14px;border-radius:12px;cursor:pointer;font-weight:700;
-  }
-  .btn.secondary{background:#374151}
+  .cols-2{grid-template-columns:1fr 1fr}
+  @media(max-width:700px){.cols-2{grid-template-columns:1fr}}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--brand);color:#fff;border:none;padding:10px 12px;border-radius:10px;font-weight:700;cursor:pointer}
   .btn.link{background:#fff;border:1px solid var(--border);color:#111827}
-  .btn.danger{background:#991b1b}
-  .btn:disabled{opacity:.6;cursor:not-allowed}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:10px;border-bottom:1px solid var(--border);text-align:left}
-  th{background:var(--soft);font-size:.9rem}
-  td.right,th.right{text-align:right}
-  .no-print {}
-  @media print{
-    header,.no-print{display:none!important}
-    body{background:#fff}
-    .container{margin:0 auto;padding:0}
-    .card{border:none;box-shadow:none;margin:0;padding:0}
-    .print-card{display:block}
-  }
-  .chip{display:inline-block;background:var(--accent);border:1px solid #fecaca;color:#7f1d1d;padding:4px 10px;border-radius:999px;font-size:.8rem}
-  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  .space-between{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  /* Items grid line */
+  .item-line{display:grid;grid-template-columns:1.2fr .6fr .6fr .6fr .6fr auto;gap:8px;margin-bottom:8px}
+  .item-line > div{display:flex;flex-direction:column}
+  .item-line .amount{display:flex;align-items:flex-end;font-weight:800;justify-content:flex-end;padding:0 6px}
+  @media(max-width:900px){.item-line{grid-template-columns:1fr 1fr 1fr 1fr;}}
+  @media(max-width:900px){.col-span-2{grid-column:span 2}}
+  @media(max-width:900px){.hide-mobile{display:none}}
+  @media print{header,.no-print{display:none!important} .card{border:none;box-shadow:none}}
+  .error{color:#b91c1c;font-size:.85rem;margin-top:4px;display:none}
 </style>
 </head>
 <body>
-<header>
-  <div class="header-inner">
-    <h1>Nusrat Enterprises</h1>
-    <div class="sub">Professional Retail Invoice • Menswear</div>
-    <div class="phones">📞 7978830017 • 9330066455 • 9040366455</div>
-  </div>
-</header>
+<header><h1>Nusrat Enterprises — Invoice</h1><div>📞 7978830017 • 9330066455 • 9040366455</div></header>
 
 <div class="container">
-  <!-- Store & Invoice -->
-  <div class="card">
-    <div class="space-between">
-      <h2>Invoice Details</h2>
-      <span class="chip">Bhubaneswar • Retail</span>
-    </div>
-    <div class="row cols-2">
-      <div>
-        <label>Store Name</label>
-        <input id="storeName" value="Nusrat Enterprises" disabled />
+  <div class="grid">
+    <div>
+      <div class="card">
+        <h2>Invoice & Customer</h2>
+        <div class="row cols-2">
+          <div>
+            <label>Invoice # (auto)</label>
+            <input id="invoiceNumber" placeholder="ddMMyyyyHHmm" readonly />
+          </div>
+          <div>
+            <label>Date (auto)</label>
+            <input id="invoiceDate" type="date" readonly />
+          </div>
+        </div>
+        <div class="row cols-2" style="margin-top:8px">
+          <div>
+            <label>Customer Name</label>
+            <input id="customerName"/>
+          </div>
+          <div>
+            <label>Customer WhatsApp (10 digits)</label>
+            <input id="customerPhone" inputmode="numeric" pattern="[0-9]*" maxlength="10" placeholder="e.g., 9876543210"/>
+            <div id="phoneError" class="error">Enter exactly 10 digits.</div>
+          </div>
+        </div>
       </div>
-      <div>
-        <label>Store Phones</label>
-        <input id="storePhones" value="7978830017, 9330066455, 9040366455" disabled />
-      </div>
-    </div>
-    <div class="row cols-2" style="margin-top:8px">
-      <div>
-        <label>Invoice # (auto)</label>
-        <input id="invoiceNumber" placeholder="ddMMyyyyHHmm" />
-        <div class="muted">Format: ddMMyyyyHHmm (e.g., 140220261022)</div>
-      </div>
-      <div>
-        <label>Date</label>
-        <input id="invoiceDate" type="date" />
-      </div>
-    </div>
-  </div>
 
-  <!-- Customer -->
-  <div class="card">
-    <h2>Customer</h2>
-    <div class="row cols-2">
-      <div>
-        <label>Customer Name</label>
-        <input id="customerName" placeholder="Full name"/>
-      </div>
-      <div>
-        <label>Customer WhatsApp</label>
-        <input id="customerPhone" placeholder="e.g., 91XXXXXXXXXX (no + or spaces)"/>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+          <h2>Items</h2>
+          <div class="no-print">
+            <button class="btn" id="addItemBtn">+ Add Item</button>
+            <button class="btn link" id="clearItemsBtn">Clear Items</button>
+          </div>
+        </div>
+        <div id="itemsList"></div>
       </div>
     </div>
-  </div>
 
-  <!-- Items -->
-  <div class="card">
-    <div class="space-between">
-      <h2>Items</h2>
-      <div class="toolbar no-print">
-        <button class="btn" id="addItemBtn">+ Add Item</button>
-        <button class="btn link" id="clearItemsBtn">Clear Items</button>
+    <div>
+      <div class="card">
+        <h2>Summary</h2>
+        <div class="row">
+          <div><label>Subtotal (₹)</label><input id="subtotal" disabled/></div>
+          <div class="row cols-2">
+            <div><label>GST %</label><input id="taxRate" type="number" min="0" step="0.01" value="0"/></div>
+            <div><label>Discount (₹)</label><input id="flatDiscount" type="number" min="0" step="0.01" value="0"/></div>
+          </div>
+          <div><label>Grand Total (₹)</label><input id="grandTotal" disabled/></div>
+        </div>
       </div>
-    </div>
-    <div class="muted" style="margin:6px 0 10px">Use the dropdown to quickly select common products. You can also type a custom name.</div>
-    <div style="overflow-x:auto">
-      <table aria-label="Items">
-        <thead>
-          <tr>
-            <th style="width:30%">Item</th>
-            <th class="right" style="width:14%">Qty</th>
-            <th class="right" style="width:18%">Rate (₹)</th>
-            <th class="right" style="width:18%">Discount %</th>
-            <th class="right" style="width:18%">Amount (₹)</th>
-            <th style="width:12%">Action</th>
-          </tr>
-        </thead>
-        <tbody id="itemsBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Totals -->
-  <div class="card">
-    <h2>Summary</h2>
-    <div class="row cols-4">
-      <div>
-        <label>Subtotal (₹)</label>
-        <input id="subtotal" disabled />
-      </div>
-      <div>
-        <label>GST %</label>
-        <input id="taxRate" type="number" min="0" step="0.01" value="0"/>
-      </div>
-      <div>
-        <label>Additional Discount (₹)</label>
-        <input id="flatDiscount" type="number" min="0" step="0.01" value="0"/>
-      </div>
-      <div>
-        <label>Grand Total (₹)</label>
-        <input id="grandTotal" disabled />
-      </div>
-    </div>
-  </div>
-
-  <!-- Actions -->
-  <div class="card no-print">
-    <div class="space-between">
-      <div class="toolbar">
+      <div class="card no-print">
+        <h2>Actions</h2>
         <button class="btn" id="printBtn">🖨️ Print / Save PDF</button>
-        <button class="btn secondary" id="previewBtn">👁️ Preview</button>
-      </div>
-      <div class="toolbar">
-        <button class="btn" id="whatsAppBtn">💬 Send WhatsApp Summary</button>
+        <button class="btn link" id="previewBtn">👁️ Preview</button>
+        <button class="btn" id="whatsAppBtn">💬 WhatsApp</button>
         <button class="btn link" id="copyTextBtn">Copy Summary</button>
       </div>
-    </div>
-    <div class="muted" style="margin-top:8px">
-      WhatsApp opens with pre-filled text; user taps <strong>Send</strong>. To auto-send PDFs from your number, you’d need WhatsApp Business Cloud API with a backend.
-    </div>
-  </div>
 
-  <!-- Preview -->
-  <div class="card print-card" id="previewCard" style="display:none">
-    <div class="space-between">
-      <h2>Invoice Preview</h2>
-      <button class="btn link no-print" id="hidePreviewBtn">Hide Preview</button>
+      <div class="card" id="previewCard" style="display:none">
+        <h2>Invoice Preview</h2>
+        <div id="invoicePreview"></div>
+      </div>
     </div>
-    <div id="invoicePreview" style="margin-top:10px"></div>
   </div>
 </div>
 
 <script>
 (function(){
-  const ITEM_OPTIONS = [
-    "Shirt","T-shirt","Jean","Formal Pant","Track","Half Pant"
-  ];
-
-  const els = {
-    invoiceNumber: document.getElementById('invoiceNumber'),
-    invoiceDate: document.getElementById('invoiceDate'),
-    customerName: document.getElementById('customerName'),
-    customerPhone: document.getElementById('customerPhone'),
-    itemsBody: document.getElementById('itemsBody'),
-    subtotal: document.getElementById('subtotal'),
-    taxRate: document.getElementById('taxRate'),
-    flatDiscount: document.getElementById('flatDiscount'),
-    grandTotal: document.getElementById('grandTotal'),
-    addItemBtn: document.getElementById('addItemBtn'),
-    clearItemsBtn: document.getElementById('clearItemsBtn'),
-    previewBtn: document.getElementById('previewBtn'),
-    hidePreviewBtn: document.getElementById('hidePreviewBtn'),
-    previewCard: document.getElementById('previewCard'),
-    invoicePreview: document.getElementById('invoicePreview'),
-    printBtn: document.getElementById('printBtn'),
-    whatsAppBtn: document.getElementById('whatsAppBtn'),
-    copyTextBtn: document.getElementById('copyTextBtn'),
+  const ITEM_OPTIONS=["Shirt","T-shirt","Jean","Formal Pant","Track","Half Pant"];
+  const els={
+    itemsList:document.getElementById('itemsList'),
+    invoiceNumber:document.getElementById('invoiceNumber'),
+    invoiceDate:document.getElementById('invoiceDate'),
+    customerName:document.getElementById('customerName'),
+    customerPhone:document.getElementById('customerPhone'),
+    phoneError:document.getElementById('phoneError'),
+    subtotal:document.getElementById('subtotal'),
+    taxRate:document.getElementById('taxRate'),
+    flatDiscount:document.getElementById('flatDiscount'),
+    grandTotal:document.getElementById('grandTotal')
   };
 
-  // === Helpers ===
-  function pad2(n){return n.toString().padStart(2,'0')}
-  function genInvoiceNumberFromNow(){
-    const d = new Date();
-    const dd = pad2(d.getDate());
-    const mm = pad2(d.getMonth()+1);
-    const yyyy = d.getFullYear();
-    const HH = pad2(d.getHours());
-    const MM = pad2(d.getMinutes());
-    return `${dd}${mm}${yyyy}${HH}${MM}`; // ddMMyyyyHHmm
+  // Helpers
+  const pad2=n=>String(n).padStart(2,'0');
+  function genInvoice(){ const d=new Date(); return `${pad2(d.getDate())}${pad2(d.getMonth()+1)}${d.getFullYear()}${pad2(d.getHours())}${pad2(d.getMinutes())}`; }
+  function toNumber(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+
+  // Init: lock invoice & date
+  els.invoiceNumber.value = genInvoice();
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = pad2(today.getMonth()+1);
+  const dd = pad2(today.getDate());
+  els.invoiceDate.value = `${yyyy}-${mm}-${dd}`;
+
+  // Sanitize phone input to digits only and max 10
+  els.customerPhone.addEventListener('input', (e)=>{
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,10);
+    validatePhone();
+  });
+  function validatePhone(){
+    const ok = /^\d{10}$/.test(els.customerPhone.value);
+    els.phoneError.style.display = ok || els.customerPhone.value.length===0 ? 'none' : 'block';
+    return ok;
   }
-  function escapeHtml(s){
-    return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+
+  function qtySelect(v=1){
+    const s=document.createElement('select');
+    for(let i=1;i<=10;i++){
+      const o=document.createElement('option');
+      o.value=i; o.textContent=i; if(i===v) o.selected=true;
+      s.appendChild(o);
+    }
+    return s;
   }
 
-  // Initialize date + invoice #
-  els.invoiceDate.valueAsNumber = els.invoiceDate.valueAsNumber || Date.now();
-  els.invoiceNumber.value = genInvoiceNumberFromNow();
+  function addItem(item={type:'',name:'',qty:1,rate:0,disc:0}){
+    const line=document.createElement('div'); line.className='item-line';
 
-  // Items
-  function addItemRow(item={type:'', name:'', qty:1, rate:0, disc:0}){
-    const tr = document.createElement('tr');
+    // Item type + name
+    const cItem=document.createElement('div'); const l1=document.createElement('label'); l1.textContent='Item';
+    const sel=document.createElement('select');
+    const ph=document.createElement('option'); ph.value=''; ph.textContent='Select item'; sel.appendChild(ph);
+    ITEM_OPTIONS.forEach(o=>{const opt=document.createElement('option');opt.value=o;opt.textContent=o;if(item.type===o) opt.selected=true; sel.appendChild(opt);});
+    cItem.appendChild(l1); cItem.appendChild(sel);
 
-    // Item with dropdown and custom text
-    const itemTd = document.createElement('td');
-    const wrap = document.createElement('div');
-    wrap.style.display='grid';
-    wrap.style.gridTemplateColumns='1fr';
-    wrap.style.gap='6px';
+    const cName=document.createElement('div'); const l2=document.createElement('label'); l2.textContent='Name';
+    const name=document.createElement('input'); name.placeholder='Name'; name.value=item.name||item.type||''; cName.appendChild(l2); cName.appendChild(name);
 
-    const select = document.createElement('select');
-    const placeholder = document.createElement('option');
-    placeholder.value=''; placeholder.textContent='Select item type';
-    select.appendChild(placeholder);
-    ITEM_OPTIONS.forEach(o=>{
-      const opt = document.createElement('option');
-      opt.value = o; opt.textContent = o;
-      if(item.type===o) opt.selected = true;
-      select.appendChild(opt);
-    });
+    // Qty, rate, disc, amount
+    const cQty=document.createElement('div'); const l3=document.createElement('label'); l3.textContent='Qty';
+    const qty=qtySelect(item.qty||1); cQty.appendChild(l3); cQty.appendChild(qty);
 
-    const nameInput = document.createElement('input');
-    nameInput.placeholder='Item name (auto from dropdown, or type your own)';
-    nameInput.value = item.name || item.type || '';
+    const cRate=document.createElement('div'); const l4=document.createElement('label'); l4.textContent='Rate (₹)';
+    const rate=document.createElement('input'); rate.type='number'; rate.min='0'; rate.step='0.01'; rate.value=item.rate||0; cRate.appendChild(l4); cRate.appendChild(rate);
 
-    select.addEventListener('change', ()=>{
-      if(!nameInput.value || ITEM_OPTIONS.includes(nameInput.value)){
-        nameInput.value = select.value || '';
-      }
+    const cDisc=document.createElement('div'); const l5=document.createElement('label'); l5.textContent='Disc %';
+    const disc=document.createElement('input'); disc.type='number'; disc.min='0'; disc.max='100'; disc.step='0.01'; disc.value=item.disc||0; cDisc.appendChild(l5); cDisc.appendChild(disc);
+
+    const cAmt=document.createElement('div'); const l6=document.createElement('label'); l6.textContent='Amount (₹)';
+    const amt=document.createElement('div'); amt.className='amount'; amt.textContent='0.00'; cAmt.appendChild(l6); cAmt.appendChild(amt);
+
+    const cAct=document.createElement('div'); cAct.className='hide-mobile';
+    const l7=document.createElement('label'); l7.textContent=' ';
+    const del=document.createElement('button'); del.className='btn'; del.style.background='#991b1b'; del.textContent='Delete';
+    cAct.appendChild(l7); cAct.appendChild(del);
+
+    line.appendChild(cItem); line.appendChild(cName); line.appendChild(cQty); line.appendChild(cRate); line.appendChild(cDisc); line.appendChild(cAmt); line.appendChild(cAct);
+    els.itemsList.appendChild(line);
+
+    function compute(){
+      const q=toNumber(qty.value), r=toNumber(rate.value), d=toNumber(disc.value);
+      const gross=q*r, a=gross-(gross*d/100);
+      amt.textContent=a.toFixed(2);
       recalc();
-      persistItems();
-    });
+      persist();
+    }
+    [sel,name,qty,rate,disc].forEach(el=>el.addEventListener('input', ()=>{
+      if(el===sel && (!name.value || ITEM_OPTIONS.includes(name.value))) name.value=sel.value||'';
+      compute();
+    }));
+    del.addEventListener('click', ()=>{ line.remove(); recalc(); persist(); });
 
-    wrap.appendChild(select);
-    wrap.appendChild(nameInput);
-    itemTd.appendChild(wrap);
+    // initial compute
+    compute();
 
-    // Qty
-    const qtyTd = document.createElement('td'); qtyTd.className='right';
-    const qtyInput = document.createElement('input');
-    qtyInput.type='number'; qtyInput.min='0'; qtyInput.step='1'; qtyInput.value=item.qty ?? 1;
-    qtyInput.style.textAlign='right';
-    qtyTd.appendChild(qtyInput);
-
-    // Rate
-    const rateTd = document.createElement('td'); rateTd.className='right';
-    const rateInput = document.createElement('input');
-    rateInput.type='number'; rateInput.min='0'; rateInput.step='0.01'; rateInput.value=item.rate ?? 0;
-    rateInput.style.textAlign='right';
-    rateTd.appendChild(rateInput);
-
-    // Discount
-    const discTd = document.createElement('td'); discTd.className='right';
-    const discInput = document.createElement('input');
-    discInput.type='number'; discInput.min='0'; discInput.max='100'; discInput.step='0.01'; discInput.value=item.disc ?? 0;
-    discInput.style.textAlign='right';
-    discTd.appendChild(discInput);
-
-    // Amount
-    const amountTd = document.createElement('td'); amountTd.className='right';
-    amountTd.textContent = '0.00';
-
-    // Action
-    const actionTd = document.createElement('td');
-    const delBtn = document.createElement('button'); delBtn.className='btn danger'; delBtn.textContent='Delete';
-    actionTd.appendChild(delBtn);
-
-    tr.appendChild(itemTd);
-    tr.appendChild(qtyTd);
-    tr.appendChild(rateTd);
-    tr.appendChild(discTd);
-    tr.appendChild(amountTd);
-    tr.appendChild(actionTd);
-
-    [nameInput, qtyInput, rateInput, discInput].forEach(inp => inp.addEventListener('input', ()=>{recalc(); persistItems();}));
-    delBtn.addEventListener('click', ()=>{ tr.remove(); recalc(); persistItems(); });
-
-    els.itemsBody.appendChild(tr);
-    recalc();
-  }
-
-  function getItems(){
-    const rows = Array.from(els.itemsBody.querySelectorAll('tr'));
-    return rows.map(row=>{
-      const selects = row.querySelectorAll('select');
-      const inputs = row.querySelectorAll('input');
-      const [nameInput, qtyInput, rateInput, discInput] = [inputs[0+0], inputs[1+0], inputs[2+0], inputs[3+0]];
-      const type = selects[0]?.value || '';
-      const name = nameInput?.value?.trim() || type || 'Item';
-      const qty = parseFloat(qtyInput.value)||0;
-      const rate = parseFloat(rateInput.value)||0;
-      const disc = parseFloat(discInput.value)||0;
-      const gross = qty*rate;
-      const amount = gross - (gross*disc/100);
-      return {type, name, qty, rate, disc, amount};
+    line._ser=()=>({
+      type:sel.value,
+      name:name.value.trim()||sel.value||'Item',
+      qty:toNumber(qty.value)||1,
+      rate:toNumber(rate.value)||0,
+      disc:toNumber(disc.value)||0,
+      amount:toNumber(amt.textContent)||0
     });
   }
 
+  function getItems(){ return Array.from(els.itemsList.children).map(l=>l._ser()); }
+
+  // Totals
   function recalc(){
-    const items = getItems();
-    let subtotal = 0;
-    const rows = Array.from(els.itemsBody.querySelectorAll('tr'));
-    items.forEach((it, idx)=>{
-      subtotal += it.amount;
-      const amountTd = rows[idx].children[4];
-      amountTd.textContent = it.amount.toFixed(2);
-    });
+    const items=getItems();
+    const subtotal = items.reduce((s,i)=> s + (toNumber(i.amount)), 0);
     els.subtotal.value = subtotal.toFixed(2);
 
-    const taxRate = parseFloat(els.taxRate.value)||0;
-    const flatDiscount = parseFloat(els.flatDiscount.value)||0;
-
-    const taxAmt = subtotal * (taxRate/100);
-    let grand = subtotal + taxAmt - flatDiscount;
+    const gstRate = toNumber(els.taxRate.value);
+    const flat = toNumber(els.flatDiscount.value);
+    const gstAmt = subtotal * (gstRate/100);
+    let grand = subtotal + gstAmt - flat;
     if(grand < 0) grand = 0;
     els.grandTotal.value = grand.toFixed(2);
   }
 
-  // Local storage (keep your last items/session)
-  const LS_ITEMS = 'nusrat.red.items.v1';
-  function persistItems(){
-    localStorage.setItem(LS_ITEMS, JSON.stringify(getItems()));
-  }
-  function loadItems(){
-    const raw = localStorage.getItem(LS_ITEMS);
-    if(!raw){ addItemRow(); return; }
+  // Persistence
+  const LS='nusrat.designC.items.v2';
+  function persist(){ localStorage.setItem(LS, JSON.stringify(getItems())); }
+  function load(){
+    const raw=localStorage.getItem(LS);
+    if(!raw){ addItem(); return; }
     try{
-      const arr = JSON.parse(raw);
-      if(Array.isArray(arr) && arr.length){
-        els.itemsBody.innerHTML='';
-        arr.forEach(addItemRow);
+      const arr=JSON.parse(raw);
+      if(Array.isArray(arr)&&arr.length){
+        els.itemsList.innerHTML='';
+        arr.forEach(addItem);
       }else{
-        addItemRow();
+        addItem();
       }
-    }catch(e){ addItemRow(); }
+    }catch(e){ addItem(); }
   }
 
-  // Invoice summary (for WhatsApp / copy)
-  function buildInvoiceSummary(){
-    const items = getItems();
-    const lines = [];
+  function summary(){
+    const items=getItems(); const lines=[];
     lines.push(`*Nusrat Enterprises*`);
     lines.push(`Phones: 7978830017, 9330066455, 9040366455`);
-    lines.push(``);
-    lines.push(`*Invoice:* ${els.invoiceNumber.value||''}`);
+    lines.push('');
+    lines.push(`*Invoice:* ${els.invoiceNumber.value}`);
     if(els.invoiceDate.value) lines.push(`*Date:* ${els.invoiceDate.value}`);
     if(els.customerName.value) lines.push(`*Customer:* ${els.customerName.value}`);
-    lines.push(``);
-    lines.push(`*Items:*`);
-    items.forEach((it,i)=>{
-      lines.push(`${i+1}. ${it.name} — Qty ${it.qty} × ₹${(it.rate||0).toFixed(2)}${it.disc?` (Disc ${it.disc}% )`:''} = ₹${it.amount.toFixed(2)}`);
-    });
-    const subtotal = parseFloat(els.subtotal.value)||0;
-    const gst = parseFloat(els.taxRate.value)||0;
-    const gstAmt = subtotal*(gst/100);
-    const flat = parseFloat(els.flatDiscount.value)||0;
-    const grand = parseFloat(els.grandTotal.value)||0;
-    lines.push(``);
+    lines.push(''); lines.push('*Items:*');
+    items.forEach((it,i)=>lines.push(`${i+1}. ${it.name} — Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)}${it.disc?` (Disc ${toNumber(it.disc)}% )`:''} = ₹${toNumber(it.amount).toFixed(2)}`));
+    const subtotal=toNumber(els.subtotal.value), gstRate=toNumber(els.taxRate.value), flat=toNumber(els.flatDiscount.value), grand=toNumber(els.grandTotal.value);
+    const gstAmt=subtotal*(gstRate/100);
+    lines.push('');
     lines.push(`Subtotal: ₹${subtotal.toFixed(2)}`);
-    if(gst>0) lines.push(`GST ${gst}%: ₹${gstAmt.toFixed(2)}`);
+    if(gstRate>0) lines.push(`GST ${gstRate}%: ₹${gstAmt.toFixed(2)}`);
     if(flat>0) lines.push(`Discount: -₹${flat.toFixed(2)}`);
     lines.push(`*Grand Total: ₹${grand.toFixed(2)}*`);
-    lines.push(``);
-    lines.push(`Thank you for shopping with Nusrat Enterprises!`);
+    lines.push('');
+    lines.push('Thank you for shopping with Nusrat Enterprises!');
     return lines.join('\n');
   }
 
-  function openWhatsApp(){
-    const phone = (els.customerPhone.value||'').replace(/\D/g,'');
-    if(!phone){ alert('Enter customer WhatsApp number with country code (e.g., 91XXXXXXXXXX).'); return; }
-    const text = encodeURIComponent(buildInvoiceSummary());
-    window.open(`https://wa.me/${phone}?text=${text}`,'_blank');
-  }
-
-  function copySummary(){
-    const text = buildInvoiceSummary();
-    navigator.clipboard.writeText(text).then(()=>alert('Invoice summary copied.')).catch(()=>alert('Copy failed.'));
-  }
-
-  // Preview (also used for print)
-  function renderPreview(){
-    const items = getItems();
-    const html = `
-      <div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px">
-        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
-          <div>
-            <div style="font-size:1.3rem;font-weight:800;color:#7f1d1d">Nusrat Enterprises</div>
-            <div>Phones: 7978830017, 9330066455, 9040366455</div>
-          </div>
-          <div style="text-align:right">
-            <div><strong>Invoice #:</strong> ${escapeHtml(els.invoiceNumber.value||'')}</div>
-            <div><strong>Date:</strong> ${escapeHtml(els.invoiceDate.value||'')}</div>
-            <div><strong>Customer:</strong> ${escapeHtml(els.customerName.value||'')}</div>
-          </div>
-        </div>
-        <hr style="border:none;border-top:1px solid #f3f4f6;margin:12px 0" />
-        <table style="width:100%;border-collapse:collapse">
-          <thead>
-            <tr>
-              <th style="text-align:left;padding:8px;border-bottom:1px solid #e5e7eb;background:#fff1f2">Item</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;background:#fff1f2">Qty</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;background:#fff1f2">Rate (₹)</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;background:#fff1f2">Disc %</th>
-              <th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;background:#fff1f2">Amount (₹)</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${items.map(it=>`
-              <tr>
-                <td style="padding:8px;border-bottom:1px solid #f1f5f9">${escapeHtml(it.name)}</td>
-                <td style="padding:8px;text-align:right;border-bottom:1px solid #f1f5f9">${it.qty}</td>
-                <td style="padding:8px;text-align:right;border-bottom:1px solid #f1f5f9">${it.rate.toFixed(2)}</td>
-                <td style="padding:8px;text-align:right;border-bottom:1px solid #f1f5f9">${(it.disc||0).toFixed(2)}</td>
-                <td style="padding:8px;text-align:right;border-bottom:1px solid #f1f5f9">${it.amount.toFixed(2)}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <div style="display:flex;justify-content:flex-end;margin-top:10px">
-          <table style="min-width:320px">
-            <tr><td style="padding:6px 8px">Subtotal</td><td style="padding:6px 8px;text-align:right">₹${(parseFloat(els.subtotal.value)||0).toFixed(2)}</td></tr>
-            <tr><td style="padding:6px 8px">GST ${(parseFloat(els.taxRate.value)||0)}%</td><td style="padding:6px 8px;text-align:right">₹${((parseFloat(els.subtotal.value)||0)*(parseFloat(els.taxRate.value)||0)/100).toFixed(2)}</td></tr>
-            <tr><td style="padding:6px 8px">Discount</td><td style="padding:6px 8px;text-align:right">-₹${(parseFloat(els.flatDiscount.value)||0).toFixed(2)}</td></tr>
-            <tr><td style="padding:6px 8px"><strong>Grand Total</strong></td><td style="padding:6px 8px;text-align:right"><strong>₹${(parseFloat(els.grandTotal.value)||0).toFixed(2)}</strong></td></tr>
-          </table>
-        </div>
-        <div style="margin-top:10px;font-size:.92rem;color:#374151">Thank you for shopping with <strong>Nusrat Enterprises</strong>.</div>
-      </div>
-    `;
-    els.invoicePreview.innerHTML = html;
-  }
-
   // Events
-  els.addItemBtn.addEventListener('click', ()=>addItemRow());
-  els.clearItemsBtn.addEventListener('click', ()=>{
-    if(confirm('Clear all items?')){ els.itemsBody.innerHTML=''; addItemRow(); recalc(); persistItems(); }
+  document.getElementById('addItemBtn').addEventListener('click', ()=>addItem());
+  document.getElementById('clearItemsBtn').addEventListener('click', ()=>{
+    if(confirm('Clear items?')){
+      els.itemsList.innerHTML='';
+      addItem();
+      recalc();
+      persist();
+    }
   });
-  ['taxRate','flatDiscount'].forEach(id => document.getElementById(id).addEventListener('input', ()=>{recalc(); persistItems();}));
-  els.previewBtn.addEventListener('click', ()=>{renderPreview(); els.previewCard.style.display='block';});
-  els.hidePreviewBtn.addEventListener('click', ()=> els.previewCard.style.display='none');
-  els.printBtn.addEventListener('click', ()=>{renderPreview(); els.previewCard.style.display='block'; window.print();});
-  els.whatsAppBtn.addEventListener('click', openWhatsApp);
-  els.copyTextBtn.addEventListener('click', copySummary);
-
-  // Regenerate invoice number if user taps into it (optional)
-  els.invoiceNumber.addEventListener('focus', (e)=>{
-    if(!e.target.value){ e.target.value = genInvoiceNumberFromNow(); }
+  ['taxRate','flatDiscount'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', ()=>{ recalc(); persist(); });
+  });
+  document.getElementById('previewBtn').addEventListener('click', ()=>{
+    const items=getItems();
+    document.getElementById('previewCard').style.display='block';
+    document.getElementById('invoicePreview').innerHTML = items.map(it=>`<div style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:6px 0">
+      <div>${it.name}</div><div>Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)} = <b>₹${toNumber(it.amount).toFixed(2)}</b></div>
+    </div>`).join('') + `
+      <div style="display:flex;justify-content:flex-end;margin-top:8px">
+        <table>
+          <tr><td>Subtotal</td><td style="text-align:right">₹${toNumber(els.subtotal.value).toFixed(2)}</td></tr>
+          <tr><td>GST ${toNumber(els.taxRate.value)}%</td><td style="text-align:right">₹${(toNumber(els.subtotal.value)*(toNumber(els.taxRate.value)/100)).toFixed(2)}</td></tr>
+          <tr><td>Discount</td><td style="text-align:right">-₹${toNumber(els.flatDiscount.value).toFixed(2)}</td></tr>
+          <tr><td><b>Grand Total</b></td><td style="text-align:right"><b>₹${toNumber(els.grandTotal.value).toFixed(2)}</b></td></tr>
+        </table>
+      </div>`;
+  });
+  document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+  document.getElementById('whatsAppBtn').addEventListener('click', ()=>{
+    if(!validatePhone()){ alert('Please enter a valid 10-digit WhatsApp number.'); return; }
+    const ten = els.customerPhone.value; // exactly 10 digits
+    const phone = `91${ten}`; // prefix India country code
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(summary())}`,'_blank');
+  });
+  document.getElementById('copyTextBtn').addEventListener('click', ()=>{
+    navigator.clipboard.writeText(summary()).then(()=>alert('Copied')).catch(()=>alert('Copy failed'));
   });
 
-  // Load items and start
-  loadItems();
+  // Load and first calc
+  load();
   recalc();
-
 })();
 </script>
 </body>
