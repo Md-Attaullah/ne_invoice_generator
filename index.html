@@ -433,7 +433,7 @@
 
     // WhatsApp preserves monospace only inside the backticks; links are more tappable outside.
     const codeBlock = '```' + '\n' + lines.join('\n') + '\n' + '```';
-    const followBlock = `${followTitle}\n\n${igLine}\n\n${waLine}\n\n${gLine}`;
+    const followBlock = `\n${followTitle}\n\n${igLine}\n\n${waLine}\n\n${gLine}`;
     return codeBlock + followBlock;
   }
 
