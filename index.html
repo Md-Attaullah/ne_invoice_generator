@@ -5,11 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Nusrat Enterprises — Invoice (Design C)</title>
 <style>
-  :root{--brand:#b91c1c;--brand-2:#7f1d1d;--bg:#fafafa;--text:#111827;--muted:#6b7280;--card:#fff;--border:#e5e7eb;--soft:#fff1f2}
+  :root{
+    --brand:#b91c1c;--brand-2:#7f1d1d;--bg:#fafafa;--text:#111827;--muted:#6b7280;
+    --card:#fff;--border:#e5e7eb;--soft:#fff1f2;
+    --ig:#db2777; --ig-hover:#be185d; --ig-ring:#f472b6;
+    --wa:#16a34a; --wa-hover:#15803d; --wa-ring:#86efac;
+  }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
   header{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;padding:16px}
   h1{margin:0;font-weight:800;font-size:1.2rem}
+  .header-meta{margin-top:6px;font-size:.92rem;opacity:.95}
+  .header-addr{margin-top:4px;font-size:.9rem;opacity:.95}
   .container{max-width:1080px;margin:-16px auto 20px;padding:0 12px}
   .grid{display:grid;grid-template-columns:2fr 1fr;gap:12px}
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
@@ -31,14 +38,36 @@
   @media(max-width:900px){.item-line{grid-template-columns:1fr 1fr 1fr 1fr;}}
   @media(max-width:900px){.col-span-2{grid-column:span 2}}
   @media(max-width:900px){.hide-mobile{display:none}}
-  @media print{header,.no-print{display:none!important} .card{border:none;box-shadow:none}}
+  @media print{header{display:none!important} .card{border:none;box-shadow:none}}
   .error{color:#b91c1c;font-size:.85rem;margin-top:4px;display:none}
+
+  /* Social (Follow Us) buttons */
+  .social-card .social-wrap{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .social-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    border-radius:10px;padding:10px 12px;color:#fff;
+    font-weight:700;font-size:.92rem;text-decoration:none;
+    box-shadow:0 2px 8px rgba(0,0,0,.12); outline:0;
+  }
+  .social-btn .social-icon{width:18px;height:18px;display:inline-block}
+  .social-btn.ig{background:var(--ig)}
+  .social-btn.ig:hover{background:var(--ig-hover)}
+  .social-btn.ig:focus{box-shadow:0 0 0 3px var(--ig-ring)}
+  .social-btn.wa{background:var(--wa)}
+  .social-btn.wa:hover{background:var(--wa-hover)}
+  .social-btn.wa:focus{box-shadow:0 0 0 3px var(--wa-ring)}
+
+  /* Small print header block for preview/print */
+  .print-header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+  .print-title{font-size:1.15rem;font-weight:800;color:#7f1d1d}
+  .print-meta{font-size:.92rem;color:#374151}
 </style>
 </head>
 <body>
 <header>
   <h1>Nusrat Enterprises — Invoice</h1>
-  <div>📞 7978830017 • 9330066455 • 9040366455</div>
+  <div class="header-meta">📞 7978830017 • 9330066455 • 9040366455</div>
+  <div class="header-addr">📍 Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014</div>
 </header>
 
 <div class="container">
@@ -73,7 +102,7 @@
       <div class="card">
         <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
           <h2>Items</h2>
-          <div class="no-print">
+          <div>
             <button class="btn" id="addItemBtn">+ Add Item</button>
             <button class="btn link" id="clearItemsBtn">Clear Items</button>
           </div>
@@ -118,7 +147,7 @@
         </div>
       </div>
 
-      <div class="card no-print">
+      <div class="card">
         <h2>Actions</h2>
         <button class="btn" id="printBtn">🖨️ Print / Save PDF</button>
         <button class="btn link" id="previewBtn">👁️ Preview</button>
@@ -130,6 +159,34 @@
         <h2>Invoice Preview</h2>
         <div id="invoicePreview"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- Follow Us card (now visible in PRINT/PDF too) -->
+  <div class="card social-card" style="margin-top:12px">
+    <h2>Follow Nusrat Enterprises</h2>
+    <div class="social-wrap" aria-label="Follow Nusrat Enterprises on social">
+      <!-- Instagram -->
+      <a href="https://www.instagram.com/nusrat_enterprises?igsh=Y3hzeHgzdnF5dThq&utm_source=website&utm_medium=header&utm_campaign=social"
+         target="_blank" rel="noopener"
+         aria-label="Follow Nusrat Enterprises on Instagram"
+         class="social-btn ig">
+        <svg xmlns="http://www.w3.org/2000/svg" class="social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm5.25-.75a1.25 1.25 0 11-2.5 0 1.25 1.25 0 012.5 0zM12 9a3 3 0 110 6 3 3 0 010-6z"></path>
+        </svg>
+        <span>Instagram</span>
+      </a>
+
+      <!-- WhatsApp Channel -->
+      <a href="https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06?utm_source=website&utm_medium=header&utm_campaign=social"
+         target="_blank" rel="noopener"
+         aria-label="Follow Nusrat Enterprises WhatsApp Channel"
+         class="social-btn wa">
+        <svg xmlns="http://www.w3.org/2000/svg" class="social-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 2.12.55 4.15 1.6 5.97L0 24l6.26-1.64A12 12 0 1012 0zm0 22c-1.82 0-3.58-.49-5.12-1.41l-.37-.22-3.51.92.94-3.41-.23-.36A9.96 9.96 0 1122 12c0 5.52-4.48 10-10 10zm5.28-7.33c-.29-.15-1.7-.84-1.97-.94-.27-.1-.47-.15-.66.15-.2.29-.76.94-.93 1.13-.17.19-.34.22-.63.07-.29-.15-1.16-.43-2.22-1.39-.82-.73-1.38-1.62-1.54-1.89-.17-.29-.02-.42.13-.56.14-.14.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.15-.63-1.52-.86-2.08-.23-.55-.43-.47-.59-.48l-.51-.01c-.18 0-.47.07-.72.34-.25.27-.95.92-.95 2.24 0 1.32.99 2.61 1.13 2.81.14.19 1.95 2.93 4.71 4.11.66.28 1.17.45 1.57.57.66.2 1.26.18 1.74.11.53-.08 1.64-.66 1.87-1.29.23-.63.23-1.18.16-1.29-.07-.11-.25-.18-.53-.32z"></path>
+        </svg>
+        <span>WhatsApp</span>
+      </a>
     </div>
   </div>
 </div>
@@ -150,7 +207,8 @@
     grandTotal:document.getElementById('grandTotal'),
     paymentMode:document.getElementById('paymentMode'),
     paidAmount:document.getElementById('paidAmount'),
-    dueAmount:document.getElementById('dueAmount')
+    dueAmount:document.getElementById('dueAmount'),
+    invoicePreview:document.getElementById('invoicePreview')
   };
 
   // ===== Helpers =====
@@ -164,7 +222,6 @@
     return Number.isFinite(n) ? n : 0;
   }
   function fit(text, len){
-    // Trim or pad with spaces to exact len; replaces newlines/tabs
     let t = String(text||'').replace(/\s+/g,' ').trim();
     if (t.length > len) return t.slice(0, len-1) + '…';
     return t.padEnd(len, ' ');
@@ -233,7 +290,6 @@
     line.appendChild(cItem); line.appendChild(cName); line.appendChild(cQty); line.appendChild(cRate); line.appendChild(cDisc); line.appendChild(cAmt); line.appendChild(cAct);
     els.itemsList.appendChild(line);
 
-    // Compute amount and totals
     function compute(){
       const q=toNumber(qty.value), r=toNumber(rate.value), d=toNumber(disc.value);
       const gross=q*r, a=gross-(gross*d/100);
@@ -247,10 +303,7 @@
     }));
     del.addEventListener('click', ()=>{ line.remove(); recalc(); persist(); });
 
-    // serialize helper
     attachSerialize(line, {sel, name, qty, rate, disc});
-
-    // initial compute
     compute();
   }
 
@@ -295,7 +348,7 @@
   }
 
   // ===== Persistence =====
-  const LS='nusrat.designC.items.v5';
+  const LS='nusrat.designC.items.v8';
   function persist(){ localStorage.setItem(LS, JSON.stringify(getItems())); }
   function load(){
     const raw=localStorage.getItem(LS);
@@ -314,38 +367,64 @@
     recalc();
   }
 
-  // ===== Monospace WhatsApp message =====
-  // We build a code block with fixed-width columns.
+  // ===== Preview Renderer (with address) =====
+  function renderPreview(){
+    const items=getItems();
+    const rowsHtml = items.map(it=>`
+      <div style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:6px 0">
+        <div>${it.name}</div>
+        <div>Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)}${it.disc?` (Disc ${toNumber(it.disc)}% )`:''} = <b>₹${toNumber(it.amount).toFixed(2)}</b></div>
+      </div>
+    `).join('');
+
+    const subtotal=toNumber(els.subtotal.value);
+    const gstRate=toNumber(els.taxRate.value);
+    const gstAmt=subtotal*(gstRate/100);
+    const flat=toNumber(els.flatDiscount.value);
+    const grand=toNumber(els.grandTotal.value);
+    const paid=toNumber(els.paidAmount.value);
+    const due=toNumber(els.dueAmount.value);
+
+    els.invoicePreview.innerHTML = `
+      <div class="print-header">
+        <div>
+          <div class="print-title">Nusrat Enterprises</div>
+          <div class="print-meta">Phones: 7978830017, 9330066455, 9040366455</div>
+          <div class="print-meta">Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014</div>
+        </div>
+        <div style="text-align:right" class="print-meta">
+          <div><b>Invoice #:</b> ${els.invoiceNumber.value}</div>
+          <div><b>Date:</b> ${els.invoiceDate.value || ''}</div>
+          <div><b>Customer:</b> ${els.customerName.value || ''}</div>
+        </div>
+      </div>
+      ${rowsHtml}
+      <div style="display:flex;justify-content:flex-end;margin-top:8px">
+        <table>
+          <tr><td>Subtotal</td><td style="text-align:right">₹${subtotal.toFixed(2)}</td></tr>
+          <tr><td>GST ${gstRate}%</td><td style="text-align:right">₹${gstAmt.toFixed(2)}</td></tr>
+          <tr><td>Discount</td><td style="text-align:right">-₹${flat.toFixed(2)}</td></tr>
+          <tr><td><b>Grand Total</b></td><td style="text-align:right"><b>₹${grand.toFixed(2)}</b></td></tr>
+          ${els.paymentMode.value?`<tr><td>Payment Mode</td><td style="text-align:right">${els.paymentMode.value}</td></tr>`:''}
+          <tr><td>Paid</td><td style="text-align:right">₹${paid.toFixed(2)}</td></tr>
+          <tr><td><b>Due</b></td><td style="text-align:right"><b>₹${due.toFixed(2)}</b></td></tr>
+        </table>
+      </div>`;
+  }
+
+  // ===== Monospace WhatsApp message (with address) =====
   function summaryMonospace(){
     const items=getItems();
-
-    // Column widths chosen to fit mobile screens nicely
-    const COLS = {
-      idx: 3,          // "No."
-      name: 18,        // item name
-      qty: 3,          // quantity
-      rate: 8,         // 99999.99
-      disc: 5,         // 100%
-      amt: 10          // 999999.99
-    };
-
-    const lineSep = '-'.repeat(COLS.idx + 1 + COLS.name + 1 + COLS.qty + 1 + COLS.rate + 1 + COLS.disc + 1 + COLS.amt);
-
-    const header =
-      fit("#", COLS.idx) + " " +
-      fit("ITEM", COLS.name) + " " +
-      fit("QTY", COLS.qty) + " " +
-      fit("RATE", COLS.rate) + " " +
-      fit("DISC", COLS.disc) + " " +
-      fit("AMOUNT", COLS.amt);
-
-    const rows = items.map((it, i) => {
-      const idx = String(i+1).padStart(COLS.idx, ' ');
-      const nm  = fit(it.name, COLS.name);
-      const qt  = String(toNumber(it.qty)).padStart(COLS.qty, ' ');
-      const rt  = p2(toNumber(it.rate), COLS.rate);
-      const dc  = (toNumber(it.disc).toFixed(0) + '%').padStart(COLS.disc, ' ');
-      const am  = p2(toNumber(it.amount), COLS.amt);
+    const COLS = { idx:3, name:18, qty:3, rate:8, disc:5, amt:10 };
+    const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.disc+1+COLS.amt);
+    const header = fit("#",COLS.idx)+" "+fit("ITEM",COLS.name)+" "+fit("QTY",COLS.qty)+" "+fit("RATE",COLS.rate)+" "+fit("DISC",COLS.disc)+" "+fit("AMOUNT",COLS.amt);
+    const rows = items.map((it,i)=>{
+      const idx=String(i+1).padStart(COLS.idx,' ');
+      const nm =fit(it.name,COLS.name);
+      const qt =String(toNumber(it.qty)).padStart(COLS.qty,' ');
+      const rt =p2(toNumber(it.rate),COLS.rate);
+      const dc =(toNumber(it.disc).toFixed(0)+'%').padStart(COLS.disc,' ');
+      const am =p2(toNumber(it.amount),COLS.amt);
       return `${idx} ${nm} ${qt} ${rt} ${dc} ${am}`;
     });
 
@@ -357,21 +436,17 @@
     const paid=toNumber(els.paidAmount.value);
     const due =toNumber(els.dueAmount.value);
 
-    const storeLine1 = 'Nusrat Enterprises';
-    const storeLine2 = 'Phones: 7978830017, 9330066455, 9040366455';
-    const invLine = `Invoice: ${els.invoiceNumber.value}`;
-    const dateLine = els.invoiceDate.value ? `Date: ${els.invoiceDate.value}` : '';
-    const custLine = els.customerName.value ? `Customer: ${els.customerName.value}` : '';
-    const payMode  = els.paymentMode.value ? `Payment Mode: ${els.paymentMode.value}` : '';
+    const store1='Nusrat Enterprises';
+    const store2='Phones: 7978830017, 9330066455, 9040366455';
+    const store3='Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014';
+    const invLine=`Invoice: ${els.invoiceNumber.value}`;
+    const dateLine=els.invoiceDate.value?`Date: ${els.invoiceDate.value}`:'';
+    const custLine=els.customerName.value?`Customer: ${els.customerName.value}`:'';
+    const payMode =els.paymentMode.value?`Payment Mode: ${els.paymentMode.value}`:'';
 
-    // Totals block aligned at the end (right pad values)
-    function kv(k, v){
-      const key = (k + ':').padEnd(13, ' ');
-      const val = v.toString().padStart(12, ' ');
-      return key + val;
-    }
+    function kv(k,v){ const key=(k+':').padEnd(13,' '); const val=v.toString().padStart(12,' '); return key+val; }
 
-    const totals = [
+    const totals=[
       kv('Subtotal', `₹${subtotal.toFixed(2)}`),
       kv(`GST ${gstRate}%`, `₹${gstAmt.toFixed(2)}`),
       kv('Discount', `-₹${flat.toFixed(2)}`),
@@ -380,33 +455,24 @@
       kv('Due', `₹${due.toFixed(2)}`)
     ];
 
-    // Build final code block
-    const lines = [
-      storeLine1,
-      storeLine2,
-      '',
+    const lines=[
+      store1, store2, store3, '',
       invLine + (dateLine ? ' | ' + dateLine : ''),
-      custLine,
-      '',
-      header,
-      lineSep,
-      ...rows,
-      lineSep,
-      ...totals,
-      payMode,
-      '',
+      custLine, '',
+      header, lineSep, ...rows, lineSep,
+      ...totals, payMode, '',
       'Thank you for shopping with Nusrat Enterprises!'
     ];
 
-    // Wrap in triple backticks to enforce monospace in WhatsApp
     return '```' + '\n' + lines.join('\n') + '\n' + '```';
   }
 
-  // ===== Human-readable summary (Copy button) remains useful =====
+  // Human-readable (for Copy button)
   function summaryReadable(){
     const items=getItems(); const lines=[];
     lines.push(`Nusrat Enterprises`);
     lines.push(`Phones: 7978830017, 9330066455, 9040366455`);
+    lines.push(`Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014`);
     lines.push('');
     lines.push(`Invoice: ${els.invoiceNumber.value}`);
     if(els.invoiceDate.value) lines.push(`Date: ${els.invoiceDate.value}`);
@@ -445,23 +511,8 @@
     document.getElementById(id).addEventListener('change', ()=>{ recalc(); persist(); });
   });
   document.getElementById('previewBtn').addEventListener('click', ()=>{
-    const items=getItems();
     document.getElementById('previewCard').style.display='block';
-    document.getElementById('invoicePreview').innerHTML = `
-      ${items.map(it=>`<div style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:6px 0">
-        <div>${it.name}</div><div>Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)}${it.disc?` (Disc ${toNumber(it.disc)}% )`:''} = <b>₹${toNumber(it.amount).toFixed(2)}</b></div>
-      </div>`).join('')}
-      <div style="display:flex;justify-content:flex-end;margin-top:8px">
-        <table>
-          <tr><td>Subtotal</td><td style="text-align:right">₹${toNumber(els.subtotal.value).toFixed(2)}</td></tr>
-          <tr><td>GST ${toNumber(els.taxRate.value)}%</td><td style="text-align:right">₹${(toNumber(els.subtotal.value)*(toNumber(els.taxRate.value)/100)).toFixed(2)}</td></tr>
-          <tr><td>Discount</td><td style="text-align:right">-₹${toNumber(els.flatDiscount.value).toFixed(2)}</td></tr>
-          <tr><td><b>Grand Total</b></td><td style="text-align:right"><b>₹${toNumber(els.grandTotal.value).toFixed(2)}</b></td></tr>
-          ${els.paymentMode.value?`<tr><td>Payment Mode</td><td style="text-align:right">${els.paymentMode.value}</td></tr>`:''}
-          <tr><td>Paid</td><td style="text-align:right">₹${toNumber(els.paidAmount.value).toFixed(2)}</td></tr>
-          <tr><td><b>Due</b></td><td style="text-align:right"><b>₹${toNumber(els.dueAmount.value).toFixed(2)}</b></td></tr>
-        </table>
-      </div>`;
+    renderPreview();
   });
   document.getElementById('printBtn').addEventListener('click', ()=>window.print());
 
@@ -469,11 +520,11 @@
   document.getElementById('whatsAppBtn').addEventListener('click', ()=>{
     if(!validatePhone()){ alert('Please enter a valid 10-digit WhatsApp number.'); return; }
     const phone = `91${els.customerPhone.value}`; // India code
-    const msg = summaryMonospace(); // <-- monospace block
+    const msg = summaryMonospace();
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
   });
 
-  // Copy human-readable (not code block) to clipboard
+  // Copy human-readable to clipboard
   document.getElementById('copyTextBtn').addEventListener('click', ()=>{
     navigator.clipboard.writeText(summaryReadable()).then(()=>alert('Copied')).catch(()=>alert('Copy failed'));
   });
