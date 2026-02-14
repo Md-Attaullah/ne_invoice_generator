@@ -63,7 +63,7 @@
           </div>
           <div>
             <label>Customer WhatsApp (10 digits)</label>
-            <!-- Force dial pad + numeric only + 10 digits -->
+            <!-- Phone dial pad + numeric only + 10 digits -->
             <input id="customerPhone" type="tel" inputmode="tel" autocomplete="tel" pattern="[0-9]*" maxlength="10" placeholder="e.g., 9876543210"/>
             <div id="phoneError" class="error">Enter exactly 10 digits.</div>
           </div>
@@ -93,7 +93,7 @@
           </div>
           <div><label>Grand Total (₹)</label><input id="grandTotal" disabled/></div>
 
-          <!-- New: Payment Section -->
+          <!-- Payment Section -->
           <div class="row cols-2" style="margin-top:8px">
             <div>
               <label>Payment Mode</label>
@@ -163,6 +163,13 @@
     const n=parseFloat(v);
     return Number.isFinite(n) ? n : 0;
   }
+  function fit(text, len){
+    // Trim or pad with spaces to exact len; replaces newlines/tabs
+    let t = String(text||'').replace(/\s+/g,' ').trim();
+    if (t.length > len) return t.slice(0, len-1) + '…';
+    return t.padEnd(len, ' ');
+  }
+  function p2(n, width){ return String(n.toFixed(2)).padStart(width, ' '); }
 
   // ===== Init: lock invoice & date =====
   els.invoiceNumber.value = genInvoice();
@@ -240,7 +247,7 @@
     }));
     del.addEventListener('click', ()=>{ line.remove(); recalc(); persist(); });
 
-    // serialize: always recompute from inputs (don’t trust UI text)
+    // serialize helper
     attachSerialize(line, {sel, name, qty, rate, disc});
 
     // initial compute
@@ -288,7 +295,7 @@
   }
 
   // ===== Persistence =====
-  const LS='nusrat.designC.items.v4';
+  const LS='nusrat.designC.items.v5';
   function persist(){ localStorage.setItem(LS, JSON.stringify(getItems())); }
   function load(){
     const raw=localStorage.getItem(LS);
@@ -307,16 +314,104 @@
     recalc();
   }
 
-  // ===== Summary & Actions =====
-  function summary(){
+  // ===== Monospace WhatsApp message =====
+  // We build a code block with fixed-width columns.
+  function summaryMonospace(){
+    const items=getItems();
+
+    // Column widths chosen to fit mobile screens nicely
+    const COLS = {
+      idx: 3,          // "No."
+      name: 18,        // item name
+      qty: 3,          // quantity
+      rate: 8,         // 99999.99
+      disc: 5,         // 100%
+      amt: 10          // 999999.99
+    };
+
+    const lineSep = '-'.repeat(COLS.idx + 1 + COLS.name + 1 + COLS.qty + 1 + COLS.rate + 1 + COLS.disc + 1 + COLS.amt);
+
+    const header =
+      fit("#", COLS.idx) + " " +
+      fit("ITEM", COLS.name) + " " +
+      fit("QTY", COLS.qty) + " " +
+      fit("RATE", COLS.rate) + " " +
+      fit("DISC", COLS.disc) + " " +
+      fit("AMOUNT", COLS.amt);
+
+    const rows = items.map((it, i) => {
+      const idx = String(i+1).padStart(COLS.idx, ' ');
+      const nm  = fit(it.name, COLS.name);
+      const qt  = String(toNumber(it.qty)).padStart(COLS.qty, ' ');
+      const rt  = p2(toNumber(it.rate), COLS.rate);
+      const dc  = (toNumber(it.disc).toFixed(0) + '%').padStart(COLS.disc, ' ');
+      const am  = p2(toNumber(it.amount), COLS.amt);
+      return `${idx} ${nm} ${qt} ${rt} ${dc} ${am}`;
+    });
+
+    const subtotal=toNumber(els.subtotal.value);
+    const gstRate=toNumber(els.taxRate.value);
+    const gstAmt=subtotal*(gstRate/100);
+    const flat=toNumber(els.flatDiscount.value);
+    const grand=toNumber(els.grandTotal.value);
+    const paid=toNumber(els.paidAmount.value);
+    const due =toNumber(els.dueAmount.value);
+
+    const storeLine1 = 'Nusrat Enterprises';
+    const storeLine2 = 'Phones: 7978830017, 9330066455, 9040366455';
+    const invLine = `Invoice: ${els.invoiceNumber.value}`;
+    const dateLine = els.invoiceDate.value ? `Date: ${els.invoiceDate.value}` : '';
+    const custLine = els.customerName.value ? `Customer: ${els.customerName.value}` : '';
+    const payMode  = els.paymentMode.value ? `Payment Mode: ${els.paymentMode.value}` : '';
+
+    // Totals block aligned at the end (right pad values)
+    function kv(k, v){
+      const key = (k + ':').padEnd(13, ' ');
+      const val = v.toString().padStart(12, ' ');
+      return key + val;
+    }
+
+    const totals = [
+      kv('Subtotal', `₹${subtotal.toFixed(2)}`),
+      kv(`GST ${gstRate}%`, `₹${gstAmt.toFixed(2)}`),
+      kv('Discount', `-₹${flat.toFixed(2)}`),
+      kv('Grand Total', `₹${grand.toFixed(2)}`),
+      kv('Paid', `₹${paid.toFixed(2)}`),
+      kv('Due', `₹${due.toFixed(2)}`)
+    ];
+
+    // Build final code block
+    const lines = [
+      storeLine1,
+      storeLine2,
+      '',
+      invLine + (dateLine ? ' | ' + dateLine : ''),
+      custLine,
+      '',
+      header,
+      lineSep,
+      ...rows,
+      lineSep,
+      ...totals,
+      payMode,
+      '',
+      'Thank you for shopping with Nusrat Enterprises!'
+    ];
+
+    // Wrap in triple backticks to enforce monospace in WhatsApp
+    return '```' + '\n' + lines.join('\n') + '\n' + '```';
+  }
+
+  // ===== Human-readable summary (Copy button) remains useful =====
+  function summaryReadable(){
     const items=getItems(); const lines=[];
-    lines.push(`*Nusrat Enterprises*`);
+    lines.push(`Nusrat Enterprises`);
     lines.push(`Phones: 7978830017, 9330066455, 9040366455`);
     lines.push('');
-    lines.push(`*Invoice:* ${els.invoiceNumber.value}`);
-    if(els.invoiceDate.value) lines.push(`*Date:* ${els.invoiceDate.value}`);
-    if(els.customerName.value) lines.push(`*Customer:* ${els.customerName.value}`);
-    lines.push(''); lines.push('*Items:*');
+    lines.push(`Invoice: ${els.invoiceNumber.value}`);
+    if(els.invoiceDate.value) lines.push(`Date: ${els.invoiceDate.value}`);
+    if(els.customerName.value) lines.push(`Customer: ${els.customerName.value}`);
+    lines.push(''); lines.push('Items:');
     items.forEach((it,i)=>lines.push(`${i+1}. ${it.name} — Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)}${it.disc?` (Disc ${toNumber(it.disc)}% )`:''} = ₹${toNumber(it.amount).toFixed(2)}`));
     const subtotal=toNumber(els.subtotal.value), gstRate=toNumber(els.taxRate.value), flat=toNumber(els.flatDiscount.value), grand=toNumber(els.grandTotal.value);
     const gstAmt=subtotal*(gstRate/100);
@@ -326,15 +421,16 @@
     lines.push(`Subtotal: ₹${subtotal.toFixed(2)}`);
     if(gstRate>0) lines.push(`GST ${gstRate}%: ₹${gstAmt.toFixed(2)}`);
     if(flat>0) lines.push(`Discount: -₹${flat.toFixed(2)}`);
-    lines.push(`*Grand Total: ₹${grand.toFixed(2)}*`);
+    lines.push(`Grand Total: ₹${grand.toFixed(2)}`);
     if(els.paymentMode.value) lines.push(`Payment Mode: ${els.paymentMode.value}`);
-    if(paid>0) lines.push(`Paid: ₹${paid.toFixed(2)}`);
-    if(due>=0) lines.push(`Due: ₹${due.toFixed(2)}`);
+    lines.push(`Paid: ₹${paid.toFixed(2)}`);
+    lines.push(`Due: ₹${due.toFixed(2)}`);
     lines.push('');
     lines.push('Thank you for shopping with Nusrat Enterprises!');
     return lines.join('\n');
   }
 
+  // ===== Actions =====
   document.getElementById('addItemBtn').addEventListener('click', ()=>{ addItem(); recalc(); });
   document.getElementById('clearItemsBtn').addEventListener('click', ()=>{
     if(confirm('Clear items?')){
@@ -368,18 +464,22 @@
       </div>`;
   });
   document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+
+  // WhatsApp monospace sending
   document.getElementById('whatsAppBtn').addEventListener('click', ()=>{
     if(!validatePhone()){ alert('Please enter a valid 10-digit WhatsApp number.'); return; }
-    const phone = `91${els.customerPhone.value}`; // add India code
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(summary())}`,'_blank');
+    const phone = `91${els.customerPhone.value}`; // India code
+    const msg = summaryMonospace(); // <-- monospace block
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
   });
+
+  // Copy human-readable (not code block) to clipboard
   document.getElementById('copyTextBtn').addEventListener('click', ()=>{
-    navigator.clipboard.writeText(summary()).then(()=>alert('Copied')).catch(()=>alert('Copy failed'));
+    navigator.clipboard.writeText(summaryReadable()).then(()=>alert('Copied')).catch(()=>alert('Copy failed'));
   });
 
   // Load and initial calc
   load();
-  // In case first paint delays, recalc once more
   setTimeout(recalc, 0);
 })();
 </script>
