@@ -149,9 +149,9 @@
 (function(){
   // ====== Config: social/review links to append in WhatsApp invoice ======
   const LINKS = {
-    instagram: "https://www.instagram.com/nusrat_enterprises?igsh=Y3hzeHgzdnF5dThq&utm_source=website&utm_medium=header&utm_campaign=social",
-    waChannel: "https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06?utm_source=website&utm_medium=header&utm_campaign=social",
-    googleFeedback: "https://www.google.com/search?client=mobilesearchapp&sca_esv=0091f1adde5afd41&channel=iss&hl=en_GB&rlz=1MDAPLA_en-GBIN1088IN1088&v=381.1.792835455&cs=1&sxsrf=AE3TifO8mOSczRGtVay16jB5kaY8IZjSzQ:1759773230659&si=AMgyJEtREmoPL4P1I5IDCfuA8gybfVI2d5Uj7QMwYCZHKDZ-E4oWdu000SHpY4Qos8xxSfSjCHF57FFTWnkNH7WvXmptla-PnW9oswknadLRSHjnVMo_oPyZ6HO7oH0Sc4RKyTGYfCW9u9xAcpr-I38jtVtOkuoCJg%3D%3D&q=NUSRAT+ENTERPRISES+Reviews&sa=X&ved=2ahUKEwi50LGSkpCQAxWaoa8BHQXxD3MQ0bkNegQIJhAE&biw=980&bih=1844&dpr=3"
+    instagram: "https://www.instagram.com/nusrat_enterprises/",
+    waChannel: "https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06",
+    googleFeedback: "https://www.google.com/search?q=NUSRAT+ENTERPRISES+Reviews"
   };
 
   const ITEM_OPTIONS=["Shirt","T-shirt","Jean","Formal Pant","Track","Half Pant"];
@@ -433,7 +433,7 @@
 
     // WhatsApp preserves monospace only inside the backticks; links are more tappable outside.
     const codeBlock = '```' + '\n' + lines.join('\n') + '\n' + '```';
-    const followBlock = `\n\n${followTitle}\n${igLine}\n${waLine}\n${gLine}`;
+    const followBlock = `\n\n${followTitle}\n\n${igLine}\n\n${waLine}\n\n${gLine}`;
     return codeBlock + followBlock;
   }
 
