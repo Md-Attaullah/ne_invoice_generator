@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Nusrat Enterprises — Invoice (Design C)</title>
+<title>Nusrat Enterprises — Invoice (100mm Receipt)</title>
 <style>
   :root{
     --brand:#b91c1c;--brand-2:#7f1d1d;--bg:#fafafa;--text:#111827;--muted:#6b7280;
@@ -22,7 +22,8 @@
   h2{margin:4px 0 8px;color:var(--brand-2);font-size:1.02rem}
   label{display:block;font-weight:700;font-size:.9rem;margin-bottom:6px}
   input,select{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff}
-  input[disabled], input[readonly]{background:#f9fafb;color:#6b7280}
+  input[disabled],input[readonly]{background:#f9fafb;color:#6b7280}
+  input::placeholder{color:#9ca3af}
   .row{display:grid;gap:10px}
   .cols-2{grid-template-columns:1fr 1fr}
   @media(max-width:700px){.cols-2{grid-template-columns:1fr}}
@@ -31,15 +32,15 @@
   .btn.danger{background:#991b1b}
   /* Items grid line */
   .item-line{display:grid;grid-template-columns:1.2fr .6fr .6fr .6fr .6fr auto;gap:8px;margin-bottom:8px}
-  .item-line > div{display:flex;flex-direction:column}
+  .item-line>div{display:flex;flex-direction:column}
   .item-line .amount{display:flex;align-items:flex-end;font-weight:800;justify-content:flex-end;padding:0 6px}
-  @media(max-width:900px){.item-line{grid-template-columns:1fr 1fr 1fr 1fr;}}
+  @media(max-width:900px){.item-line{grid-template-columns:1fr 1fr 1fr 1fr}}
   @media(max-width:900px){.col-span-2{grid-column:span 2}}
   @media(max-width:900px){.hide-mobile{display:none}}
   @media print{header{display:none!important} .card{border:none;box-shadow:none}}
   .error{color:#b91c1c;font-size:.85rem;margin-top:4px;display:none}
 
-  /* Small print header block for preview/print */
+  /* Small print header block for preview */
   .print-header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
   .print-title{font-size:1.15rem;font-weight:800;color:#7f1d1d}
   .print-meta{font-size:.92rem;color:#374151}
@@ -61,7 +62,7 @@
   <div class="grid">
     <div>
       <div class="card">
-        <h2>Invoice & Customer</h2>
+        <h2>Invoice &amp; Customer</h2>
         <div class="row cols-2">
           <div>
             <label>Invoice # (auto)</label>
@@ -75,11 +76,11 @@
         <div class="row cols-2" style="margin-top:8px">
           <div>
             <label>Customer Name</label>
-            <input id="customerName"/>
+            <input id="customerName" placeholder="Enter customer name"/>
+            <div class="error"></div>
           </div>
           <div>
             <label>Customer WhatsApp (10 digits)</label>
-            <!-- Phone dial pad + numeric only + 10 digits -->
             <input id="customerPhone" type="tel" inputmode="tel" autocomplete="tel" pattern="[0-9]*" maxlength="10" placeholder="e.g., 9876543210"/>
             <div id="phoneError" class="error">Enter exactly 10 digits.</div>
           </div>
@@ -109,7 +110,6 @@
           </div>
           <div><label>Grand Total (₹)</label><input id="grandTotal" disabled/></div>
 
-          <!-- Payment Section -->
           <div class="row cols-2" style="margin-top:8px">
             <div>
               <label>Payment Mode</label>
@@ -121,10 +121,12 @@
                 <option>Wallet</option>
                 <option>Bank Transfer</option>
               </select>
+              <div class="error"></div>
             </div>
             <div>
               <label>Paid (₹)</label>
-              <input id="paidAmount" type="number" min="0" step="0.01" value="0"/>
+              <input id="paidAmount" type="number" min="0" step="0.01" placeholder="0.00"/>
+              <div class="error"></div>
             </div>
           </div>
           <div>
@@ -137,10 +139,9 @@
       <div class="card">
         <h2>Actions</h2>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
-          <!-- Print (WhatsApp-style) now generates & downloads a PDF -->
-          <a href="#" class="btn link" id="printMonospaceLink">🖨️ Print (WhatsApp-style)</a>
+          <button class="btn" id="printMonospaceLink">🖨️ Print </button>
           <button class="btn link" id="previewBtn">👁️ Preview</button>
-          <button class="btn" id="whatsAppBtn">💬 WhatsApp (Text)</button>
+          <button class="btn" id="whatsAppBtn">💬 WhatsApp </button>
           <button class="btn link" id="copyTextBtn">Copy Summary</button>
         </div>
       </div>
@@ -153,11 +154,24 @@
   </div>
 </div>
 
-<!-- Hidden render target for WhatsApp-style invoice (for PDF capture & link mapping) -->
-<div id="monoRender" style="position:fixed;left:-9999px;top:-9999px;visibility:hidden"></div>
+<!-- Visible-but-offscreen render target for PDF capture & hyperlink mapping -->
+<div id="monoRender" style="
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  opacity: 0;
+  pointer-events: none;
+  visibility: visible;
+  z-index: -1;
+"></div>
 
 <script>
 (function(){
+  // ====== Single source of truth for receipt width ======
+  const RECEIPT_MM = 100; // <-- 100mm width
+  const mmToPx = mm => Math.round(mm * 96 / 25.4); // ~3.78 px per mm at 96DPI
+  const mmToPt = mm => (mm * 72 / 25.4);           // jsPDF uses points (pt)
+
   // ====== Config: social/review links (used in PDF and WhatsApp text) ======
   const LINKS = {
     instagram: "https://www.instagram.com/nusrat_enterprises/",
@@ -215,8 +229,12 @@
   }
 
   // ===== Items =====
-  function qtySelect(v=1){
+  function qtySelect(v=''){
     const s=document.createElement('select');
+    const ph=document.createElement('option');
+    ph.value=''; ph.textContent='Qty'; ph.disabled=true;
+    if (v === '' || v === undefined || v === null) ph.selected=true;
+    s.appendChild(ph);
     for(let i=1;i<=10;i++){
       const o=document.createElement('option');
       o.value=i; o.textContent=i;
@@ -226,13 +244,14 @@
     return s;
   }
 
-  function addItem(item={type:'',name:'',qty:1,rate:0,disc:0}){
+  function addItem(item={type:'',name:'',qty:'',rate:'',disc:''}){
     const line=document.createElement('div'); line.className='item-line';
 
     // Item type + name
     const cItem=document.createElement('div'); const l1=document.createElement('label'); l1.textContent='Item';
     const sel=document.createElement('select');
-    const ph=document.createElement('option'); ph.value=''; ph.textContent='Select item'; sel.appendChild(ph);
+    const ph=document.createElement('option'); ph.value=''; ph.textContent='Select item'; ph.disabled=true; ph.selected=!item.type;
+    sel.appendChild(ph);
     ITEM_OPTIONS.forEach(o=>{const opt=document.createElement('option');opt.value=o;opt.textContent=o;if(item.type===o) opt.selected=true; sel.appendChild(opt);});
     cItem.appendChild(l1); cItem.appendChild(sel);
 
@@ -241,13 +260,14 @@
 
     // Qty, rate, disc, amount
     const cQty=document.createElement('div'); const l3=document.createElement('label'); l3.textContent='Qty';
-    const qty=qtySelect(item.qty||1); cQty.appendChild(l3); cQty.appendChild(qty);
+    const qty=qtySelect(item.qty === 0 ? '' : item.qty); cQty.appendChild(l3); cQty.appendChild(qty);
 
     const cRate=document.createElement('div'); const l4=document.createElement('label'); l4.textContent='Rate (₹)';
-    const rate=document.createElement('input'); rate.type='number'; rate.min='0'; rate.step='0.01'; rate.value=item.rate||0; cRate.appendChild(l4); cRate.appendChild(rate);
+    const rate=document.createElement('input'); rate.type='number'; rate.min='0'; rate.step='0.01'; rate.placeholder='0.00';
+    rate.value = (item.rate === 0 || item.rate === '') ? '' : item.rate; cRate.appendChild(l4); cRate.appendChild(rate);
 
     const cDisc=document.createElement('div'); const l5=document.createElement('label'); l5.textContent='Disc %';
-    const disc=document.createElement('input'); disc.type='number'; disc.min='0'; disc.max='100'; disc.step='0.01'; disc.value=item.disc||0; cDisc.appendChild(l5); cDisc.appendChild(disc);
+    const disc=document.createElement('input'); disc.type='number'; disc.min='0'; disc.max='100'; disc.step='0.01'; disc.placeholder='0'; disc.value=item.disc||''; cDisc.appendChild(l5); cDisc.appendChild(disc);
 
     const cAmt=document.createElement('div'); const l6=document.createElement('label'); l6.textContent='Amount (₹)';
     const amt=document.createElement('div'); amt.className='amount'; amt.textContent='0.00'; cAmt.appendChild(l6); cAmt.appendChild(amt);
@@ -318,7 +338,7 @@
   }
 
   // ===== Persistence =====
-  const LS='nusrat.designC.items.v9';
+  const LS='nusrat.designC.items.v11';
   function persist(){ localStorage.setItem(LS, JSON.stringify(getItems())); }
   function load(){
     const raw=localStorage.getItem(LS);
@@ -327,7 +347,16 @@
       const arr=JSON.parse(raw);
       if(Array.isArray(arr) && arr.length){
         els.itemsList.innerHTML='';
-        arr.forEach(addItem);
+        arr.forEach(it=>{
+          const item = {
+            type: it.type || '',
+            name: it.name || '',
+            qty: it.qty ? it.qty : '',
+            rate: it.rate ? it.rate : '',
+            disc: (it.disc || it.disc===0) ? it.disc : ''
+          };
+          addItem(item);
+        });
       }else{
         addItem();
       }
@@ -335,6 +364,88 @@
       addItem();
     }
     recalc();
+  }
+
+  // ===== Inline error helpers & Central Validation =====
+  function showErrorBelow(el, msg) {
+    let e = el.parentElement.querySelector('.error');
+    if (!e) {
+      e = document.createElement('div');
+      e.className = 'error';
+      el.parentElement.appendChild(e);
+    }
+    e.textContent = msg;
+    e.style.display = 'block';
+  }
+  function hideErrorBelow(el) {
+    const e = el.parentElement.querySelector('.error');
+    if (e) e.style.display = 'none';
+  }
+
+  function validateAll(forAction = 'general') {
+    let ok = true;
+
+    // Customer name
+    if (!els.customerName.value.trim()) {
+      showErrorBelow(els.customerName, 'Customer name is required.');
+      ok = false;
+    } else hideErrorBelow(els.customerName);
+
+    // Phone 10 digits
+    if (!/^\d{10}$/.test(els.customerPhone.value)) {
+      els.phoneError.style.display = 'block';
+      ok = false;
+    } else els.phoneError.style.display = 'none';
+
+    // Items at least one valid row
+    const itemsNodes = Array.from(els.itemsList.children);
+    if (!itemsNodes.length) { ok = false; alert('Add at least one item.'); }
+    let hasValid = false;
+    itemsNodes.forEach(line => {
+      const selects = line.querySelectorAll('select');
+      const sel = selects[0]; // item select
+      const qtySel = selects[1]; // qty select
+      const rate = line.querySelector('input[type="number"]'); // rate input is first number input
+
+      // Item required
+      if (!sel.value) {
+        showErrorBelow(sel, 'Select an item.');
+        ok = false;
+      } else hideErrorBelow(sel);
+
+      // Qty required
+      if (!qtySel.value) {
+        showErrorBelow(qtySel, 'Select quantity.');
+        ok = false;
+      } else hideErrorBelow(qtySel);
+
+      // Rate required
+      if (rate.value === '') {
+        showErrorBelow(rate, 'Enter rate.');
+        ok = false;
+      } else hideErrorBelow(rate);
+
+      if (sel.value && qtySel.value && rate.value !== '') hasValid = true;
+    });
+
+    if (!hasValid) ok = false;
+
+    // Payment mode required
+    if (!els.paymentMode.value) {
+      showErrorBelow(els.paymentMode, 'Select payment mode.');
+      ok = false;
+    } else hideErrorBelow(els.paymentMode);
+
+    // Paid amount required (blank not allowed; 0 is okay)
+    if (els.paidAmount.value === '') {
+      showErrorBelow(els.paidAmount, 'Enter paid amount (0 allowed).');
+      ok = false;
+    } else hideErrorBelow(els.paidAmount);
+
+    if (!ok && forAction !== 'general') {
+      alert('Please correct the highlighted fields before proceeding.');
+    }
+    return ok;
   }
 
   // ===== Preview Renderer (visual card) =====
@@ -382,7 +493,7 @@
       </div>`;
   }
 
-  // ===== WhatsApp monospace message (with links *outside* the code block) =====
+  // ===== WhatsApp monospace message (links outside code block) =====
   function summaryMonospace(){
     const items=getItems();
     const COLS = { idx:3, name:18, qty:3, rate:8, disc:5, amt:10 };
@@ -444,7 +555,7 @@
     return codeBlock + followBlock;
   }
 
-  // ===== Build a DOM block identical to WhatsApp monospace (with clickable anchors) =====
+  // ===== Build a DOM block identical to WhatsApp monospace (100mm width) =====
   function buildMonospaceHTML() {
     const items=getItems();
     const COLS = { idx:3, name:18, qty:3, rate:8, disc:5, amt:10 };
@@ -496,70 +607,80 @@
       'Thank you for shopping with Nusrat Enterprises!'
     ];
 
-    // Wrap into a styled <pre> so the image looks like WhatsApp monospace;
-    // add real <a> elements for links so we can map clickable hotspots in PDF.
+    // 100mm visual block (≈ 100 * 96 / 25.4 ≈ 378px at 96DPI)
     const html = `
       <div id="monoBox" style="
-        width: 900px;
-        padding: 16px;
+        width: ${mmToPx(RECEIPT_MM)}px; /* receipt width in px (for html2canvas) */
+        padding: 12px;
         border: 1px solid #e5e7eb;
-        border-radius: 10px;
+        border-radius: 8px;
         background: #ffffff;
         color: #111827;
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-        font-size: 13px; line-height: 1.4;">
+        font-size: 12px; line-height: 1.4;">
         <pre style="margin:0; white-space:pre-wrap;">${lines.join('\n')}</pre>
-        <div style="height:12px"></div>
-        <div style="font-size:12px;color:#374151">
-          <div style="font-weight:600;margin-bottom:6px">Follow &amp; Feedback:</div>
-          <div><a id="igLink" class="inline-link" href="${LINKS.instagram}" target="_blank" rel="noopener">Instagram: ${LINKS.instagram}</a></div>
-          <div><a id="waLink" class="inline-link" href="${LINKS.waChannel}" target="_blank" rel="noopener">WhatsApp Channel: ${LINKS.waChannel}</a></div>
-          <div><a id="gLink" class="inline-link" href="${LINKS.googleFeedback}" target="_blank" rel="noopener">Google Feedback: ${LINKS.googleFeedback}</a></div>
+        <div style="height:8px"></div>
+        <div style="font-size:11px;color:#374151">
+          <div style="font-weight:600;margin-bottom:4px">Follow &amp; Feedback:</div>
+          <div><a id="igLink" href="${LINKS.instagram}" target="_blank" rel="noopener">Instagram: ${LINKS.instagram}</a></div>
+          <div><a id="waLink" href="${LINKS.waChannel}" target="_blank" rel="noopener">WhatsApp Channel: ${LINKS.waChannel}</a></div>
+          <div><a id="gLink" href="${LINKS.googleFeedback}" target="_blank" rel="noopener">Google Feedback: ${LINKS.googleFeedback}</a></div>
         </div>
       </div>`;
     return html;
   }
 
-  // ===== Generate PDF from the same monospace block and overlay live hyperlinks =====
+  // ===== Generate PDF (100mm width, auto height) and overlay hyperlinks =====
   async function generatePdf() {
-    // 1) Render the DOM block
+    // Render visible-offscreen DOM
     els.monoRender.innerHTML = buildMonospaceHTML();
-    await new Promise(r => setTimeout(r, 50)); // allow layout
+    await new Promise(r => setTimeout(r, 120)); // allow layout
 
     const box = els.monoRender.querySelector('#monoBox');
     const ig = els.monoRender.querySelector('#igLink');
     const wa = els.monoRender.querySelector('#waLink');
     const gl = els.monoRender.querySelector('#gLink');
 
-    const canvas = await html2canvas(box, { scale: 2, backgroundColor: '#ffffff' });
-    const imgData = canvas.toDataURL('image/png');
+    // Rasterize
+    const canvas = await html2canvas(box, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true
+    });
+
+    // ---- 100mm receipt sizing ----
+    // jsPDF units: pt (1 pt = 1/72 in). 100mm = 3.937 in => 283.46 pt
+    const pageWpt = mmToPt(RECEIPT_MM);        // exact width in pt
+    const margin = 8;                          // minimal margin for thermal
+    const targetWidth = pageWpt - margin * 2;  // usable width
+
+    // Compute target height from canvas aspect ratio
+    const ratio = canvas.height / canvas.width;
+    const targetHeight = targetWidth * ratio;
+
+    // Create PDF with exact height (auto-fit to content)
+    const pageHpt = targetHeight + margin * 2;
 
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pdf = new jsPDF({
+      unit: 'pt',
+      format: [pageWpt, pageHpt]    // custom size (w,h) in pt
+    });
 
-    // 2) Place image centered with margins
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 24; // pt
-    const maxW = pageWidth - margin*2;
-    const maxH = pageHeight - margin*2;
-
-    const scale = Math.min(maxW / canvas.width, maxH / canvas.height);
-    const w = canvas.width * scale;
-    const h = canvas.height * scale;
-
-    const x = (pageWidth - w) / 2;
-    const y = (pageHeight - h) / 2;
-
+    // Place image
+    const x = margin;
+    const y = margin;
+    const w = targetWidth;
+    const h = targetHeight;
+    const imgData = canvas.toDataURL('image/png');
     pdf.addImage(imgData, 'PNG', x, y, w, h, undefined, 'FAST');
 
-    // 3) Add clickable link annotations at correct positions
-    // Compute DOM -> PDF scale
+    // Map link rects -> pdf.link()
     const scaleX = w / canvas.width;
     const scaleY = h / canvas.height;
 
-    function addLinkHotspot(el, url){
-      if(!el) return;
+    function addLinkHotspot(el, url) {
+      if (!el) return;
       const r = el.getBoundingClientRect();
       const base = box.getBoundingClientRect();
       const dx = r.left - base.left;
@@ -570,15 +691,16 @@
       const ly = y + dy * scaleY;
       const lW = lw * scaleX;
       const lH = lh * scaleY;
-      pdf.link(lx, ly, lW, lH, { url });
+      try { pdf.link(lx, ly, lW, lH, { url }); } catch(_) {}
     }
+
     addLinkHotspot(ig, LINKS.instagram);
     addLinkHotspot(wa, LINKS.waChannel);
     addLinkHotspot(gl, LINKS.googleFeedback);
 
-    // 4) Save with a friendly filename
+    // Save
     const cust = (els.customerName.value || 'Customer').replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'_');
-    const filename = `Invoice_${els.invoiceNumber.value}_${cust}.pdf`;
+    const filename = `Invoice_${els.invoiceNumber.value}_${cust}_100mm.pdf`;
     pdf.save(filename);
   }
 
@@ -597,13 +719,15 @@
     document.getElementById(id).addEventListener('change', ()=>{ recalc(); persist(); });
   });
   document.getElementById('previewBtn').addEventListener('click', ()=>{
+    if (!validateAll('preview')) return;
     document.getElementById('previewCard').style.display='block';
     renderPreview();
   });
 
-  // Print (WhatsApp-style) now = generate PDF (exact same look) with clickable links
+  // Print (100mm receipt PDF)
   document.getElementById('printMonospaceLink').addEventListener('click', async (e)=>{
     e.preventDefault();
+    if (!validateAll('print')) return;
     try {
       await generatePdf();
     } catch (err) {
@@ -614,7 +738,7 @@
 
   // WhatsApp monospace sending (with follow/feedback appended after code block)
   document.getElementById('whatsAppBtn').addEventListener('click', ()=>{
-    if(!validatePhone()){ alert('Please enter a valid 10-digit WhatsApp number.'); return; }
+    if (!validateAll('whatsapp')) return;
     const phone = `91${els.customerPhone.value}`; // India code
     const msg = summaryMonospace();
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
@@ -622,7 +746,8 @@
 
   // Copy human-readable (with follow/feedback) to clipboard
   document.getElementById('copyTextBtn').addEventListener('click', ()=>{
-    const text = (()=>{ // readable summary without code block
+    if (!validateAll('copy')) return;
+    const text = (()=>{
       const items=getItems(); const lines=[];
       lines.push(`Nusrat Enterprises`);
       lines.push(`Phones: 7978830017, 9330066455, 9040366455`);
