@@ -65,6 +65,76 @@
   .print-title{font-size:1.15rem;font-weight:800;color:#7f1d1d}
   .print-meta{font-size:.92rem;color:#374151}
   a.inline-link{color:#1d4ed8;text-decoration:underline}
+
+  .actions-card {
+  padding: 20px;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.actions-card h2 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Base button */
+.btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Primary button – highlights WhatsApp */
+.btn.primary {
+  background: #25D366;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(37,211,102,0.3);
+}
+
+.btn.primary:hover {
+  background: #1ebe5c;
+  transform: translateY(-2px);
+}
+
+/* Outline button – clean, elegant */
+.btn.outline {
+  border: 2px solid #007bff;
+  background: transparent;
+  color: #007bff;
+}
+
+.btn.outline:hover {
+  background: #007bff;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Ghost button – subtle professional look */
+.btn.ghost {
+  background: #f4f4f4;
+  color: #333;
+}
+
+.btn.ghost:hover {
+  background: #e8e8e8;
+  transform: translateY(-2px);
+}
 </style>
 
 <!-- PDF dependencies -->
@@ -171,15 +241,15 @@
         </div>
       </div>
 
-      <div class="card">
-        <h2>Actions</h2>
-        <div style="display:flex;flex-wrap:wrap;gap:8px">
-          <button class="btn" id="whatsAppBtn">💬 WhatsApp </button>
-          <button class="btn" id="printMonospaceLink">🖨️ Print </button>
-          <button class="btn link" id="previewBtn">👁️ Preview</button>
-          <button class="btn link" id="copyTextBtn">Copy Summary</button>
-        </div>
-      </div>
+      <div class="card actions-card">
+  <h2>Actions</h2>
+  <div class="action-buttons">
+    <button class="btn primary" id="whatsAppBtn">💬 WhatsApp</button>
+    <button class="btn outline" id="printMonospaceLink">🖨️ Print</button>
+    <button class="btn ghost" id="previewBtn">👁️ Preview</button>
+    <button class="btn ghost" id="copyTextBtn">📋 Copy Summary</button>
+  </div>
+</div>
 
       <div class="card" id="previewCard" style="display:none">
         <h2>Invoice Preview</h2>
