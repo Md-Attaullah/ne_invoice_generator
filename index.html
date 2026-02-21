@@ -187,11 +187,12 @@
       <div class="card actions-card">
         <h2>Actions</h2>
         <div class="action-buttons">
-          <button class="btn ghost" id="saveToSheetBtn" aria-label="Save to Google Sheet">📑 Save to Google Sheet</button>
           <button class="btn primary" id="whatsAppBtn" aria-label="Send invoice on WhatsApp">💬 WhatsApp</button>
           <button class="btn outline" id="printMonospaceLink" aria-label="Print invoice">🖨️ Print</button>
           <button class="btn ghost" id="previewBtn" aria-label="Preview invoice">👁️ Preview</button>
           <button class="btn ghost" id="copyTextBtn" aria-label="Copy invoice summary">📋 Copy Summary</button>
+          <!-- >>> ADDED: Save to Google Sheet button -->
+          <button class="btn ghost" id="saveToSheetBtn" aria-label="Save to Google Sheet">📑 Save to Google Sheet</button>
         </div>
       </div>
 
@@ -219,6 +220,11 @@
     waChannel: "https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06",
     googleFeedback: "https://maps.app.goo.gl/4S4U5DYizVB3ZeZj6"
   };
+
+  // ====== ADDED: Google Sheets Web App Config ======
+  // Use your deployed Apps Script Web App URL and shared token
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzzBSzBCKvtSr8aK1Kersxzp4FgPxTH6PAeRLj14BbLMHBFkMShnY7DRQXTY3sxi97pQw/exec';
+  const AUTH_TOKEN  = '9705322252';
 
   const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Formal Pant","Track","Half Pant","Under Wear","Vest"];
   const els={
@@ -306,12 +312,12 @@
     const selQty=qtySelect(item.qty === 0 ? '' : item.qty);
     cQty.appendChild(lQty); cQty.appendChild(selQty);
 
-    // Rate (force numeric keypad on mobile)
+    // Rate
     const cRate=document.createElement('div'); cRate.className='cell';
     const lRate=document.createElement('label'); lRate.textContent='Rate (₹)';
     const inpRate=document.createElement('input');
     inpRate.type='number'; inpRate.min='0'; inpRate.step='0.01'; inpRate.placeholder='0.00';
-    inpRate.setAttribute('inputmode','decimal'); // 🔢 show number keypad
+    inpRate.setAttribute('inputmode','decimal');
     inpRate.setAttribute('data-field','rate');
     inpRate.value = (item.rate === 0 || item.rate === '') ? '' : item.rate;
     cRate.appendChild(lRate); cRate.appendChild(inpRate);
@@ -344,7 +350,7 @@
     card.appendChild(blockType); card.appendChild(blockName); card.appendChild(numsRow); card.appendChild(bottom);
     els.itemsList.appendChild(card);
 
-    // ---- Qty custom (accept ANY positive integer) ----
+    // ---- Qty custom ----
     (function attachQtyCustomHandler() {
       selQty.dataset.prev = selQty.value || '';
 
@@ -490,7 +496,7 @@
     return ok;
   }
 
-  // ===== Preview Renderer (hide zero lines; no breakdown/qty) =====
+  // ===== Preview Renderer =====
   function renderPreview(){
     const items=getItems();
     const rowsHtml = items.map(it=>`
@@ -536,7 +542,7 @@
       </div>`;
   }
 
-  // ===== WhatsApp monospace (hide zero lines; no breakdown/qty) =====
+  // ===== WhatsApp monospace =====
   function summaryMonospace(){
     const items=getItems();
     const COLS = { idx:3, name:18, qty:3, rate:8, disc:5, amt:10 };
@@ -593,7 +599,7 @@
     return codeBlock + followBlock;
   }
 
-  // ===== PDF block (same rules: hide zero lines; no breakdown/qty) =====
+  // ===== PDF block (monospace) =====
   function buildMonospaceHTML() {
     const items=getItems();
     const COLS = { idx:3, name:18, qty:3, rate:8, disc:5, amt:10 };
@@ -699,6 +705,51 @@
     pdf.save(filename);
   }
 
+  // ====== ADDED: Google Sheet Sync (Apps Script Web App) ======
+  async function collectInvoicePayload() {
+    const items = Array.from(document.getElementById('itemsList').children).map(c => c._ser());
+    return {
+      token: AUTH_TOKEN,
+      invoiceNumber: document.getElementById('invoiceNumber').value || '',
+      invoiceDate: document.getElementById('invoiceDate').value || '',
+      customerName: document.getElementById('customerName').value || '',
+      customerPhone: document.getElementById('customerPhone').value || '',
+      itemsBreakdown: document.getElementById('itemsBreakdown').value || '',
+      itemsCountQty: document.getElementById('itemsCountQty').value || '0',
+      subtotal: document.getElementById('subtotal').value || '0',
+      taxRate: document.getElementById('taxRate').value || '0',
+      flatDiscount: document.getElementById('flatDiscount').value || '0',
+      grandTotal: document.getElementById('grandTotal').value || '0',
+      paymentMode: document.getElementById('paymentMode').value || '',
+      paidAmount: document.getElementById('paidAmount').value || '0',
+      dueAmount: document.getElementById('dueAmount').value || '0',
+      items
+    };
+  }
+
+  async function pushToGoogleSheet() {
+    if (!validateAll('push')) return;
+    const payload = await collectInvoicePayload();
+
+    try {
+      const res = await fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const json = await res.json().catch(() => ({}));
+      if (json && json.ok) {
+        alert('Saved to Google Sheet ✅');
+      } else {
+        alert('Failed to save to Google Sheet ❌' + (json && json.error ? `\n${json.error}` : ''));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network error while saving to Google Sheet.');
+    }
+  }
+
   // ===== Actions =====
   document.getElementById('addItemBtn').addEventListener('click', ()=>{ addItem(); recalc(); });
   document.getElementById('clearItemsBtn').addEventListener('click', ()=>{
@@ -747,77 +798,14 @@
     navigator.clipboard.writeText(lines.join('\n')).then(()=>alert('Copied')).catch(()=>alert('Copy failed'));
   });
 
+  // >>> ADDED: wire Save button
+  document.getElementById('saveToSheetBtn').addEventListener('click', pushToGoogleSheet);
+
   function initFirstItemIfEmpty(){ if (!els.itemsList.children.length) addItem(); }
   load();
   initFirstItemIfEmpty();
   setTimeout(recalc, 0);
 })();
-</script>
-<script>
-// ====== Google Sheet Sync ======
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw4ZPTLrPWADOMmgCUjVfqCEalAhG1po8jJz0rgJn6lvDQ_hF-aDcbKJ6LPSypIBEUDDw/exec';
-const AUTH_TOKEN = '9705322252';
-
-async function collectInvoicePayload() {
-  // Reuse your existing helpers and elements
-  const items = Array.from(document.getElementById('itemsList').children).map(c => c._ser());
-
-  const payload = {
-    token: AUTH_TOKEN,
-    invoiceNumber: document.getElementById('invoiceNumber').value || '',
-    invoiceDate: document.getElementById('invoiceDate').value || '',
-    customerName: document.getElementById('customerName').value || '',
-    customerPhone: document.getElementById('customerPhone').value || '',
-    itemsBreakdown: document.getElementById('itemsBreakdown').value || '',
-    itemsCountQty: document.getElementById('itemsCountQty').value || '0',
-    subtotal: document.getElementById('subtotal').value || '0',
-    taxRate: document.getElementById('taxRate').value || '0',
-    flatDiscount: document.getElementById('flatDiscount').value || '0',
-    grandTotal: document.getElementById('grandTotal').value || '0',
-    paymentMode: document.getElementById('paymentMode').value || '',
-    paidAmount: document.getElementById('paidAmount').value || '0',
-    dueAmount: document.getElementById('dueAmount').value || '0',
-    items // keep the full breakdown as JSON too
-  };
-  return payload;
-}
-
-async function pushToGoogleSheet() {
-  // Reuse your validation
-  if (!validateAll('push')) return;
-
-  const payload = await collectInvoicePayload();
-
-  // POST to the Apps Script web app
-  try {
-    const res = await fetch(WEB_APP_URL, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    const json = await res.json().catch(() => ({}));
-    if (json && json.ok) {
-      alert('Saved to Google Sheet ✅');
-    } else {
-      alert('Failed to save to Google Sheet ❌' + (json && json.error ? `\n${json.error}` : ''));
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Network error while saving to Google Sheet.');
-  }
-}
-
-// Wire the new button
-document.getElementById('saveToSheetBtn')?.addEventListener('click', pushToGoogleSheet);
-
-// (Optional) also auto-push on print/whatsapp/copy if you like:
-// document.getElementById('printMonospaceLink').addEventListener('click', async (e) => {
-//   e.preventDefault();
-//   if (!validateAll('print')) return;
-//   await pushToGoogleSheet(); // save first
-//   try { await generatePdf(); } catch (err) { console.error(err); alert('PDF failed'); }
-// });
 </script>
 </body>
 </html>
