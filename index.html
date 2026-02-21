@@ -187,6 +187,7 @@
       <div class="card actions-card">
         <h2>Actions</h2>
         <div class="action-buttons">
+          <button class="btn ghost" id="saveToSheetBtn" aria-label="Save to Google Sheet">📑 Save to Google Sheet</button>
           <button class="btn primary" id="whatsAppBtn" aria-label="Send invoice on WhatsApp">💬 WhatsApp</button>
           <button class="btn outline" id="printMonospaceLink" aria-label="Print invoice">🖨️ Print</button>
           <button class="btn ghost" id="previewBtn" aria-label="Preview invoice">👁️ Preview</button>
@@ -751,6 +752,72 @@
   initFirstItemIfEmpty();
   setTimeout(recalc, 0);
 })();
+</script>
+<script>
+// ====== Google Sheet Sync ======
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbw4ZPTLrPWADOMmgCUjVfqCEalAhG1po8jJz0rgJn6lvDQ_hF-aDcbKJ6LPSypIBEUDDw/exec';
+const AUTH_TOKEN = '9705322252';
+
+async function collectInvoicePayload() {
+  // Reuse your existing helpers and elements
+  const items = Array.from(document.getElementById('itemsList').children).map(c => c._ser());
+
+  const payload = {
+    token: AUTH_TOKEN,
+    invoiceNumber: document.getElementById('invoiceNumber').value || '',
+    invoiceDate: document.getElementById('invoiceDate').value || '',
+    customerName: document.getElementById('customerName').value || '',
+    customerPhone: document.getElementById('customerPhone').value || '',
+    itemsBreakdown: document.getElementById('itemsBreakdown').value || '',
+    itemsCountQty: document.getElementById('itemsCountQty').value || '0',
+    subtotal: document.getElementById('subtotal').value || '0',
+    taxRate: document.getElementById('taxRate').value || '0',
+    flatDiscount: document.getElementById('flatDiscount').value || '0',
+    grandTotal: document.getElementById('grandTotal').value || '0',
+    paymentMode: document.getElementById('paymentMode').value || '',
+    paidAmount: document.getElementById('paidAmount').value || '0',
+    dueAmount: document.getElementById('dueAmount').value || '0',
+    items // keep the full breakdown as JSON too
+  };
+  return payload;
+}
+
+async function pushToGoogleSheet() {
+  // Reuse your validation
+  if (!validateAll('push')) return;
+
+  const payload = await collectInvoicePayload();
+
+  // POST to the Apps Script web app
+  try {
+    const res = await fetch(WEB_APP_URL, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (json && json.ok) {
+      alert('Saved to Google Sheet ✅');
+    } else {
+      alert('Failed to save to Google Sheet ❌' + (json && json.error ? `\n${json.error}` : ''));
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Network error while saving to Google Sheet.');
+  }
+}
+
+// Wire the new button
+document.getElementById('saveToSheetBtn')?.addEventListener('click', pushToGoogleSheet);
+
+// (Optional) also auto-push on print/whatsapp/copy if you like:
+// document.getElementById('printMonospaceLink').addEventListener('click', async (e) => {
+//   e.preventDefault();
+//   if (!validateAll('print')) return;
+//   await pushToGoogleSheet(); // save first
+//   try { await generatePdf(); } catch (err) { console.error(err); alert('PDF failed'); }
+// });
 </script>
 </body>
 </html>
