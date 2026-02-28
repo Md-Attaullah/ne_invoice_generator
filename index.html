@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Nusrat Enterprises — Invoice (Very Compact Vertical)</title>
 
-<!-- ================== BASE THEME + LAYOUT ================== -->
 <style>
   :root{
     --brand:#b91c1c;--brand-2:#7f1d1d;--bg:#fafafa;--text:#111827;--muted:#6b7280;
@@ -13,7 +12,6 @@
     --font:14px; --pad:10px; --gap:8px; --radius:12px;
   }
   *{box-sizing:border-box; min-width:0}
-  /* Use min-height instead of fixed height to avoid nested/second scrollbars */
   html,body{
     min-height:100%;
     margin:0;
@@ -23,30 +21,18 @@
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
     font-size:var(--font)
   }
-
   header{
-  background:#fff;
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  box-shadow:0 6px 20px rgba(0,0,0,.06);
-  padding:16px 14px 18px 14px;
-  margin:10px auto;
-  max-width:720px;
-}
-h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
-.header-meta{margin-top:6px;font-size:.92rem;color:#374151}
-.header-addr{margin-top:4px;font-size:.9rem;color:#374151}
-  
-
-
-
-  /* header{
-    background:linear-gradient(135deg,var(--brand),var(--brand-2));
-    color:#fff;padding:16px 14px 18px 14px
-  } */
-  h1{margin:0;font-weight:800;font-size:1.2rem}
-  .header-meta{margin-top:6px;font-size:.92rem;opacity:.95}
-  .header-addr{margin-top:4px;font-size:.9rem;opacity:.95}
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:0 6px 20px rgba(0,0,0,.06);
+    padding:16px 14px 18px 14px;
+    margin:10px auto;
+    max-width:720px;
+  }
+  h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
+  .header-meta{margin-top:6px;font-size:.92rem;color:#374151}
+  .header-addr{margin-top:4px;font-size:.9rem;color:#374151}
 
   .container{max-width:720px;margin:10px auto 80px;padding:0 10px}
   .card{
@@ -85,7 +71,6 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
   .print-title{font-size:1.15rem;font-weight:800;color:#7f1d1d}
   .print-meta{font-size:.92rem;color:#374151}
 
-  /* ======= VERY COMPACT VERTICAL ITEMS ======= */
   .items-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
   .items-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 
@@ -94,28 +79,23 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
 
   .item{border:1px solid var(--border);border-radius:10px;background:#fff;padding:8px 8px}
   .item .top{display:flex;align-items:center;gap:8px}
-  /* >>> Adjusted sizes: Type smaller, Name bigger <<< */
-  .item .top .type{flex:0 0 34%}    /* smaller */
-  .item .top .name{flex:1}          /* bigger */
+  .item .top .type{flex:0 0 34%}
+  .item .top .name{flex:1}
   .item .top .del{flex:0 0 auto}
 
   .item .bot{display:flex;align-items:center;gap:8px;margin-top:6px}
   .stepper{display:inline-flex;align-items:center;gap:6px}
   .stepper .sbtn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:#fff;font-weight:900}
-  .qty{width:60px;text-align:center}  /* compact */
-  .rate{flex:1.2}                     /* bigger */
+  .qty{width:60px;text-align:center}
+  .rate{flex:1.2}
   .amt{margin-left:auto;font-weight:800}
 
-  /* No horizontal scroll, ever */
   .container, .card, .items-list, .item, .top, .bot{max-width:100%; overflow-x:hidden}
-
-  /* Floating Add button */
   .fab{
     position:fixed; right:14px; bottom:14px; z-index:30;
     background:var(--brand); color:#fff; border:none; border-radius:999px; padding:12px 16px;
     box-shadow:0 8px 20px rgba(0,0,0,.25); font-weight:800; font-size:16px;
   }
-
   @media print{header{display:none!important}.card{border:none;box-shadow:none}}
 </style>
 
@@ -159,14 +139,11 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
       </div>
     </div>
 
-    <!-- Items compact vertical -->
+    <!-- Items -->
     <div class="card">
       <div class="items-head">
         <h2>Items</h2>
       </div>
-
-      <!-- Quickline (FORM) → Android & iOS friendly -->
-      <!-- Type "Shirt 2 300" and press Enter/Done -->
       <form id="quicklineForm" class="quickline" style="margin-bottom:8px">
         <input
           id="quickline"
@@ -175,10 +152,8 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
           enterkeyhint="done"
           aria-label="Quick add item line"
         />
-        <!-- Hidden submit ensures Android/webviews always submit -->
         <button type="submit" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">Submit</button>
       </form>
-
       <ul id="itemsList" class="items-list" aria-label="Invoice items"></ul>
     </div>
 
@@ -250,10 +225,7 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
   </div>
 </div>
 
-<!-- Offscreen PDF render target (ensure no second scrollbar anywhere) -->
 <div id="monoRender" style="position:absolute;left:-99999px;top:0;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;visibility:hidden;"></div>
-
-<!-- Floating Add button -->
 <button type="button" class="fab" id="fabAdd">+ Add</button>
 
 <script>
@@ -264,9 +236,7 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     waChannel: "https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06",
     googleFeedback: "https://maps.app.goo.gl/4S4U5DYizVB3ZeZj6"
   };
-  // ✅ Updated to your latest Apps Script Web App URL:
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwFcSGSZjTmUtxWtyxnK1fnRWH9uNPZA7VRdd1jr1uT73h-y-eHfOgTQ11u34Ambeyo/exec';
-  // ✅ Must match TOKEN in Apps Script:
   const AUTH_TOKEN  = '9705322252';
   const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Formal Pant","Track","Half Pant","Under Wear","Vest"];
 
@@ -316,11 +286,7 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
   function validatePhone(){ const ok = /^\d{10}$/.test(els.customerPhone.value); els.phoneError.style.display = ok || els.customerPhone.value.length===0 ? 'none' : 'block'; return ok; }
 
   // ====== Item logic (no per-item discount) ======
-  function compute(obj){
-    const gross = obj.qty * obj.rate;
-    const amount = Math.max(0, gross); // no per-item discount
-    return amount;
-  }
+  function compute(obj){ return Math.max(0, obj.qty * obj.rate); }
 
   function liToObj(li){
     const obj = {
@@ -345,7 +311,6 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     const nameEl = li.querySelector('[data-f="name"]');
     const qtyEl  = li.querySelector('[data-f="qty"]');
 
-    // steppers
     li.querySelector('[data-act="minus"]').addEventListener('click', ()=>{
       qtyEl.value = Math.max(1, (parseInt(qtyEl.value||'1',10)-1));
       updateLi(li); recalc(); persist();
@@ -355,7 +320,6 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
       updateLi(li); recalc(); persist();
     });
 
-    // auto-fill name from type if name is generic
     li.addEventListener('input', (e)=>{
       if (e.target === typeEl){
         if ((!nameEl.value || ITEM_OPTIONS.includes(nameEl.value)) && typeEl.value) nameEl.value = typeEl.value;
@@ -364,11 +328,9 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     });
     li.addEventListener('change', ()=>{ updateLi(li); recalc(); persist(); });
 
-    // delete
     li.querySelector('.del').addEventListener('click', ()=>{ li.remove(); recalc(); persist(); });
   }
 
-  // Insert control: atTop = true inserts at the top, otherwise appends
   function addItem(obj={type:'',name:'',qty:1,rate:''}, { atTop = true } = {}){
     const li = document.createElement('li'); li.className='item';
     li.innerHTML = `
@@ -392,21 +354,18 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
         <div class="amt">₹ <span data-f="amt">0.00</span></div>
       </div>
     `;
-
     if (atTop && els.itemsList.firstChild) {
       els.itemsList.insertBefore(li, els.itemsList.firstChild);
     } else {
       els.itemsList.appendChild(li);
     }
-
     attachLi(li);
     updateLi(li);
     recalc();
   }
 
-  // ====== Quickline (robust for Android & iOS) ======
+  // Quickline
   function parseQuickline(s){
-    // format: name qty rate, e.g., "Shirt 2 300"
     const parts = (s||'').trim().split(/\s+/);
     if(!parts.length) return null;
     let name=[], qty=1, rate='';
@@ -432,31 +391,16 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     persist();
   }
 
-  // Submit form (Android/iOS friendly)
-  els.quicklineForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    addFromQuickline();
-  });
-
-  // Optional fallback for devices that do send keydown
+  els.quicklineForm.addEventListener('submit', (e) => { e.preventDefault(); addFromQuickline(); });
   els.quickline.addEventListener('keydown', (e) => {
-    if ((e.key && e.key.toLowerCase() === 'enter') || e.keyCode === 13) {
-      e.preventDefault();
-      addFromQuickline();
-    }
+    if ((e.key && e.key.toLowerCase() === 'enter') || e.keyCode === 13) { e.preventDefault(); addFromQuickline(); }
   });
-
-  // Clean stray newlines (rare on some IMEs)
   els.quickline.addEventListener('input', () => {
-    if (/\n/.test(els.quickline.value)) {
-      els.quickline.value = els.quickline.value.replace(/\n/g, '').trim();
-    }
+    if (/\n/.test(els.quickline.value)) { els.quickline.value = els.quickline.value.replace(/\n/g, '').trim(); }
   });
-
-  // Floating + Add → insert at TOP
   els.fabAdd.addEventListener('click', () => addItem({}, { atTop: true }));
 
-  // ====== Totals & Summary ======
+  // Summary
   function buildItemsBreakdown(items){
     const map = new Map();
     items.forEach(it=>{
@@ -495,8 +439,8 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     document.getElementById(id).addEventListener('change', ()=>{ recalc(); persist(); });
   });
 
-  // ====== Persistence ======
-  const LS='nusrat.vertical.items.v3'; // v3: no per-item discount
+  // Persistence
+  const LS='nusrat.vertical.items.v3';
   function persist(){ try{ localStorage.setItem(LS, JSON.stringify(getItems())); }catch(_){} }
   function load(){
     const raw=localStorage.getItem(LS);
@@ -505,7 +449,6 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
       const arr=JSON.parse(raw);
       if(Array.isArray(arr) && arr.length){
         els.itemsList.innerHTML='';
-        // append to preserve saved order
         arr.forEach(it=> addItem({
           type: it.type||'',
           name: it.name||'',
@@ -521,7 +464,7 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     recalc();
   }
 
-  // ====== Validation ======
+  // Validation
   function showErrorBelow(el, msg){
     let e=el.parentElement.querySelector('.error');
     if(!e){ e=document.createElement('div'); e.className='error'; el.parentElement.appendChild(e);}
@@ -557,7 +500,7 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     return ok;
   }
 
-  // ====== Preview ======
+  // Preview
   function renderPreview(){
     const items=getItems();
     const rowsHtml = items.map(it=>`
@@ -603,7 +546,7 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
       </div>`;
   }
 
-  // ====== WhatsApp monospace (no per-item discount column) ======
+  // WhatsApp monospace
   function summaryMonospace(){
     const items=getItems();
     const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
@@ -664,18 +607,12 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     return codeBlock + followBlock;
   }
 
-  // ====== PDF ======
+  // PDF
   function buildMonospaceHTML() {
     const items=getItems();
     const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
     const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.amt);
-    const header = [
-      fit('#',COLS.idx),
-      fit('ITEM',COLS.name),
-      fit('QTY',COLS.qty),
-      fit('RATE',COLS.rate),
-      fit('AMOUNT',COLS.amt)
-    ].join(' ');
+    const header = [ fit('#',COLS.idx), fit('ITEM',COLS.name), fit('QTY',COLS.qty), fit('RATE',COLS.rate), fit('AMOUNT',COLS.amt) ].join(' ');
     const rows = items.map((it,i)=>{
       const idx=String(i+1).padStart(COLS.idx,' ');
       const nm =fit(it.name,COLS.name);
@@ -775,10 +712,15 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     const payload = await collectInvoicePayload();
     try {
       const res = await fetch(WEB_APP_URL, {
-        method: 'POST', mode: 'cors',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+      if (!res.ok) {
+        const text = await res.text().catch(()=> '');
+        alert(`Failed to save (HTTP ${res.status}).\n${text.slice(0,500)}`);
+        return;
+      }
       const json = await res.json().catch(() => ({}));
       if (json && json.ok) alert('Saved to Google Sheet ✅');
       else alert('Failed to save to Google Sheet ❌' + (json && json.error ? `\n${json.error}` : ''));
@@ -788,7 +730,7 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     }
   }
 
-  // ====== Actions ======
+  // Actions
   document.getElementById('previewBtn').addEventListener('click', ()=>{
     if (!validateAll('preview')) return;
     els.previewCard.style.display='block';
@@ -814,8 +756,7 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     const items=getItems(); const lines=[];
     lines.push('Nusrat Enterprises');
     lines.push('Phones: 7978830017, 9330066455, 9040366455');
-    // ✅ Fixed the address line typo here:
-    lines.push('Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014');
+    lines.push('Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014'); // fixed typo
     lines.push('');
     lines.push(`Invoice: ${els.invoiceNumber.value}`);
     if(els.invoiceDate.value) lines.push(`Date: ${els.invoiceDate.value}`);
@@ -846,7 +787,7 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
 
   document.getElementById('saveToSheetBtn').addEventListener('click', pushToGoogleSheet);
 
-  // ====== Boot ======
+  // Boot
   load();
 })();
 </script>
