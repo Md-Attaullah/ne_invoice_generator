@@ -3,85 +3,83 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Nusrat Enterprises — Invoice (100mm Receipt)</title>
+<title>Nusrat Enterprises — Invoice (Very Compact Vertical)</title>
 
-<!-- ==========================================================
-     STYLE BLOCK 1 — BASE THEME + LAYOUT + FORM + ITEM CARDS
-   ========================================================== -->
+<!-- ================== BASE THEME + LAYOUT ================== -->
 <style>
   :root{
     --brand:#b91c1c;--brand-2:#7f1d1d;--bg:#fafafa;--text:#111827;--muted:#6b7280;
     --card:#fff;--border:#e5e7eb;--soft:#fff1f2;
+    --font:14px; --pad:10px; --gap:8px; --radius:12px;
   }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-  header{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;padding:16px;margin-bottom:25px}
+  *{box-sizing:border-box; min-width:0}
+  /* Use min-height instead of height to avoid nested/second scrollbars */
+  html,body{min-height:100%; margin:0; overflow-x:hidden; background:var(--bg); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; font-size:var(--font)}
+
+  header{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;padding:16px 14px 18px 14px}
   h1{margin:0;font-weight:800;font-size:1.2rem}
   .header-meta{margin-top:6px;font-size:.92rem;opacity:.95}
   .header-addr{margin-top:4px;font-size:.9rem;opacity:.95}
 
-  .container{max-width:1080px;margin:-16px auto 20px;padding:0 12px}
-  .grid{display:grid;grid-template-columns:2fr 1fr;gap:12px}
-  @media(max-width:900px){.grid{grid-template-columns:1fr}}
-
-  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.06);padding:12px}
+  .container{max-width:720px;margin:10px auto 80px;padding:0 10px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 6px 20px rgba(0,0,0,.06);padding:12px}
   h2{margin:4px 0 8px;color:var(--brand-2);font-size:1.02rem}
 
-  label{display:block;font-weight:700;font-size:.9rem;margin-bottom:6px}
+  label{display:block;font-weight:700;font-size:.88rem;margin-bottom:6px}
   input,select,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff}
-  input[disabled],input[readonly],textarea[disabled]{background:#f9fafb;color:#6b7280}
-  input::placeholder{color:#9ca3af}
+  input[disabled],textarea[disabled]{background:#f9fafb;color:#6b7280}
   textarea{resize:vertical;min-height:48px}
-  .row{display:grid;gap:10px}
+  .row{display:grid;gap:var(--gap)}
   .cols-2{grid-template-columns:1fr 1fr}
-  @media(max-width:700px){.cols-2{grid-template-columns:1fr}}
-  .error{color:#b91c1c;font-size:.85rem;margin-top:4px;display:none}
+  @media(max-width:600px){.cols-2{grid-template-columns:1fr}}
+  .error{color:#b91c1c;font-size:.82rem;margin-top:4px;display:none}
 
-  .items-header-actions{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
-  .items-header-actions>div{display:flex;flex-direction:row;gap:10px;margin-bottom:12px}
-  .items-header-actions .btn{padding:9px 12px;border-radius:10px;font-weight:700;border:1px solid transparent;background:var(--brand);color:#fff;cursor:pointer;transition:transform .15s ease}
-  .items-header-actions .btn:hover{transform:translateY(-1px)}
-  .items-header-actions .btn.link{background:#fff;border:1px solid var(--border);color:#111827}
-
-  .item-cards{display:grid;gap:10px}
-  .item-card{border:1px solid var(--border);background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-  .item-card .row-inline{display:grid;gap:8px;grid-template-columns:1fr 1fr 1fr}
-  .item-card .cell{display:flex;flex-direction:column}
-  .item-card .amount-line{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
-  .item-card .amount{font-weight:800;font-size:1.05rem;color:#111827}
-  .item-card .subtle{font-size:.85rem;color:#6b7280}
-  .item-card .actions{display:flex;gap:8px}
-  .item-card .btn{padding:8px 10px;border:none;border-radius:8px;font-weight:700;cursor:pointer}
-  .item-card .btn.danger{background:#991b1b;color:#fff}
+  .actions-card{padding:16px;border-radius:var(--radius);background:#ffffff;border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,0.06)}
+  .action-buttons{display:grid;gap:8px;grid-template-columns:1fr}
+  .btn{appearance:none;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:10px;font-size:15px;font-weight:700;transition:all .2s ease;text-decoration:none;line-height:1.1;min-height:44px;box-shadow:0 1px 0 rgba(0,0,0,0.03)}
+  .btn:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
+  .btn.primary{background:#25D366;color:#fff;box-shadow:0 6px 16px rgba(37,211,102,0.28)}
+  .btn.outline{border:2px solid #1d4ed8;color:#1d4ed8;background:transparent}
+  .btn.ghost{background:#f3f4f6;color:#111827}
+  .btn.link{background:#fff;border:1px solid var(--border);color:#111827}
+  .btn.danger{background:#991b1b;color:#fff}
 
   .print-header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
   .print-title{font-size:1.15rem;font-weight:800;color:#7f1d1d}
   .print-meta{font-size:.92rem;color:#374151}
 
+  /* ======= VERY COMPACT VERTICAL ITEMS ======= */
+  .items-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .items-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+
+  .quickline{display:flex;gap:8px}
+  .quickline input{flex:1}
+
+  .item{border:1px solid var(--border);border-radius:10px;background:#fff;padding:8px 8px}
+  .item .top{display:flex;align-items:center;gap:8px}
+  /* >>> Adjusted sizes: Type smaller, Name bigger <<< */
+  .item .top .type{flex:0 0 34%}    /* smaller */
+  .item .top .name{flex:1}          /* bigger */
+  .item .top .del{flex:0 0 auto}
+
+  .item .bot{display:flex;align-items:center;gap:8px;margin-top:6px}
+  .stepper{display:inline-flex;align-items:center;gap:6px}
+  .stepper .sbtn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:#fff;font-weight:900}
+  .qty{width:60px;text-align:center}  /* compact */
+  .rate{flex:1.2}                     /* bigger */
+  .amt{margin-left:auto;font-weight:800}
+
+  /* No horizontal scroll, ever */
+  .container, .card, .items-list, .item, .top, .bot{max-width:100%; overflow-x:hidden}
+
+  /* Floating Add button */
+  .fab{
+    position:fixed; right:14px; bottom:14px; z-index:30;
+    background:var(--brand); color:#fff; border:none; border-radius:999px; padding:12px 16px;
+    box-shadow:0 8px 20px rgba(0,0,0,.25); font-weight:800; font-size:16px;
+  }
+
   @media print{header{display:none!important}.card{border:none;box-shadow:none}}
-</style>
-
-<!-- ==========================================================
-     STYLE BLOCK 2 — ACTION BUTTON SYSTEM (WhatsApp primary)
-   ========================================================== -->
-<style>
-  .actions-card{padding:18px 16px;border-radius:12px;background:#ffffff;border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,0.06)}
-  .actions-card h2{margin:0 0 12px 0;font-size:1.02rem;font-weight:700;color:#111827}
-  .action-buttons{display:grid;gap:10px;grid-template-columns:1fr;align-items:stretch}
-  .action-buttons .btn:first-child{order:0}
-
-  .actions-card .btn{appearance:none;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:10px;font-size:15px;font-weight:700;transition:all .2s ease;text-decoration:none;line-height:1.1;min-height:44px;box-shadow:0 1px 0 rgba(0,0,0,0.03)}
-  .actions-card .btn:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
-  .actions-card .btn.primary{background:#25D366;color:#fff;box-shadow:0 6px 16px rgba(37,211,102,0.28)}
-  .actions-card .btn.primary:hover{background:#1ebe5c;transform:translateY(-1px)}
-  .actions-card .btn.outline{border:2px solid #1d4ed8;color:#1d4ed8;background:transparent}
-  .actions-card .btn.outline:hover{background:#1d4ed8;color:#fff;transform:translateY(-1px)}
-  .actions-card .btn.ghost{background:#f3f4f6;color:#111827}
-  .actions-card .btn.ghost:hover{background:#e5e7eb;transform:translateY(-1px)}
-
-  @media (max-width:479px){.action-buttons{grid-template-columns:1fr}}
-  @media (min-width:480px) and (max-width:899px){.action-buttons{grid-template-columns:1fr 1fr}.action-buttons .btn.primary{grid-column:1 / -1}}
-  @media (min-width:900px){.action-buttons{grid-template-columns:1fr 1fr}.action-buttons .btn.primary{grid-column:1 / 2}.action-buttons .btn.outline{grid-column:2 / 3}.action-buttons .btn.ghost:nth-of-type(3){grid-column:1 / 2}.action-buttons .btn.ghost:nth-of-type(4){grid-column:2 / 3}}
 </style>
 
 <!-- PDF deps -->
@@ -96,338 +94,297 @@
 </header>
 
 <div class="container">
-  <div class="grid">
-    <div>
-      <div class="card">
-        <h2>Invoice &amp; Customer</h2>
-        <div class="row cols-2">
-          <div>
-            <label>Invoice #</label>
-            <input id="invoiceNumber" placeholder="ddMMyyyyHHmm" readonly />
-          </div>
-          <div>
-            <label>Date</label>
-            <input id="invoiceDate" type="date" readonly />
-          </div>
+  <div class="row" style="grid-template-columns:1fr; gap:12px">
+    <!-- Customer -->
+    <div class="card">
+      <h2>Invoice & Customer</h2>
+      <div class="row cols-2">
+        <div>
+          <label>Invoice #</label>
+          <input id="invoiceNumber" readonly />
         </div>
-        <div class="row cols-2" style="margin-top:8px">
-          <div>
-            <label>Customer Name</label>
-            <input id="customerName" placeholder="Enter customer name"/>
-            <div class="error"></div>
-          </div>
-          <div>
-            <label>Customer WhatsApp (10 digits)</label>
-            <input id="customerPhone" type="tel" inputmode="tel" autocomplete="tel" pattern="[0-9]*" maxlength="10" placeholder="e.g., 9876543210"/>
-            <div id="phoneError" class="error">Enter exactly 10 digits.</div>
-          </div>
+        <div>
+          <label>Date</label>
+          <input id="invoiceDate" type="date" readonly />
         </div>
       </div>
-
-      <div class="card">
-        <div class="items-header-actions">
-          <h2>Items</h2>
-          <div>
-            <button class="btn" id="addItemBtn">+ Add Item</button>
-            <button class="btn link" id="clearItemsBtn">Clear Items</button>
-          </div>
+      <div class="row cols-2" style="margin-top:8px">
+        <div>
+          <label>Customer Name</label>
+          <input id="customerName" placeholder="Enter customer name"/>
+          <div class="error"></div>
         </div>
-        <div id="itemsList" class="item-cards" aria-label="Invoice items"></div>
+        <div>
+          <label>Customer WhatsApp (10 digits)</label>
+          <input id="customerPhone" type="tel" inputmode="tel" autocomplete="tel" pattern="[0-9]*" maxlength="10" placeholder="e.g., 9876543210"/>
+          <div id="phoneError" class="error">Enter exactly 10 digits.</div>
+        </div>
       </div>
     </div>
 
-    <div>
-      <div class="card">
-        <h2>Summary</h2>
-        <div class="row">
-          <div><label>Subtotal (₹)</label><input id="subtotal" disabled/></div>
+    <!-- Items compact vertical -->
+    <div class="card">
+      <div class="items-head">
+        <h2>Items</h2>
+      </div>
 
-          <div class="row cols-2">
-            <div>
-              <label>Items (breakdown)</label>
-              <textarea id="itemsBreakdown" disabled placeholder="e.g., 2x Shirt, 1x Jean"></textarea>
-            </div>
-            <div>
-              <label>Total Qty</label>
-              <input id="itemsCountQty" disabled/>
-            </div>
-          </div>
+      <!-- Quickline: type "Shirt 2 300" and press Enter -->
+      <div class="quickline" style="margin-bottom:8px">
+        <input id="quickline" placeholder="Quick add: Item  Qty  Rate  →  e.g., Shirt 2 300" />
+      </div>
 
-          <div class="row cols-2">
-            <div><label>GST %</label><input id="taxRate" type="number" min="0" step="0.01" value="0" inputmode="decimal"/></div>
-            <div><label>Discount (₹)</label><input id="flatDiscount" type="number" min="0" step="0.01" value="0" inputmode="decimal"/></div>
-          </div>
-          <div><label>Grand Total (₹)</label><input id="grandTotal" disabled/></div>
+      <ul id="itemsList" class="items-list" aria-label="Invoice items"></ul>
+    </div>
 
-          <div class="row cols-2" style="margin-top:8px">
-            <div>
-              <label>Payment Mode</label>
-              <select id="paymentMode">
-                <option value="">Select</option>
-                <option>Cash</option>
-                <option>UPI</option>
-                <option>Card</option>
-                <option>Bank Transfer</option>
-              </select>
-              <div class="error"></div>
-            </div>
-            <div>
-              <label>Paid (₹)</label>
-              <input id="paidAmount" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"/>
-              <div class="error"></div>
-            </div>
+    <!-- Summary -->
+    <div class="card">
+      <h2>Summary</h2>
+      <div class="row">
+        <div><label>Subtotal (₹)</label><input id="subtotal" disabled/></div>
+
+        <div class="row cols-2">
+          <div>
+            <label>Items (breakdown)</label>
+            <textarea id="itemsBreakdown" disabled placeholder="e.g., 2x Shirt, 1x Jean"></textarea>
           </div>
           <div>
-            <label>Due (₹)</label>
-            <input id="dueAmount" disabled/>
+            <label>Total Qty</label>
+            <input id="itemsCountQty" disabled/>
           </div>
         </div>
-      </div>
 
-      <div class="card actions-card">
-        <h2>Actions</h2>
-        <div class="action-buttons">
-          <button class="btn primary" id="whatsAppBtn" aria-label="Send invoice on WhatsApp">💬 WhatsApp</button>
-          <button class="btn outline" id="printMonospaceLink" aria-label="Print invoice">🖨️ Print</button>
-          <button class="btn ghost" id="previewBtn" aria-label="Preview invoice">👁️ Preview</button>
-          <button class="btn ghost" id="copyTextBtn" aria-label="Copy invoice summary">📋 Copy Summary</button>
-          <!-- >>> ADDED: Save to Google Sheet button -->
-          <button class="btn ghost" id="saveToSheetBtn" aria-label="Save to Google Sheet">📑 Save to Google Sheet</button>
+        <div class="row cols-2">
+          <div><label>GST %</label><input id="taxRate" type="number" min="0" step="0.01" value="0" inputmode="decimal"/></div>
+          <div><label>Discount (₹)</label><input id="flatDiscount" type="number" min="0" step="0.01" value="0" inputmode="decimal"/></div>
+        </div>
+        <div><label>Grand Total (₹)</label><input id="grandTotal" disabled/></div>
+
+        <div class="row cols-2" style="margin-top:8px">
+          <div>
+            <label>Payment Mode</label>
+            <select id="paymentMode">
+              <option value="">Select</option>
+              <option value="Cash">Cash</option>
+              <option value="UPI">UPI</option>
+              <option value="Card">Card</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+            <div class="error"></div>
+          </div>
+          <div>
+            <label>Paid (₹)</label>
+            <input id="paidAmount" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"/>
+            <div class="error"></div>
+          </div>
+        </div>
+        <div>
+          <label>Negotiated (₹)</label>
+          <input id="dueAmount" disabled/>
         </div>
       </div>
+    </div>
 
-      <div class="card" id="previewCard" style="display:none">
-        <h2>Invoice Preview</h2>
-        <div id="invoicePreview"></div>
+    <!-- Actions -->
+    <div class="card actions-card">
+      <h2>Actions</h2>
+      <div class="action-buttons">
+        <button type="button" class="btn primary" id="whatsAppBtn">💬 WhatsApp</button>
+        <button type="button" class="btn outline" id="printBtn">🖨️ Print</button>
+        <button type="button" class="btn ghost" id="previewBtn">👁️ Preview</button>
+        <button type="button" class="btn ghost" id="copyTextBtn">📋 Copy Summary</button>
+        <button type="button" class="btn ghost" id="saveToSheetBtn">📑 Save to Google Sheet</button>
       </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="card" id="previewCard" style="display:none">
+      <h2>Invoice Preview</h2>
+      <div id="invoicePreview" aria-live="polite"></div>
     </div>
   </div>
 </div>
 
-<!-- Offscreen render target for PDF capture & link mapping -->
-<div id="monoRender" style="position:fixed;left:-10000px;top:0;opacity:0;pointer-events:none;visibility:visible;z-index:-1"></div>
+<!-- Offscreen PDF render target (ensure no second scrollbar anywhere) -->
+<div id="monoRender" style="position:absolute;left:-99999px;top:0;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;visibility:hidden;"></div>
+
+<!-- Floating Add button -->
+<button type="button" class="fab" id="fabAdd">+ Add</button>
 
 <script>
 (function(){
-  // ====== Sizing ======
-  const RECEIPT_MM = 107; // ~100mm thermal width incl. margin
-  const mmToPx = mm => Math.round(mm * 96 / 25.4);
-  const mmToPt = mm => (mm * 72 / 25.4);
-
-  // ====== Config Links ======
+  // ====== Config ======
   const LINKS = {
     instagram: "https://www.instagram.com/nusrat_enterprises/",
     waChannel: "https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06",
     googleFeedback: "https://maps.app.goo.gl/4S4U5DYizVB3ZeZj6"
   };
-
-  // ====== ADDED: Google Sheets Web App Config ======
-  // Use your deployed Apps Script Web App URL and shared token
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzzBSzBCKvtSr8aK1Kersxzp4FgPxTH6PAeRLj14BbLMHBFkMShnY7DRQXTY3sxi97pQw/exec';
   const AUTH_TOKEN  = '9705322252';
-
   const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Formal Pant","Track","Half Pant","Under Wear","Vest"];
+
+  // ====== Elements ======
   const els={
     itemsList:document.getElementById('itemsList'),
+    quickline:document.getElementById('quickline'),
+    fabAdd:document.getElementById('fabAdd'),
+
     invoiceNumber:document.getElementById('invoiceNumber'),
     invoiceDate:document.getElementById('invoiceDate'),
     customerName:document.getElementById('customerName'),
     customerPhone:document.getElementById('customerPhone'),
     phoneError:document.getElementById('phoneError'),
+
     subtotal:document.getElementById('subtotal'),
-    itemsBreakdown: document.getElementById('itemsBreakdown'),
-    itemsCountQty: document.getElementById('itemsCountQty'),
+    itemsBreakdown:document.getElementById('itemsBreakdown'),
+    itemsCountQty:document.getElementById('itemsCountQty'),
     taxRate:document.getElementById('taxRate'),
     flatDiscount:document.getElementById('flatDiscount'),
     grandTotal:document.getElementById('grandTotal'),
     paymentMode:document.getElementById('paymentMode'),
     paidAmount:document.getElementById('paidAmount'),
     dueAmount:document.getElementById('dueAmount'),
+
+    previewCard:document.getElementById('previewCard'),
     invoicePreview:document.getElementById('invoicePreview'),
-    monoRender:document.getElementById('monoRender')
+    monoRender:document.getElementById('monoRender'),
   };
 
-  // ===== Helpers =====
+  // ====== Helpers ======
   const pad2=n=>String(n).padStart(2,'0');
   function genInvoice(){ const d=new Date(); return `${pad2(d.getDate())}${pad2(d.getMonth()+1)}${d.getFullYear()}${pad2(d.getHours())}${pad2(d.getMinutes())}`; }
   function toNumber(v){ const n=parseFloat(v); return Number.isFinite(n) ? n : 0; }
   function fit(text, len){ let t=String(text||'').replace(/\s+/g,' ').trim(); return t.length>len ? t.slice(0,len-1)+'…' : t.padEnd(len,' '); }
   function p2(n, width){ return String(n.toFixed(2)).padStart(width,' '); }
+  const RECEIPT_MM = 107; const mmToPx = mm => Math.round(mm * 96 / 25.4);
 
-  // ===== Init invoice/date =====
+  // ====== Init ======
   els.invoiceNumber.value = genInvoice();
   const today = new Date();
   els.invoiceDate.value = `${today.getFullYear()}-${pad2(today.getMonth()+1)}-${pad2(today.getDate())}`;
 
-  // ===== Phone numeric enforcement =====
-  els.customerPhone.addEventListener('input', (e)=>{
-    e.target.value = e.target.value.replace(/\D/g,'').slice(0,10);
-    validatePhone();
-  });
-  function validatePhone(){
-    const ok = /^\d{10}$/.test(els.customerPhone.value);
-    els.phoneError.style.display = ok || els.customerPhone.value.length===0 ? 'none' : 'block';
-    return ok;
+  // phone numeric
+  els.customerPhone.addEventListener('input', (e)=>{ e.target.value = e.target.value.replace(/\D/g,'').slice(0,10); validatePhone(); });
+  function validatePhone(){ const ok = /^\d{10}$/.test(els.customerPhone.value); els.phoneError.style.display = ok || els.customerPhone.value.length===0 ? 'none' : 'block'; return ok; }
+
+  // ====== Item logic (no per-item discount) ======
+  function compute(obj){
+    const gross = obj.qty * obj.rate;
+    const amount = Math.max(0, gross); // no per-item discount
+    return amount;
   }
 
-  // ===== Items: controls =====
-  function qtySelect(v=''){
-    const s=document.createElement('select');
-    s.setAttribute('data-field','qty');
-
-    // placeholder
-    const ph=document.createElement('option'); ph.value=''; ph.textContent='Qty'; ph.disabled=true; if(!v) ph.selected=true; s.appendChild(ph);
-    // 1..10
-    for(let i=1;i<=10;i++){ const o=document.createElement('option'); o.value=i; o.textContent=i; if(i===v) o.selected=true; s.appendChild(o); }
-    // custom (any)
-    const cust=document.createElement('option'); cust.value='__custom__'; cust.textContent='Custom…'; s.appendChild(cust);
-    return s;
-  }
-
-  function makeItemSelect(curr=''){
-    const s=document.createElement('select');
-    s.setAttribute('data-field','type');
-    const ph=document.createElement('option'); ph.value=''; ph.textContent='Select item'; ph.disabled=true; ph.selected=!curr; s.appendChild(ph);
-    ITEM_OPTIONS.forEach(o=>{const opt=document.createElement('option');opt.value=o;opt.textContent=o;if(curr===o) opt.selected=true; s.appendChild(opt);});
-    return s;
-  }
-
-  function addItem(item={type:'',name:'',qty:'',rate:'',disc:''}){
-    const card=document.createElement('div'); card.className='item-card';
-
-    const blockType=document.createElement('div');
-    const lblType=document.createElement('label'); lblType.textContent='Item';
-    const selType=makeItemSelect(item.type||'');
-    blockType.appendChild(lblType); blockType.appendChild(selType);
-
-    const blockName=document.createElement('div');
-    const lblName=document.createElement('label'); lblName.textContent='Name';
-    const inpName=document.createElement('input'); inpName.placeholder='Name'; inpName.setAttribute('data-field','name'); inpName.value=item.name || item.type || '';
-    blockName.appendChild(lblName); blockName.appendChild(inpName);
-
-    const numsRow=document.createElement('div'); numsRow.className='row-inline';
-    // Qty
-    const cQty=document.createElement('div'); cQty.className='cell';
-    const lQty=document.createElement('label'); lQty.textContent='Qty';
-    const selQty=qtySelect(item.qty === 0 ? '' : item.qty);
-    cQty.appendChild(lQty); cQty.appendChild(selQty);
-
-    // Rate
-    const cRate=document.createElement('div'); cRate.className='cell';
-    const lRate=document.createElement('label'); lRate.textContent='Rate (₹)';
-    const inpRate=document.createElement('input');
-    inpRate.type='number'; inpRate.min='0'; inpRate.step='0.01'; inpRate.placeholder='0.00';
-    inpRate.setAttribute('inputmode','decimal');
-    inpRate.setAttribute('data-field','rate');
-    inpRate.value = (item.rate === 0 || item.rate === '') ? '' : item.rate;
-    cRate.appendChild(lRate); cRate.appendChild(inpRate);
-
-    // Disc
-    const cDisc=document.createElement('div'); cDisc.className='cell';
-    const lDisc=document.createElement('label'); lDisc.textContent='Disc %';
-    const inpDisc=document.createElement('input');
-    inpDisc.type='number'; inpDisc.min='0'; inpDisc.max='100'; inpDisc.step='0.01'; inpDisc.placeholder='0';
-    inpDisc.setAttribute('inputmode','decimal');
-    inpDisc.setAttribute('data-field','disc');
-    inpDisc.value=item.disc||'';
-    cDisc.appendChild(lDisc); cDisc.appendChild(inpDisc);
-
-    numsRow.appendChild(cQty); numsRow.appendChild(cRate); numsRow.appendChild(cDisc);
-
-    // Amount & actions
-    const bottom=document.createElement('div'); bottom.className='amount-line';
-    const amountWrap=document.createElement('div');
-    const amountLbl=document.createElement('div'); amountLbl.className='subtle'; amountLbl.textContent='Amount (₹)';
-    const amountVal=document.createElement('div'); amountVal.className='amount'; amountVal.textContent='0.00';
-    amountWrap.appendChild(amountLbl); amountWrap.appendChild(amountVal);
-
-    const actions=document.createElement('div'); actions.className='actions';
-    const delBtn=document.createElement('button'); delBtn.className='btn danger'; delBtn.type='button'; delBtn.textContent='Delete';
-    actions.appendChild(delBtn);
-
-    bottom.appendChild(amountWrap); bottom.appendChild(actions);
-
-    card.appendChild(blockType); card.appendChild(blockName); card.appendChild(numsRow); card.appendChild(bottom);
-    els.itemsList.appendChild(card);
-
-    // ---- Qty custom ----
-    (function attachQtyCustomHandler() {
-      selQty.dataset.prev = selQty.value || '';
-
-      function ensureOptionExists(valStr) {
-        let opt = selQty.querySelector(`option[value="${valStr}"]`);
-        if (!opt) {
-          const customNode = selQty.querySelector('option[value="__custom__"]');
-          opt = document.createElement('option');
-          opt.value = valStr;
-          opt.textContent = valStr;
-          selQty.insertBefore(opt, customNode);
-        }
-        return opt;
-      }
-
-      selQty.addEventListener('change', () => {
-        if (selQty.value === '__custom__') {
-          const entered = prompt('Enter quantity:', selQty.dataset.prev || '');
-          const q = parseInt(String(entered ?? '').trim().replace(/\D/g, ''), 10);
-
-          if (Number.isFinite(q) && q > 0) {
-            const valStr = String(q);
-            ensureOptionExists(valStr);
-            selQty.value = valStr;
-            selQty.dataset.prev = valStr;
-          } else {
-            selQty.value = selQty.dataset.prev || '';
-          }
-          compute();
-        } else {
-          selQty.dataset.prev = selQty.value || '';
-          compute();
-        }
-      });
-    })();
-
-    // ---- Compute ----
-    function compute(){
-      const q=toNumber(selQty.value), r=toNumber(inpRate.value), d=toNumber(inpDisc.value);
-      const gross=q*r, a=gross-(gross*d/100);
-      amountVal.textContent=a.toFixed(2);
-      recalc();
-      persist();
-    }
-
-    [selType, inpName, selQty, inpRate, inpDisc].forEach(el=>el.addEventListener('input', ()=>{
-      if(el===selType && (!inpName.value || ITEM_OPTIONS.includes(inpName.value))) inpName.value=selType.value||'';
-      compute();
-    }));
-    delBtn.addEventListener('click', ()=>{ card.remove(); recalc(); persist(); });
-
-    attachSerialize(card, {selType, inpName, selQty, inpRate, inpDisc});
-    compute();
-  }
-
-  function attachSerialize(card, refs){
-    const {selType, inpName, selQty, inpRate, inpDisc} = refs;
-    card._ser = () => {
-      const q=toNumber(selQty.value), r=toNumber(inpRate.value), d=toNumber(inpDisc.value);
-      const gross = q*r; const amount = gross - (gross*d/100);
-      return { type: selType.value || '', name: (inpName.value.trim() || selType.value || 'Item'), qty: q, rate: r, disc: d, amount };
+  function liToObj(li){
+    const obj = {
+      type: li.querySelector('[data-f="type"]').value || '',
+      name: (li.querySelector('[data-f="name"]').value || '').trim() || (li.querySelector('[data-f="type"]').value || 'Item'),
+      qty:  toNumber(li.querySelector('[data-f="qty"]').value),
+      rate: toNumber(li.querySelector('[data-f="rate"]').value)
     };
+    obj.amount = compute(obj);
+    return obj;
   }
 
-  function getItems(){ return Array.from(els.itemsList.children).map(c=>c._ser()); }
+  function getItems(){ return Array.from(els.itemsList.children).map(liToObj); }
 
+  function updateLi(li){
+    const amt = liToObj(li).amount;
+    li.querySelector('[data-f="amt"]').textContent = amt.toFixed(2);
+  }
+
+  function attachLi(li){
+    const typeEl = li.querySelector('[data-f="type"]');
+    const nameEl = li.querySelector('[data-f="name"]');
+    const qtyEl  = li.querySelector('[data-f="qty"]');
+
+    // steppers
+    li.querySelector('[data-act="minus"]').addEventListener('click', ()=>{
+      qtyEl.value = Math.max(1, (parseInt(qtyEl.value||'1',10)-1));
+      updateLi(li); recalc(); persist();
+    });
+    li.querySelector('[data-act="plus"]').addEventListener('click', ()=>{
+      qtyEl.value = Math.max(1, (parseInt(qtyEl.value||'1',10)+1));
+      updateLi(li); recalc(); persist();
+    });
+
+    // auto-fill name from type if name is generic
+    li.addEventListener('input', (e)=>{
+      if (e.target === typeEl){
+        if ((!nameEl.value || ITEM_OPTIONS.includes(nameEl.value)) && typeEl.value) nameEl.value = typeEl.value;
+      }
+      updateLi(li); recalc(); persist();
+    });
+    li.addEventListener('change', ()=>{ updateLi(li); recalc(); persist(); });
+
+    // delete
+    li.querySelector('.del').addEventListener('click', ()=>{ li.remove(); recalc(); persist(); });
+  }
+
+  function addItem(obj={type:'',name:'',qty:1,rate:''}){
+    const li = document.createElement('li'); li.className='item';
+    li.innerHTML = `
+      <div class="top">
+        <div class="type">
+          <select data-f="type">
+            <option value="" disabled ${obj.type?'':'selected'}>Select item</option>
+            ${ITEM_OPTIONS.map(x=>`<option value="${x}" ${x===obj.type?'selected':''}>${x}</option>`).join('')}
+          </select>
+        </div>
+        <input class="name" data-f="name" placeholder="Name" value="${(obj.name||obj.type||'').replace(/"/g,'&quot;')}"/>
+        <button type="button" class="btn danger del" title="Delete">✕</button>
+      </div>
+      <div class="bot">
+        <div class="stepper">
+          <button type="button" class="sbtn" data-act="minus">−</button>
+          <input class="qty" data-f="qty" type="number" min="1" step="1" value="${obj.qty||1}"/>
+          <button type="button" class="sbtn" data-act="plus">+</button>
+        </div>
+        <input class="rate" data-f="rate" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Rate" value="${obj.rate === '' ? '' : (obj.rate||0)}"/>
+        <div class="amt">₹ <span data-f="amt">0.00</span></div>
+      </div>
+    `;
+    els.itemsList.appendChild(li);
+    attachLi(li);
+    updateLi(li);
+    recalc();
+  }
+
+  // ====== Quickline (Enter to add) ======
+  function parseQuickline(s){
+    // format now: name qty rate, e.g., "Shirt 2 300"
+    const parts = (s||'').trim().split(/\s+/);
+    if(!parts.length) return null;
+    let name=[], qty=1, rate='';
+    for(let i=parts.length-1;i>=0;i--){
+      const t=parts[i];
+      if(rate==='' && /^[0-9]+(\.[0-9]+)?$/.test(t)){ rate = parseFloat(t); continue; }
+      if(qty===1 && /^[0-9]+$/.test(t)){ qty = parseInt(t,10); continue; }
+      name = parts.slice(0, i+1); break;
+    }
+    if(name.length===0) name = [parts[0]];
+    return { name: name.join(' '), qty, rate: rate===''?'':rate };
+  }
+  function addFromQuickline(){
+    const parsed = parseQuickline(els.quickline.value);
+    if(!parsed || parsed.rate===''){ alert('Use: Item  Qty  Rate. Example: "Shirt 2 300"'); return; }
+    let typeMatch = ITEM_OPTIONS.find(x => parsed.name.toLowerCase().includes(x.toLowerCase()));
+    addItem({ type:typeMatch||'', name:parsed.name, qty:parsed.qty, rate:parsed.rate });
+    els.quickline.value='';
+    persist();
+  }
+  els.quickline.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); addFromQuickline(); }});
+
+  // Floating + Add
+  els.fabAdd.addEventListener('click', () => addItem());
+
+  // ====== Totals & Summary ======
   function buildItemsBreakdown(items){
     const map = new Map();
-    items.forEach(it=>{ const qty = toNumber(it.qty); if (!qty) return; const key=(it.name||it.type||'Item').toString().trim(); map.set(key,(map.get(key)||0)+qty); });
-    const parts=[]; for (const [name,qty] of map.entries()) parts.push(`${qty}x ${name}`);
-    return parts.join(', ');
+    items.forEach(it=>{ const qty=toNumber(it.qty); if(!qty) return; const key=(it.name||it.type||'Item').toString().trim(); map.set(key,(map.get(key)||0)+qty); });
+    const parts=[]; for (const [name,qty] of map.entries()) parts.push(`${qty}x ${name}`); return parts.join(', ');
   }
 
-  // ===== Totals & Payment =====
   function recalc(){
     const items=getItems();
-
     const countQty = items.reduce((s,i)=> s + toNumber(i.qty), 0);
     const breakdown = buildItemsBreakdown(items);
 
@@ -439,18 +396,22 @@
 
     els.subtotal.value=subtotal.toFixed(2);
     els.grandTotal.value=grand.toFixed(2);
-
-    if (els.itemsBreakdown) els.itemsBreakdown.value = breakdown;
-    if (els.itemsCountQty) els.itemsCountQty.value = String(countQty);
+    els.itemsBreakdown.value = breakdown;
+    els.itemsCountQty.value = String(countQty);
 
     const paid=toNumber(els.paidAmount.value);
-    let due = grand - paid; if(due < 0) due = 0;
-    els.dueAmount.value = due.toFixed(2);
+    let negotiated = grand - paid; if(negotiated < 0) negotiated = 0;
+    els.dueAmount.value = negotiated.toFixed(2);
   }
 
-  // ===== Persistence =====
-  const LS='nusrat.designC.items.v12';
-  function persist(){ localStorage.setItem(LS, JSON.stringify(getItems())); }
+  ['taxRate','flatDiscount','paidAmount','paymentMode'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', ()=>{ recalc(); persist(); });
+    document.getElementById(id).addEventListener('change', ()=>{ recalc(); persist(); });
+  });
+
+  // ====== Persistence ======
+  const LS='nusrat.vertical.items.v3'; // bump key because structure changed (no disc)
+  function persist(){ try{ localStorage.setItem(LS, JSON.stringify(getItems())); }catch(_){} }
   function load(){
     const raw=localStorage.getItem(LS);
     if(!raw){ addItem(); recalc(); return; }
@@ -458,16 +419,13 @@
       const arr=JSON.parse(raw);
       if(Array.isArray(arr) && arr.length){
         els.itemsList.innerHTML='';
-        arr.forEach(it=>{
-          const item = { type: it.type||'', name: it.name||'', qty: it.qty?it.qty:'', rate: it.rate?it.rate:'', disc: (it.disc||it.disc===0)?it.disc:'' };
-          addItem(item);
-        });
+        arr.forEach(it=> addItem({ type: it.type||'', name: it.name||'', qty: it.qty||1, rate: (it.rate===''? '': it.rate) }));
       }else{ addItem(); }
     }catch(e){ addItem(); }
     recalc();
   }
 
-  // ===== Validation Helpers =====
+  // ====== Validation ======
   function showErrorBelow(el, msg){ let e=el.parentElement.querySelector('.error'); if(!e){ e=document.createElement('div'); e.className='error'; el.parentElement.appendChild(e);} e.textContent=msg; e.style.display='block'; }
   function hideErrorBelow(el){ const e=el.parentElement.querySelector('.error'); if(e) e.style.display='none'; }
 
@@ -476,33 +434,34 @@
     if(!els.customerName.value.trim()){ showErrorBelow(els.customerName,'Customer name is required.'); ok=false; } else hideErrorBelow(els.customerName);
     if(!/^\d{10}$/.test(els.customerPhone.value)){ els.phoneError.style.display='block'; ok=false; } else els.phoneError.style.display='none';
 
-    const cards = Array.from(els.itemsList.children); if(!cards.length){ ok=false; alert('Add at least one item.'); }
+    const rows = Array.from(els.itemsList.children);
+    if(!rows.length){ ok=false; alert('Add at least one item.'); }
     let hasValid=false;
-    cards.forEach(card=>{
-      const sel = card.querySelector('select[data-field="type"]');
-      const qtySel = card.querySelector('select[data-field="qty"]');
-      const rate = card.querySelector('input[data-field="rate"]');
+    rows.forEach(li=>{
+      const sel = li.querySelector('[data-f="type"]');
+      const qty = li.querySelector('[data-f="qty"]');
+      const rate= li.querySelector('[data-f="rate"]');
       if(!sel.value){ showErrorBelow(sel,'Select an item.'); ok=false; } else hideErrorBelow(sel);
-      if(!qtySel.value){ showErrorBelow(qtySel,'Select quantity.'); ok=false; } else hideErrorBelow(qtySel);
+      if(!qty.value){ showErrorBelow(qty,'Enter quantity.'); ok=false; } else hideErrorBelow(qty);
       if(rate.value===''){ showErrorBelow(rate,'Enter rate.'); ok=false; } else hideErrorBelow(rate);
-      if (sel.value && qtySel.value && rate.value!=='') hasValid=true;
+      if (sel.value && qty.value && rate.value!=='') hasValid=true;
     });
     if(!hasValid) ok=false;
 
     if(!els.paymentMode.value){ showErrorBelow(els.paymentMode,'Select payment mode.'); ok=false; } else hideErrorBelow(els.paymentMode);
     if(els.paidAmount.value===''){ showErrorBelow(els.paidAmount,'Enter paid amount (0 allowed).'); ok=false; } else hideErrorBelow(els.paidAmount);
 
-    if(!ok && forAction!=='general'){ alert('Please correct the highlighted fields before proceeding.'); }
+    if(!ok && forAction!=='general'){ alert('Please correct highlighted fields.'); }
     return ok;
   }
 
-  // ===== Preview Renderer =====
+  // ====== Preview ======
   function renderPreview(){
     const items=getItems();
     const rowsHtml = items.map(it=>`
       <div style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:6px 0">
         <div>${it.name}</div>
-        <div>Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)}${it.disc?` (Disc ${toNumber(it.disc)}% )`:''} = <b>₹${toNumber(it.amount).toFixed(2)}</b></div>
+        <div>Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)} = <b>₹${toNumber(it.amount).toFixed(2)}</b></div>
       </div>
     `).join('');
 
@@ -512,7 +471,7 @@
     const flat=toNumber(els.flatDiscount.value);
     const grand=toNumber(els.grandTotal.value);
     const paid=toNumber(els.paidAmount.value);
-    const due=toNumber(els.dueAmount.value);
+    const negotiated=toNumber(els.dueAmount.value);
 
     const lines=[];
     lines.push(`<tr><td>Subtotal</td><td style="text-align:right">₹${subtotal.toFixed(2)}</td></tr>`);
@@ -521,7 +480,7 @@
     lines.push(`<tr><td><b>Grand Total</b></td><td style="text-align:right"><b>₹${grand.toFixed(2)}</b></td></tr>`);
     if (els.paymentMode.value) lines.push(`<tr><td>Payment Mode</td><td style="text-align:right">${els.paymentMode.value}</td></tr>`);
     if (paid>0) lines.push(`<tr><td>Paid</td><td style="text-align:right">₹${paid.toFixed(2)}</td></tr>`);
-    if (due>0) lines.push(`<tr><td><b>Due</b></td><td style="text-align:right"><b>₹${due.toFixed(2)}</b></td></tr>`);
+    if (negotiated>0) lines.push(`<tr><td><b>Negotiated</b></td><td style="text-align:right"><b>₹${negotiated.toFixed(2)}</b></td></tr>`);
 
     els.invoicePreview.innerHTML = `
       <div class="print-header">
@@ -542,20 +501,25 @@
       </div>`;
   }
 
-  // ===== WhatsApp monospace =====
+  // ====== WhatsApp monospace (no DISC column) ======
   function summaryMonospace(){
     const items=getItems();
-    const COLS = { idx:3, name:18, qty:3, rate:8, disc:5, amt:10 };
-    const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.disc+1+COLS.amt);
-    const header = fit('#',COLS.idx)+' '+fit('ITEM',COLS.name)+' '+fit('QTY',COLS.qty)+' '+fit('RATE',COLS.rate)+' '+fit('DISC',COLS.disc)+' '+fit('AMOUNT',COLS.amt);
+    const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
+    const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.amt);
+    const header = [
+      fit('#',COLS.idx),
+      fit('ITEM',COLS.name),
+      fit('QTY',COLS.qty),
+      fit('RATE',COLS.rate),
+      fit('AMOUNT',COLS.amt)
+    ].join(' ');
     const rows = items.map((it,i)=>{
       const idx=String(i+1).padStart(COLS.idx,' ');
       const nm =fit(it.name,COLS.name);
       const qt =String(toNumber(it.qty)).padStart(COLS.qty,' ');
       const rt =p2(toNumber(it.rate),COLS.rate);
-      const dc =(toNumber(it.disc)>0? (toNumber(it.disc).toFixed(0)+'%') : '').padStart(COLS.disc,' ');
       const am =p2(toNumber(it.amount),COLS.amt);
-      return `${idx} ${nm} ${qt} ${rt} ${dc} ${am}`;
+      return `${idx} ${nm} ${qt} ${rt} ${am}`;
     });
 
     const subtotal=toNumber(els.subtotal.value);
@@ -564,7 +528,7 @@
     const flat=toNumber(els.flatDiscount.value);
     const grand=toNumber(els.grandTotal.value);
     const paid=toNumber(els.paidAmount.value);
-    const due =toNumber(els.dueAmount.value);
+    const negotiated =toNumber(els.dueAmount.value);
 
     const store1='Nusrat Enterprises';
     const store2='Phones: 7978830017, 9330066455, 9040366455';
@@ -572,7 +536,6 @@
     const invLine=`Invoice: ${els.invoiceNumber.value}`;
     const dateLine=els.invoiceDate.value?`Date: ${els.invoiceDate.value}`:'';
     const custLine=els.customerName.value?`Customer: ${els.customerName.value}`:'';
-    const payMode =els.paymentMode.value?`Payment Mode: ${els.paymentMode.value}`:'';
 
     function kv(k,v){ const key=(k+':').padEnd(13,' '); const val=String(v); return key + val; }
 
@@ -583,7 +546,7 @@
     totals.push(kv('Grand Total', `₹${grand.toFixed(2)}`));
     if (els.paymentMode.value) totals.push(kv('Payment Mode', els.paymentMode.value));
     if (paid>0) totals.push(kv('Paid', `₹${paid.toFixed(2)}`));
-    if (due>0) totals.push(kv('Due', `₹${due.toFixed(2)}`));
+    if (negotiated>0) totals.push(kv('Negotiated', `₹${negotiated.toFixed(2)}`));
 
     const lines=[
       store1, store2, store3, '',
@@ -599,21 +562,25 @@
     return codeBlock + followBlock;
   }
 
-  // ===== PDF block (monospace) =====
+  // ====== PDF (monospace block without DISC) ======
   function buildMonospaceHTML() {
     const items=getItems();
-    const COLS = { idx:3, name:18, qty:3, rate:8, disc:5, amt:10 };
-    const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.disc+1+COLS.amt);
-    const header = fit('#',COLS.idx)+' '+fit('ITEM',COLS.name)+' '+fit('QTY',COLS.qty)+' '+fit('RATE',COLS.rate)+' '+fit('DISC',COLS.disc)+' '+fit('AMOUNT',COLS.amt);
-
+    const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
+    const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.amt);
+    const header = [
+      fit('#',COLS.idx),
+      fit('ITEM',COLS.name),
+      fit('QTY',COLS.qty),
+      fit('RATE',COLS.rate),
+      fit('AMOUNT',COLS.amt)
+    ].join(' ');
     const rows = items.map((it,i)=>{
       const idx=String(i+1).padStart(COLS.idx,' ');
       const nm =fit(it.name,COLS.name);
       const qt =String(toNumber(it.qty)).padStart(COLS.qty,' ');
       const rt =p2(toNumber(it.rate),COLS.rate);
-      const dc =(toNumber(it.disc)>0? (toNumber(it.disc).toFixed(0)+'%') : '').padStart(COLS.disc,' ');
       const am =p2(toNumber(it.amount),COLS.amt);
-      return `${idx} ${nm} ${qt} ${rt} ${dc} ${am}`;
+      return `${idx} ${nm} ${qt} ${rt} ${am}`;
     });
 
     const subtotal=toNumber(els.subtotal.value);
@@ -622,107 +589,81 @@
     const flat=toNumber(els.flatDiscount.value);
     const grand=toNumber(els.grandTotal.value);
     const paid=toNumber(els.paidAmount.value);
-    const due=toNumber(els.dueAmount.value);
+    const negotiated=toNumber(els.dueAmount.value);
 
     function kv(k,v){ const key=(k+':').padEnd(13,' '); const val=String(v); return key + val; }
-    const totals=[];
-    totals.push(kv('Subtotal', `₹${subtotal.toFixed(2)}`));
-    if (gstRate>0 && gstAmt>0) totals.push(kv(`GST ${gstRate}%`, `₹${gstAmt.toFixed(2)}`));
-    if (flat>0) totals.push(kv('Discount', `-₹${flat.toFixed(2)}`));
-    totals.push(kv('Grand Total', `₹${grand.toFixed(2)}`));
-    if (els.paymentMode.value) totals.push(kv('Payment Mode', els.paymentMode.value));
-    if (paid>0) totals.push(kv('Paid', `₹${paid.toFixed(2)}`));
-    if (due>0) totals.push(kv('Due', `₹${due.toFixed(2)}`));
-
-    const lines=[
-      'Nusrat Enterprises',
-      'Phones: 7978830017, 9330066455, 9040366455',
-      'Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014',
-      '',
-      `Invoice: ${els.invoiceNumber.value}` + (els.invoiceDate.value ? ` | Date: ${els.invoiceDate.value}` : ''),
-      els.customerName.value ? `Customer: ${els.customerName.value}` : '',
-      '',
-      header, lineSep, ...rows, lineSep,
-      ...totals, '',
-      'Thank you for shopping with Nusrat Enterprises!'
-    ];
-
-    const html = `
+    return `
       <div id="monoBox" style="
-        width: ${mmToPx(RECEIPT_MM)}px;
-        padding: 12px;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        background: #ffffff; color:#111827;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-        font-size: 12px; line-height: 1.4;">
-        <pre style="margin:0; white-space:pre-wrap;">${lines.join('\n')}</pre>
+        width:${mmToPx(RECEIPT_MM)}px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;color:#111827;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace; font-size:12px; line-height:1.4;">
+        <pre style="margin:0; white-space:pre-wrap;">${
+          [
+            'Nusrat Enterprises',
+            'Phones: 7978830017, 9330066455, 9040366455',
+            'Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014',
+            '',
+            `Invoice: ${els.invoiceNumber.value}` + (els.invoiceDate.value ? ` | Date: ${els.invoiceDate.value}` : ''),
+            els.customerName.value ? `Customer: ${els.customerName.value}` : '',
+            '',
+            header, lineSep, ...rows, lineSep,
+            kv('Subtotal', `₹${subtotal.toFixed(2)}`),
+            ...(gstRate>0 && gstAmt>0 ? [kv(`GST ${gstRate}%`, `₹${gstAmt.toFixed(2)}`)] : []),
+            ...(flat>0 ? [kv('Discount', `-₹${flat.toFixed(2)}`)] : []),
+            kv('Grand Total', `₹${grand.toFixed(2)}`),
+            ...(els.paymentMode.value ? [kv('Payment Mode', els.paymentMode.value)] : []),
+            ...(paid>0 ? [kv('Paid', `₹${paid.toFixed(2)}`)] : []),
+            ...(negotiated>0 ? [kv('Negotiated', `₹${negotiated.toFixed(2)}`)] : []),
+            '',
+            'Thank you for shopping with Nusrat Enterprises!'
+          ].join('\n')
+        }</pre>
         <div style="height:8px"></div>
         <div style="font-size:11px;color:#374151">
           <div style="font-weight:600;margin-bottom:4px">Follow &amp; Feedback:</div>
-          <div><a id="gLink" href="${LINKS.googleFeedback}" target="_blank" rel="noopener">Google Feedback: ${LINKS.googleFeedback}</a></div>
-          <div><a id="igLink" href="${LINKS.instagram}" target="_blank" rel="noopener">Instagram: ${LINKS.instagram}</a></div>
-          <div><a id="waLink" href="${LINKS.waChannel}" target="_blank" rel="noopener">WhatsApp Channel: ${LINKS.waChannel}</a></div>
+          <div>Google Feedback: ${LINKS.googleFeedback}</div>
+          <div>Instagram: ${LINKS.instagram}</div>
+          <div>WhatsApp Channel: ${LINKS.waChannel}</div>
         </div>
       </div>`;
-    return html;
   }
 
-  // ===== PDF generation =====
   async function generatePdf() {
     els.monoRender.innerHTML = buildMonospaceHTML();
     await new Promise(r => setTimeout(r, 120));
-
     const box = els.monoRender.querySelector('#monoBox');
-    const ig = els.monoRender.querySelector('#igLink');
-    const wa = els.monoRender.querySelector('#waLink');
-    const gl = els.monoRender.querySelector('#gLink');
-
     const canvas = await html2canvas(box, { scale: 2, backgroundColor:'#ffffff', useCORS:true });
-
-    const pageWpt = mmToPt(RECEIPT_MM);
+    const { jsPDF } = window.jspdf;
+    const pageWpt = (RECEIPT_MM * 72 / 25.4);
     const margin = 8;
     const targetWidth = pageWpt - margin * 2;
     const ratio = canvas.height / canvas.width;
     const targetHeight = targetWidth * ratio;
     const pageHpt = targetHeight + margin * 2;
-
-    const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ unit: 'pt', format: [pageWpt, pageHpt] });
-
     const x=margin, y=margin, w=targetWidth, h=targetHeight;
-    const imgData = canvas.toDataURL('image/png');
-    pdf.addImage(imgData, 'PNG', x, y, w, h, undefined, 'FAST');
-
-    const scaleX = w / canvas.width; const scaleY = h / canvas.height;
-    function addLinkHotspot(el, url){ if(!el) return; const r=el.getBoundingClientRect(); const base=box.getBoundingClientRect(); const dx=r.left-base.left; const dy=r.top-base.top; const lx=x+dx*scaleX; const ly=y+dy*scaleY; const lW=r.width*scaleX; const lH=r.height*scaleY; try{ pdf.link(lx, ly, lW, lH, { url }); }catch(_){} }
-    addLinkHotspot(ig, LINKS.instagram);
-    addLinkHotspot(wa, LINKS.waChannel);
-    addLinkHotspot(gl, LINKS.googleFeedback);
-
+    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, w, h, undefined, 'FAST');
     const cust = (els.customerName.value || 'Customer').replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'_');
-    const filename = `Invoice_${cust}_${els.invoiceDate.value}.pdf`;
-    pdf.save(filename);
+    pdf.save(`Invoice_${cust}_${els.invoiceDate.value}.pdf`);
   }
 
-  // ====== ADDED: Google Sheet Sync (Apps Script Web App) ======
+  // ====== Google Sheet Sync ======
   async function collectInvoicePayload() {
-    const items = Array.from(document.getElementById('itemsList').children).map(c => c._ser());
+    const items = getItems();
     return {
       token: AUTH_TOKEN,
-      invoiceNumber: document.getElementById('invoiceNumber').value || '',
-      invoiceDate: document.getElementById('invoiceDate').value || '',
-      customerName: document.getElementById('customerName').value || '',
-      customerPhone: document.getElementById('customerPhone').value || '',
-      itemsBreakdown: document.getElementById('itemsBreakdown').value || '',
-      itemsCountQty: document.getElementById('itemsCountQty').value || '0',
-      subtotal: document.getElementById('subtotal').value || '0',
-      taxRate: document.getElementById('taxRate').value || '0',
-      flatDiscount: document.getElementById('flatDiscount').value || '0',
-      grandTotal: document.getElementById('grandTotal').value || '0',
-      paymentMode: document.getElementById('paymentMode').value || '',
-      paidAmount: document.getElementById('paidAmount').value || '0',
-      dueAmount: document.getElementById('dueAmount').value || '0',
+      invoiceNumber: els.invoiceNumber.value || '',
+      invoiceDate: els.invoiceDate.value || '',
+      customerName: els.customerName.value || '',
+      customerPhone: els.customerPhone.value || '',
+      itemsBreakdown: els.itemsBreakdown.value || '',
+      itemsCountQty: els.itemsCountQty.value || '0',
+      subtotal: els.subtotal.value || '0',
+      taxRate: els.taxRate.value || '0',
+      flatDiscount: els.flatDiscount.value || '0',
+      grandTotal: els.grandTotal.value || '0',
+      paymentMode: els.paymentMode.value || '',
+      paidAmount: els.paidAmount.value || '0',
+      dueAmount: els.dueAmount.value || '0', // "Negotiated"
       items
     };
   }
@@ -730,38 +671,25 @@
   async function pushToGoogleSheet() {
     if (!validateAll('push')) return;
     const payload = await collectInvoicePayload();
-
     try {
       const res = await fetch(WEB_APP_URL, {
-        method: 'POST',
-        mode: 'cors',
+        method: 'POST', mode: 'cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       const json = await res.json().catch(() => ({}));
-      if (json && json.ok) {
-        alert('Saved to Google Sheet ✅');
-      } else {
-        alert('Failed to save to Google Sheet ❌' + (json && json.error ? `\n${json.error}` : ''));
-      }
+      if (json && json.ok) alert('Saved to Google Sheet ✅');
+      else alert('Failed to save to Google Sheet ❌' + (json && json.error ? `\n${json.error}` : ''));
     } catch (err) {
       console.error(err);
       alert('Network error while saving to Google Sheet.');
     }
   }
 
-  // ===== Actions =====
-  document.getElementById('addItemBtn').addEventListener('click', ()=>{ addItem(); recalc(); });
-  document.getElementById('clearItemsBtn').addEventListener('click', ()=>{
-    if(confirm('Clear items?')){ els.itemsList.innerHTML=''; addItem(); recalc(); persist(); }
-  });
-  ['taxRate','flatDiscount','paidAmount','paymentMode'].forEach(id=>{
-    document.getElementById(id).addEventListener('input', ()=>{ recalc(); persist(); });
-    document.getElementById(id).addEventListener('change', ()=>{ recalc(); persist(); });
-  });
-  document.getElementById('previewBtn').addEventListener('click', ()=>{ if (!validateAll('preview')) return; document.getElementById('previewCard').style.display='block'; renderPreview(); });
-  document.getElementById('printMonospaceLink').addEventListener('click', async (e)=>{ e.preventDefault(); if (!validateAll('print')) return; try { await generatePdf(); } catch (err) { console.error(err); alert('PDF generation failed. Please try again.'); } });
-  document.getElementById('whatsAppBtn').addEventListener('click', ()=>{ if (!validateAll('whatsapp')) return; const phone = `91${els.customerPhone.value}`; const msg = summaryMonospace(); window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank'); });
+  // ====== Actions ======
+  document.getElementById('previewBtn').addEventListener('click', ()=>{ if (!validateAll('preview')) return; els.previewCard.style.display='block'; renderPreview(); });
+  document.getElementById('printBtn').addEventListener('click', async (e)=>{ e.preventDefault(); if (!validateAll('print')) return; try { await generatePdf(); } catch (err) { console.error(err); alert('PDF generation failed.'); } });
+  document.getElementById('whatsAppBtn').addEventListener('click', ()=>{ if (!validateAll('whatsapp')) return; const phone = `91${els.customerPhone.value}`; const msg = summaryMonospace(); window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener,noreferrer'); });
   document.getElementById('copyTextBtn').addEventListener('click', ()=>{
     if (!validateAll('copy')) return;
     const items=getItems(); const lines=[];
@@ -773,12 +701,9 @@
     if(els.invoiceDate.value) lines.push(`Date: ${els.invoiceDate.value}`);
     if(els.customerName.value) lines.push(`Customer: ${els.customerName.value}`);
     lines.push(''); lines.push('Items:');
-    items.forEach((it,i)=>lines.push(`${i+1}. ${it.name} — Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)}${it.disc?` (Disc ${toNumber(it.disc)}% )`:''} = ₹${toNumber(it.amount).toFixed(2)}`));
-
+    items.forEach((it,i)=>lines.push(`${i+1}. ${it.name} — Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)} = ₹${toNumber(it.amount).toFixed(2)}`));
     const subtotal=toNumber(els.subtotal.value), gstRate=toNumber(els.taxRate.value), flat=toNumber(els.flatDiscount.value), grand=toNumber(els.grandTotal.value);
-    const gstAmt=subtotal*(gstRate/100);
-    const paid=toNumber(els.paidAmount.value); const due=toNumber(els.dueAmount.value);
-
+    const gstAmt=subtotal*(gstRate/100); const paid=toNumber(els.paidAmount.value); const negotiated=toNumber(els.dueAmount.value);
     lines.push('');
     lines.push(`Subtotal: ₹${subtotal.toFixed(2)}`);
     if(gstRate>0 && gstAmt>0) lines.push(`GST ${gstRate}%: ₹${gstAmt.toFixed(2)}`);
@@ -786,7 +711,7 @@
     lines.push(`Grand Total: ₹${grand.toFixed(2)}`);
     if(els.paymentMode.value) lines.push(`Payment Mode: ${els.paymentMode.value}`);
     if(paid>0) lines.push(`Paid: ₹${paid.toFixed(2)}`);
-    if(due>0) lines.push(`Due: ₹${due.toFixed(2)}`);
+    if(negotiated>0) lines.push(`Negotiated: ₹${negotiated.toFixed(2)}`);
     lines.push('');
     lines.push('Thank you for shopping with Nusrat Enterprises!');
     lines.push('');
@@ -794,17 +719,12 @@
     lines.push(`Instagram: ${LINKS.instagram}`);
     lines.push(`WhatsApp Channel: ${LINKS.waChannel}`);
     lines.push(`Google Feedback: ${LINKS.googleFeedback}`);
-
-    navigator.clipboard.writeText(lines.join('\n')).then(()=>alert('Copied')).catch(()=>alert('Copy failed'));
+    navigator.clipboard.writeText(lines.join('\n')).then(()=>alert('Copied')).catch(()=>alert('Copy failed (permission denied).'));
   });
-
-  // >>> ADDED: wire Save button
   document.getElementById('saveToSheetBtn').addEventListener('click', pushToGoogleSheet);
 
-  function initFirstItemIfEmpty(){ if (!els.itemsList.children.length) addItem(); }
+  // ====== Boot ======
   load();
-  initFirstItemIfEmpty();
-  setTimeout(recalc, 0);
 })();
 </script>
 </body>
