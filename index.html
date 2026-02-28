@@ -793,22 +793,22 @@
         ok = res.ok;
       }
 
-      if (ok) {
-        if (alertOnResult) alert('Saved to Google Sheet ✅');
-        return true;
-      } else {
-        const txt = await res.text().catch(()=> '');
-        if (alertOnResult) {
-          alert('Failed to save to Google Sheet ❌\n' + (txt ? txt.slice(0,500) : 'No response body'));
-        }
-        return false;
-      }
-    } catch (err) {
-      console.error(err);
-      if (alertOnResult) alert('Network error while saving to Google Sheet.');
-      return false;
-    }
-  }
+  //     if (ok) {
+  //       if (alertOnResult) alert('Saved to Google Sheet ✅');
+  //       return true;
+  //     } else {
+  //       const txt = await res.text().catch(()=> '');
+  //       if (alertOnResult) {
+  //         alert('Failed to save to Google Sheet ❌\n' + (txt ? txt.slice(0,500) : 'No response body'));
+  //       }
+  //       return false;
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     if (alertOnResult) alert('Network error while saving to Google Sheet.');
+  //     return false;
+  //   }
+  // }
 
   // Actions
   document.getElementById('previewBtn').addEventListener('click', ()=>{
