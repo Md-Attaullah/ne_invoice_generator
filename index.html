@@ -264,7 +264,9 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     waChannel: "https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06",
     googleFeedback: "https://maps.app.goo.gl/4S4U5DYizVB3ZeZj6"
   };
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzzBSzBCKvtSr8aK1Kersxzp4FgPxTH6PAeRLj14BbLMHBFkMShnY7DRQXTY3sxi97pQw/exec';
+  // ✅ Updated to your latest Apps Script Web App URL:
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwFcSGSZjTmUtxWtyxnK1fnRWH9uNPZA7VRdd1jr1uT73h-y-eHfOgTQ11u34Ambeyo/exec';
+  // ✅ Must match TOKEN in Apps Script:
   const AUTH_TOKEN  = '9705322252';
   const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Formal Pant","Track","Half Pant","Under Wear","Vest"];
 
@@ -763,7 +765,7 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
       grandTotal: els.grandTotal.value || '0',
       paymentMode: els.paymentMode.value || '',
       paidAmount: els.paidAmount.value || '0',
-      dueAmount: els.dueAmount.value || '0', // "Negotiated"
+      dueAmount: els.dueAmount.value || '0', // server ignores this
       items
     };
   }
@@ -812,7 +814,8 @@ h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
     const items=getItems(); const lines=[];
     lines.push('Nusrat Enterprises');
     lines.push('Phones: 7978830017, 9330066455, 9040366455');
-    lines.push('Addresshubaneswar, Odisha — 751014');
+    // ✅ Fixed the address line typo here:
+    lines.push('Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014');
     lines.push('');
     lines.push(`Invoice: ${els.invoiceNumber.value}`);
     if(els.invoiceDate.value) lines.push(`Date: ${els.invoiceDate.value}`);
