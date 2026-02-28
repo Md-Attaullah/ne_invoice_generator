@@ -217,7 +217,8 @@
         <button type="button" class="btn outline" id="printBtn">🖨️ Print</button>
         <button type="button" class="btn ghost" id="previewBtn">👁️ Preview</button>
         <button type="button" class="btn ghost" id="copyTextBtn">📋 Copy Summary</button>
-        <button type="button" class="btn ghost" id="saveToSheetBtn">📑 Save to Google Sheet</button>
+        <!-- WhatsApp-like (green) -->
+        <button type="button" class="btn primary" id="saveToSheetBtn">📑 Save to Google Sheet</button>
       </div>
     </div>
 
@@ -715,8 +716,19 @@
     };
   }
 
-  async function pushToGoogleSheet() {
-    if (!validateAll('push')) return;
+  /**
+   * Pushes to Google Sheet.
+   * @param {Object} [opts]
+   * @param {boolean} [opts.alertOnResult=true] - Whether to show alert dialogs.
+   * @returns {Promise<boolean>} true if saved, false otherwise
+   */
+  async function pushToGoogleSheet(opts = {}) {
+    const { alertOnResult = true } = opts;
+
+    if (!validateAll('push')) {
+      if (alertOnResult) alert('Please correct highlighted fields.');
+      return false;
+    }
 
     const payload = await collectInvoicePayload();
 
@@ -725,13 +737,9 @@
       const form = new FormData();
       form.append('payload', JSON.stringify(payload));
 
-      const res = await fetch(WEB_APP_URL, {
-        method: 'POST',
-        body: form
-        // NOTE: DO NOT set Content-Type here; the browser sets the correct multipart boundary.
-      });
+      const res = await fetch(WEB_APP_URL, { method: 'POST', body: form });
 
-      // Try to parse JSON result; fall back to HTTP status if needed
+      // Try JSON; fall back to HTTP status
       let ok = false;
       try {
         const json = await res.json();
@@ -741,14 +749,19 @@
       }
 
       if (ok) {
-        alert('Saved to Google Sheet ✅');
+        if (alertOnResult) alert('Saved to Google Sheet ✅');
+        return true;
       } else {
         const txt = await res.text().catch(()=> '');
-        alert('Failed to save to Google Sheet ❌\n' + (txt ? txt.slice(0,500) : 'No response body'));
+        if (alertOnResult) {
+          alert('Failed to save to Google Sheet ❌\n' + (txt ? txt.slice(0,500) : 'No response body'));
+        }
+        return false;
       }
     } catch (err) {
       console.error(err);
-      alert('Network error while saving to Google Sheet.');
+      if (alertOnResult) alert('Network error while saving to Google Sheet.');
+      return false;
     }
   }
 
@@ -766,11 +779,31 @@
     catch (err) { console.error(err); alert('PDF generation failed.'); }
   });
 
-  document.getElementById('whatsAppBtn').addEventListener('click', ()=>{
+  // ✅ WhatsApp: save to sheet (with alerts), then open WhatsApp ONLY if save succeeded
+  document.getElementById('whatsAppBtn').addEventListener('click', async ()=>{
     if (!validateAll('whatsapp')) return;
-    const phone = `91${els.customerPhone.value}`;
-    const msg = summaryMonospace();
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener,noreferrer');
+
+    const waBtn = document.getElementById('whatsAppBtn');
+    waBtn.disabled = true;
+    waBtn.style.opacity = '0.7';
+
+    try {
+      // 1) Save to Google Sheet and SHOW alerts
+      const saved = await pushToGoogleSheet({ alertOnResult: true });
+
+      // 2) Only proceed to WhatsApp if save succeeded
+      if (!saved) return;
+
+      // 3) Open WhatsApp with message
+      const phone = `91${els.customerPhone.value}`;
+      const msg = summaryMonospace();
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener,noreferrer');
+    } finally {
+      setTimeout(()=>{
+        waBtn.disabled = false;
+        waBtn.style.opacity = '1';
+      }, 800);
+    }
   });
 
   document.getElementById('copyTextBtn').addEventListener('click', ()=>{
@@ -807,7 +840,11 @@
       .catch(()=>alert('Copy failed (permission denied).'));
   });
 
-  document.getElementById('saveToSheetBtn').addEventListener('click', pushToGoogleSheet);
+  // Save to Google Sheet (green button)
+  document.getElementById('saveToSheetBtn').addEventListener('click', ()=>{
+    // shows alerts by default
+    pushToGoogleSheet({ alertOnResult: true });
+  });
 
   // Boot
   load();
