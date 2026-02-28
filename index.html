@@ -67,6 +67,18 @@
   .btn.link{background:#fff;border:1px solid var(--border);color:#111827}
   .btn.danger{background:#991b1b;color:#fff}
 
+  /* Spinner */
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .spinner{
+    width:16px;height:16px;border-radius:999px;border:2px solid currentColor;border-top-color:transparent;
+    display:none; animation:spin .9s linear infinite;
+  }
+  .btn.loading{opacity:.85; cursor:wait}
+  .btn.loading .spinner{display:inline-block}
+  .btn .btn-text{display:inline-block}
+  .btn.loading .btn-text{opacity:.9}
+  .btn .btn-icon{display:inline-block}
+
   .print-header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
   .print-title{font-size:1.15rem;font-weight:800;color:#7f1d1d}
   .print-meta{font-size:.92rem;color:#374151}
@@ -213,12 +225,23 @@
     <div class="card actions-card">
       <h2>Actions</h2>
       <div class="action-buttons">
-        <button type="button" class="btn primary" id="whatsAppBtn">💬 WhatsApp</button>
+        <!-- WhatsApp with spinner -->
+        <button type="button" class="btn primary" id="whatsAppBtn">
+          <span class="btn-icon" aria-hidden="true">💬</span>
+          <span class="btn-text">WhatsApp</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+
         <button type="button" class="btn outline" id="printBtn">🖨️ Print</button>
         <button type="button" class="btn ghost" id="previewBtn">👁️ Preview</button>
         <button type="button" class="btn ghost" id="copyTextBtn">📋 Copy Summary</button>
-        <!-- WhatsApp-like (green) -->
-        <button type="button" class="btn primary" id="saveToSheetBtn">📑 Save to Google Sheet</button>
+
+        <!-- Save to Google Sheet with spinner (WhatsApp-like green) -->
+        <button type="button" class="btn primary" id="saveToSheetBtn">
+          <span class="btn-icon" aria-hidden="true">📑</span>
+          <span class="btn-text">Save to Google Sheet</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
       </div>
     </div>
 
@@ -275,6 +298,13 @@
     previewCard:document.getElementById('previewCard'),
     invoicePreview:document.getElementById('invoicePreview'),
     monoRender:document.getElementById('monoRender'),
+
+    // Buttons
+    whatsAppBtn: document.getElementById('whatsAppBtn'),
+    saveBtn: document.getElementById('saveToSheetBtn'),
+    printBtn: document.getElementById('printBtn'),
+    previewBtn: document.getElementById('previewBtn'),
+    copyBtn: document.getElementById('copyTextBtn'),
   };
 
   // ====== Helpers ======
@@ -284,6 +314,21 @@
   function fit(text, len){ let t=String(text||'').replace(/\s+/g,' ').trim(); return t.length>len ? t.slice(0,len-1)+'…' : t.padEnd(len,' '); }
   function p2(n, width){ return String(n.toFixed(2)).padStart(width,' '); }
   const RECEIPT_MM = 107; const mmToPx = mm => Math.round(mm * 96 / 25.4);
+
+  // Button loading UX helper
+  function setBtnLoading(btn, loading, loadingText, normalText){
+    if(!btn) return;
+    const textEl = btn.querySelector('.btn-text');
+    if(loading){
+      btn.classList.add('loading');
+      btn.disabled = true;
+      if (textEl && loadingText) textEl.textContent = loadingText;
+    } else {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      if (textEl && normalText) textEl.textContent = normalText;
+    }
+  }
 
   // ====== Init ======
   els.invoiceNumber.value = genInvoice();
@@ -780,33 +825,24 @@
   });
 
   // ✅ WhatsApp: save to sheet (with alerts), then open WhatsApp ONLY if save succeeded
-  document.getElementById('whatsAppBtn').addEventListener('click', async ()=>{
+  els.whatsAppBtn.addEventListener('click', async ()=>{
     if (!validateAll('whatsapp')) return;
 
-    const waBtn = document.getElementById('whatsAppBtn');
-    waBtn.disabled = true;
-    waBtn.style.opacity = '0.7';
-
+    setBtnLoading(els.whatsAppBtn, true, 'Saving & Sending…', null);
     try {
-      // 1) Save to Google Sheet and SHOW alerts
       const saved = await pushToGoogleSheet({ alertOnResult: true });
+      if (!saved) return; // stop if save failed
 
-      // 2) Only proceed to WhatsApp if save succeeded
-      if (!saved) return;
-
-      // 3) Open WhatsApp with message
       const phone = `91${els.customerPhone.value}`;
       const msg = summaryMonospace();
       window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener,noreferrer');
     } finally {
-      setTimeout(()=>{
-        waBtn.disabled = false;
-        waBtn.style.opacity = '1';
-      }, 800);
+      setBtnLoading(els.whatsAppBtn, false, null, 'WhatsApp');
     }
   });
 
-  document.getElementById('copyTextBtn').addEventListener('click', ()=>{
+  // Copy text
+  els.copyBtn.addEventListener('click', ()=>{
     if (!validateAll('copy')) return;
     const items=getItems(); const lines=[];
     lines.push('Nusrat Enterprises');
@@ -840,10 +876,14 @@
       .catch(()=>alert('Copy failed (permission denied).'));
   });
 
-  // Save to Google Sheet (green button)
-  document.getElementById('saveToSheetBtn').addEventListener('click', ()=>{
-    // shows alerts by default
-    pushToGoogleSheet({ alertOnResult: true });
+  // Save to Google Sheet (green button) with spinner
+  els.saveBtn.addEventListener('click', async ()=>{
+    setBtnLoading(els.saveBtn, true, 'Saving…', null);
+    try {
+      await pushToGoogleSheet({ alertOnResult: true });
+    } finally {
+      setBtnLoading(els.saveBtn, false, null, 'Save to Google Sheet');
+    }
   });
 
   // Boot
