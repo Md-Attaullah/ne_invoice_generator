@@ -96,6 +96,7 @@
     background:var(--brand); color:#fff; border:none; border-radius:999px; padding:12px 16px;
     box-shadow:0 8px 20px rgba(0,0,0,.25); font-weight:800; font-size:16px;
   }
+
   @media print{header{display:none!important}.card{border:none;box-shadow:none}}
 </style>
 
@@ -144,6 +145,8 @@
       <div class="items-head">
         <h2>Items</h2>
       </div>
+
+      <!-- Quickline form -->
       <form id="quicklineForm" class="quickline" style="margin-bottom:8px">
         <input
           id="quickline"
@@ -154,6 +157,7 @@
         />
         <button type="submit" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">Submit</button>
       </form>
+
       <ul id="itemsList" class="items-list" aria-label="Invoice items"></ul>
     </div>
 
@@ -225,7 +229,10 @@
   </div>
 </div>
 
+<!-- Offscreen PDF render target -->
 <div id="monoRender" style="position:absolute;left:-99999px;top:0;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;visibility:hidden;"></div>
+
+<!-- Floating Add button -->
 <button type="button" class="fab" id="fabAdd">+ Add</button>
 
 <script>
@@ -236,6 +243,7 @@
     waChannel: "https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06",
     googleFeedback: "https://maps.app.goo.gl/4S4U5DYizVB3ZeZj6"
   };
+  // Use your current deployment URL; update if you redeploy and URL changes
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwFcSGSZjTmUtxWtyxnK1fnRWH9uNPZA7VRdd1jr1uT73h-y-eHfOgTQ11u34Ambeyo/exec';
   const AUTH_TOKEN  = '9705322252';
   const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Formal Pant","Track","Half Pant","Under Wear","Vest"];
@@ -685,7 +693,7 @@
     pdf.save(`Invoice_${cust}_${els.invoiceDate.value}.pdf`);
   }
 
-  // ====== Google Sheet Sync ======
+  // ====== Google Sheet Sync (FormData to avoid preflight/CORS) ======
   async function collectInvoicePayload() {
     const items = getItems();
     return {
@@ -702,28 +710,42 @@
       grandTotal: els.grandTotal.value || '0',
       paymentMode: els.paymentMode.value || '',
       paidAmount: els.paidAmount.value || '0',
-      // dueAmount: els.dueAmount.value || '0', // server ignores this
+      dueAmount: els.dueAmount.value || '0', // server ignores this
       items
     };
   }
 
   async function pushToGoogleSheet() {
     if (!validateAll('push')) return;
+
     const payload = await collectInvoicePayload();
+
     try {
+      // Build FormData so the request is "simple" (no preflight)
+      const form = new FormData();
+      form.append('payload', JSON.stringify(payload));
+
       const res = await fetch(WEB_APP_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: form
+        // NOTE: DO NOT set Content-Type here; the browser sets the correct multipart boundary.
       });
-      if (!res.ok) {
-        const text = await res.text().catch(()=> '');
-        alert(`Failed to save (HTTP ${res.status}).\n${text.slice(0,500)}`);
-        return;
+
+      // Try to parse JSON result; fall back to HTTP status if needed
+      let ok = false;
+      try {
+        const json = await res.json();
+        ok = !!(json && json.ok);
+      } catch (_) {
+        ok = res.ok;
       }
-      const json = await res.json().catch(() => ({}));
-      if (json && json.ok) alert('Saved to Google Sheet ✅');
-      else alert('Failed to save to Google Sheet ❌' + (json && json.error ? `\n${json.error}` : ''));
+
+      if (ok) {
+        alert('Saved to Google Sheet ✅');
+      } else {
+        const txt = await res.text().catch(()=> '');
+        alert('Failed to save to Google Sheet ❌\n' + (txt ? txt.slice(0,500) : 'No response body'));
+      }
     } catch (err) {
       console.error(err);
       alert('Network error while saving to Google Sheet.');
@@ -756,7 +778,7 @@
     const items=getItems(); const lines=[];
     lines.push('Nusrat Enterprises');
     lines.push('Phones: 7978830017, 9330066455, 9040366455');
-    lines.push('Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014'); // fixed typo
+    lines.push('Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014');
     lines.push('');
     lines.push(`Invoice: ${els.invoiceNumber.value}`);
     if(els.invoiceDate.value) lines.push(`Date: ${els.invoiceDate.value}`);
