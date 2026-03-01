@@ -113,6 +113,125 @@
   .btn.sm{padding:8px 10px; font-size:13px; min-height:36px; border-radius:8px}
 
   @media print{header{display:none!important}.card{border:none;box-shadow:none}}
+
+  /* ============================
+     Icon-only contacts button
+     ============================ */
+  .icon-btn{
+    appearance:none; border:none; background: transparent;
+    color: #3b6cff; /* light theme default */
+    cursor:pointer; border-radius:10px;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:36px; height:36px; padding:0;
+    transition: background .15s ease, color .15s ease, transform .05s ease;
+  }
+  .icon-btn:hover{ background: color-mix(in lab, currentColor 8%, transparent); }
+  .icon-btn:active{ transform: translateY(1px); }
+  .icon-btn:focus-visible{ outline:3px solid #93c5fd; outline-offset: 2px; }
+  .icon-btn .icon{ width:20px; height:20px; display:block; }
+  @media (prefers-color-scheme: dark){
+    .icon-btn{ color:#9db7ff; }
+    .icon-btn:hover{ background: color-mix(in lab, #fff 6%, transparent); }
+  }
+
+  /* ============================
+     Phone input + inline icon
+     ============================ */
+  .phone-field{ display:block; }
+  .phone-adorn{ position:relative; }
+  .phone-adorn .phone-input{ padding-right:44px; } /* space for the icon button */
+  .phone-adorn .icon-btn.inline{
+    position:absolute; right:4px; top:50%; transform:translateY(-50%);
+    width:36px; height:36px; border-radius:10px;
+  }
+
+/* ===============================================
+   Raised Card (filled highlight) segmented control
+   =============================================== */
+.seg-raised{
+  --h: 42px; --pad-x: 16px; --minw: 140px; --radius: 12px; --gap: 8px;
+
+  /* Unselected card surfaces (you can keep your own) */
+  --seg-bg:#f3f4f6;
+  --seg-hover:#ffffff;
+
+  /* Use brand red (same as + Add button) as segment highlight */
+  --segment-highlight: var(--brand);
+
+  /* Selected highlight variable used below */
+  --seg-gold: var(--segment-highlight, #25D366); /* fallback if brand missing */
+  --seg-ink:#ffffff; /* ink on highlight (dark, readable) */
+
+  /* Derived tints for depth */
+  --gold-top: color-mix(in lab, var(--seg-gold) 92%, #fff 8%);
+  --gold-bottom: color-mix(in lab, var(--seg-gold) 78%, #ffffff 22%);
+  --gold-border: color-mix(in lab, var(--seg-gold) 70%, #000 30%);
+  --gold-glow: color-mix(in lab, var(--seg-gold) 35%, transparent);
+
+  display: grid; grid-auto-flow: column; gap: 10px;
+  background: transparent; border: none;
+}
+
+@media (prefers-color-scheme: light){
+  .seg-raised{
+    --seg-bg:#f4f7ff; --seg-hover:#eef3ff; --seg-ink:#052814; /* slightly darker for light mode */
+    --gold-top: color-mix(in lab, var(--seg-gold) 96%, #fff 4%);
+    --gold-bottom: color-mix(in lab, var(--seg-gold) 80%, #ffffff 20%);
+    --gold-border: color-mix(in lab, var(--seg-gold) 65%, #ffffff 35%);
+    --gold-glow: color-mix(in lab, var(--seg-gold) 28%, transparent);
+  }
+}
+
+.seg-raised .seg{
+  position: relative;
+  display:grid; grid-auto-flow: column; align-items:center; justify-content:center;
+  gap: var(--gap); padding: 0 var(--pad-x);
+  min-width: var(--minw); height: var(--h);
+  border-radius: var(--radius);
+  background: var(--seg-bg);
+  color: var(--text);
+  border:1px solid var(--border);
+  cursor:pointer; user-select:none;
+  transition: transform .16s ease, box-shadow .16s ease, color .16s ease, border-color .16s ease, background .16s ease;
+}
+.seg-raised .seg:hover{
+  background: var(--seg-hover);
+  transform: translateY(-1px);
+}
+
+/* Keep radios accessible but visually hidden */
+.seg-raised .seg input[type="radio"]{
+  position: absolute; inline-size:1px; block-size:1px; margin:-1px; padding:0;
+  overflow:hidden; clip: rect(0 0 0 0); white-space:nowrap; border:0;
+}
+
+/* Keyboard focus */
+.seg-raised .seg:has(input[type="radio"]:focus-visible){
+  outline: 3px solid #93c5fd; outline-offset: 3px;
+}
+
+/* Selected card = filled brand highlight (red) */
+.seg-raised .seg:has(input[type="radio"]:checked){
+  background: linear-gradient(180deg, var(--gold-top), var(--gold-bottom));
+  color: var(--seg-ink);
+  border-color: var(--gold-border);
+  box-shadow:
+    0 10px 22px rgba(0,0,0,.26),
+    0 0 0 2px var(--gold-glow) inset,
+    0 1px 0 rgba(255,255,255,.18) inset;
+  transform: translateY(-1px);
+  font-weight: 700;
+}
+
+/* Optional checkmark in selected */
+.seg-raised .check{
+  width: 14px; height: 14px; opacity: 0; transform: scale(.9);
+  transition: opacity .15s ease, transform .15s ease;
+  color: var(--seg-ink);
+}
+.seg-raised .seg:has(input[type="radio"]:checked) .check{
+  opacity: 1; transform: scale(1);
+}
 </style>
 
 <!-- PDF deps -->
@@ -150,30 +269,60 @@
         </div>
         <div>
           <label>Customer WhatsApp (10 digits)</label>
-          <input id="customerPhone" type="tel" inputmode="tel" autocomplete="tel" pattern="[0-9]*" maxlength="10" placeholder="e.g., 9876543210"/>
-          <div id="phoneError" class="error">Enter exactly 10 digits.</div>
 
-          <!-- Pick from Contacts (browser support required) -->
-          <div class="inline-actions">
-            <button type="button" class="btn link sm" id="pickContactBtn">📇 Pick from Contacts</button>
+          <!-- Phone input with inline (end-adornment) contacts icon -->
+          <div class="phone-field">
+            <div class="phone-adorn">
+              <input
+                id="customerPhone"
+                class="phone-input"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                pattern="[0-9]*"
+                maxlength="10"
+                placeholder="e.g., 9876543210"
+              />
+              <button type="button" class="icon-btn inline" id="pickContactBtn" aria-label="Pick from contacts">
+                <!-- Address book icon -->
+                <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M6 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M18 7h2M18 12h2M18 17h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <circle cx="11" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M14.8 16a3.8 3.8 0 0 0-7.6 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <div id="phoneError" class="error">Enter exactly 10 digits.</div>
           </div>
         </div>
       </div>
 
-      <!-- Sale Type (Option B: radios + hidden #saleType) -->
+      <!-- Sale Type: Raised Card (filled highlight) + hidden #saleType -->
       <div class="row cols-2" style="margin-top:8px">
         <div>
           <label>Sale Type</label>
-          <div role="radiogroup" aria-label="Sale Type" style="display:flex;gap:12px;align-items:center">
-            <label style="display:inline-flex;gap:6px;align-items:center">
+
+          <!-- Inline style removed; now inherits --segment-highlight from CSS (brand red) -->
+          <div class="seg-raised" role="radiogroup" aria-label="Sale Type" id="saleTypeGroup">
+            <label class="seg">
               <input type="radio" name="saleTypeRadio" value="Retail" />
-              Retail
+              <span>Retail</span>
+              <!-- Optional check icon -->
+              <svg class="check" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </label>
-            <label style="display:inline-flex;gap:6px;align-items:center">
+
+            <label class="seg">
               <input type="radio" name="saleTypeRadio" value="Wholesale" />
-              Wholesale
+              <span>Wholesale</span>
+              <svg class="check" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </label>
           </div>
+
           <!-- Hidden keeps the same ID so the rest of your code keeps working -->
           <input type="hidden" id="saleType" value="">
           <div class="error"></div>
