@@ -231,7 +231,7 @@
     width:36px; height:36px; border-radius:10px;
   }
 
-  /* ===== Sale Type Segmented (no :has) ===== */
+  /* ===== Sale Type Segmented (start unselected) ===== */
   .seg-raised{
     display: grid; grid-auto-flow: column; gap: 10px;
     background: transparent; border: none;
@@ -242,8 +242,9 @@
     gap: 8px; padding: 0 16px;
     min-width: 140px; height: 42px;
     border-radius: 12px;
-    background: #f4f7ff;
-    color: var(--text);
+    /* Neutral state: no color, transparent bg */
+    background: transparent;
+    color: var(--muted);
     border:1px solid var(--border);
     cursor:pointer; user-select:none;
     transition: transform .16s ease, box-shadow .16s ease, color .16s ease, border-color .16s ease, background .16s ease;
@@ -256,7 +257,7 @@
   /* focus ring */
   .seg-raised .seg:focus-within{ outline: 3px solid #93c5fd; outline-offset: 3px; }
 
-  /* Selected */
+  /* Selected (gets coloured only after click) */
   .seg-raised .seg.active{
     background: linear-gradient(180deg, var(--brand), color-mix(in lab, var(--brand) 78%, #ffffff 22%));
     color: #fff;
@@ -270,7 +271,7 @@
   }
   /* Dark */
   :root[data-theme="dark"] .seg-raised .seg{
-    background:#0f172a; border-color:#334155; color:#e5e7eb;
+    background: transparent; border-color:#334155; color:#9ca3af;
   }
   :root[data-theme="dark"] .seg-raised .seg.active{
     background: linear-gradient(180deg, color-mix(in lab, var(--brand) 90%, #000 10%), color-mix(in lab, var(--brand) 65%, #000 35%));
@@ -346,23 +347,20 @@
       </div>
 
       <!-- Sale Type -->
-      <div class="row cols-2" style="margin-top:8px">
+      <div class="row cols-2" style="margin-top:10px">
         <div>
-          <label>Sale Type</label>
-          <div class="seg-raised" role="radiogroup" aria-label="Sale Type" id="saleTypeGroup">
-            <label class="seg">
-              <input type="radio" name="saleTypeRadio" value="Retail" />
-              <span>Retail</span>
-            </label>
-            <label class="seg">
-              <input type="radio" name="saleTypeRadio" value="Wholesale" />
-              <span>Wholesale</span>
-            </label>
-          </div>
-          <input type="hidden" id="saleType" value="">
-          <div class="error"></div>
-        </div>
-      </div>
+          <label style="margin-bottom:15px">Sale Type</label>
+      <div class="seg-raised" role="radiogroup" aria-label="Sale Type" id="saleTypeGroup">
+        <label class="seg">
+          <input type="radio" name="saleTypeRadio" value="Retail" />
+          <span>Retail</span>
+        </label>
+        <label class="seg">
+          <input type="radio" name="saleTypeRadio" value="Wholesale" />
+          <span>Wholesale</span>
+        </label>
+      </div></div>
+      <input type="hidden" id="saleType" value="">
     </div>
 
     <!-- Items -->
@@ -468,7 +466,7 @@
             </svg>
             <!-- Sending -->
             <svg class="icon-send" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M2.01 3.87a1 1 0 0 1 1.2-.16l18 10a1 1 0  0 1 0 1.78l-18 10a1 1 0 0 1-1.43-1.13l2.22-7.76 8.1-2-8.1-2-2.22-7.76a1 1 0 0 1 .23-.97Z"/>
+              <path fill="currentColor" d="M2.01 3.87a1 1 0 0 1 1.2-.16l18 10a1 1 0 0 1 0 1.78l-18 10a1 1 0 0 1-1.43-1.13l2.22-7.76 8.1-2-8.1-2-2.22-7.76a1 1 0 0 1 .23-.97Z"/>
             </svg>
           </span>
 
@@ -588,7 +586,7 @@
     vcfBtn: document.getElementById('vcfBtn'),
   };
 
-  // ===== Sale Type segments: .active toggling & persistence =====
+  // ===== Sale Type segments: start unselected, set active only on click (no localStorage restore) =====
   (function wireSaleTypeSegments(){
     const group = document.getElementById('saleTypeGroup');
     if (!group) return;
@@ -607,22 +605,17 @@
       }
     }
 
-    // Restore saved selection
-    try{
-      const saved = localStorage.getItem('nusrat.saleType');
-      if (saved) {
-        setActiveByValue(saved);
-        const match = radios.find(r => r.value === saved);
-        if (match) match.checked = true;
-      }
-    }catch(_){}
+    // Ensure nothing is checked on load (initially no colour)
+    radios.forEach(r => { r.checked = false; });
+    els.saleType.value = '';
+    labels.forEach(l => l.classList.remove('active'));
 
-    // Change handler
+    // Change handler (activate on click)
     radios.forEach(radio => {
       radio.addEventListener('change', () => {
         if (radio.checked){
           setActiveByValue(radio.value);
-          try { localStorage.setItem('nusrat.saleType', radio.value); } catch(_) {}
+          // no persistence to localStorage to keep future loads unselected
           persist(); // keep consistent with other state saves
         }
       });
@@ -965,7 +958,7 @@
 
     const lines=[];
     lines.push(`<tr><td>Subtotal</td><td style="text-align:right">₹${subtotal.toFixed(2)}</td></tr>`);
-    if (gstRate>0 && gstAmt>0) lines.push(`<tr><td>GST ${gstRate}%</td><td style="text-align:right">₹${gstAmt.toFixed(2)}</td></tr>`);
+    if (gstRate>0 && gstAmt > 0) lines.push(`<tr><td>GST ${gstRate}%</td><td style="text-align:right">₹${gstAmt.toFixed(2)}</td></tr>`);
     if (flat>0) lines.push(`<tr><td>Discount</td><td style="text-align:right">-₹${flat.toFixed(2)}</td></tr>`);
     lines.push(`<tr><td><b>Grand Total</b></td><td style="text-align:right"><b>₹${grand.toFixed(2)}</b></td></tr>`);
     if (els.paymentMode.value) lines.push(`<tr><td>Payment Mode</td><td style="text-align:right">${els.paymentMode.value}</td></tr>`);
