@@ -1,16 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-theme="light">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Nusrat Enterprises — Invoice (Very Compact Vertical)</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nusrat Enterprises — Invoice (Vertical + WA Staged Flow + Fixed Sale Type)</title>
 
 <style>
   :root{
-    --brand:#b91c1c;--brand-2:#7f1d1d;--bg:#fafafa;--text:#111827;--muted:#6b7280;
+    --brand:#b91c1c;--brand-2:#7f1d1d;
+    --bg:#fafafa;--text:#111827;--muted:#6b7280;
     --card:#fff;--border:#e5e7eb;--soft:#fff1f2;
     --font:14px; --pad:10px; --gap:8px; --radius:12px;
+    --btn-ghost-bg:#f3f4f6; --btn-ghost-ink:#111827;
+    --link:#1d4ed8;
   }
+  /* Dark mode */
+  :root[data-theme="dark"]{
+    --bg:#0b0f17; --text:#f9fafb; --muted:#9ca3af;
+    --card:#111827; --border:#1f2937; --soft:#2a1a1c;
+    --btn-ghost-bg:#1f2937; --btn-ghost-ink:#e5e7eb;
+    --link:#93c5fd;
+  }
+
   *{box-sizing:border-box; min-width:0}
   html,body{
     min-height:100%;
@@ -21,18 +32,21 @@
     font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
     font-size:var(--font)
   }
+  a{ color:var(--link) }
+
   header{
-    background:#fff;
+    background:var(--card);
     border:1px solid var(--border);
     border-radius:var(--radius);
     box-shadow:0 6px 20px rgba(0,0,0,.06);
-    padding:16px 14px 18px 14px;
+    padding:12px 14px 14px 14px;
     margin:10px auto;
     max-width:720px;
   }
+  .hdr-row{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
   h1{margin:0;font-weight:800;font-size:1.2rem;color:var(--brand-2)}
-  .header-meta{margin-top:6px;font-size:.92rem;color:#374151}
-  .header-addr{margin-top:4px;font-size:.9rem;color:#374151}
+  .header-meta{margin-top:6px;font-size:.92rem;color:var(--muted)}
+  .header-addr{margin-top:4px;font-size:.9rem;color:var(--muted)}
 
   .container{max-width:720px;margin:10px auto 80px;padding:0 10px}
   .card{
@@ -45,204 +59,241 @@
   h2{margin:4px 0 8px;color:var(--brand-2);font-size:1.02rem}
 
   label{display:block;font-weight:700;font-size:.88rem;margin-bottom:6px}
-  input,select,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff}
+  input,select,textarea{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff;color:#111827}
+  :root[data-theme="dark"] input,
+  :root[data-theme="dark"] select,
+  :root[data-theme="dark"] textarea{ background:#0f172a;color:#e5e7eb;border-color:#334155 }
+  input::placeholder, textarea::placeholder{ color:#9ca3af }
   input[disabled],textarea[disabled]{background:#f9fafb;color:#6b7280}
+  :root[data-theme="dark"] input[disabled],
+  :root[data-theme="dark"] textarea[disabled]{background:#0b1220;color:#6b7280}
+
   textarea{resize:vertical;min-height:48px}
   .row{display:grid;gap:var(--gap)}
   .cols-2{grid-template-columns:1fr 1fr}
   @media(max-width:600px){.cols-2{grid-template-columns:1fr}}
   .error{color:#b91c1c;font-size:.82rem;margin-top:4px;display:none}
 
-  .actions-card{padding:16px;border-radius:var(--radius);background:#ffffff;border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,0.06)}
+  .actions-card{padding:16px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);box-shadow:0 4px 16px rgba(0,0,0,0.06)}
   .action-buttons{display:grid;gap:8px;grid-template-columns:1fr}
   .btn{
     appearance:none;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;
     padding:11px 14px;border-radius:10px;font-size:15px;font-weight:700;transition:all .2s ease;text-decoration:none;line-height:1.1;min-height:44px;
-    box-shadow:0 1px 0 rgba(0,0,0,0.03)
+    box-shadow:0 1px 0 rgba(0,0,0,0.03); color:#fff;
   }
   .btn:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
-  .btn.primary{background:#25D366;color:#fff;box-shadow:0 6px 16px rgba(37,211,102,0.28)}
-  .btn.outline{border:2px solid #1d4ed8;color:#1d4ed8;background:transparent}
-  .btn.ghost{background:#f3f4f6;color:#111827}
+  .btn.primary{background:#25D366;box-shadow:0 6px 16px rgba(37,211,102,0.28)}
+  .btn.outline{border:2px solid #1d4ed8;background:transparent;color:#1d4ed8}
+  :root[data-theme="dark"] .btn.outline{border-color:#93c5fd;color:#93c5fd}
+  .btn.ghost{background:var(--btn-ghost-bg);color:var(--btn-ghost-ink)}
   .btn.link{background:#fff;border:1px solid var(--border);color:#111827}
-  .btn.danger{background:#991b1b;color:#fff}
+  :root[data-theme="dark"] .btn.link{background:#0f172a;color:#e5e7eb;border-color:#334155}
+  .btn.danger{background:#991b1b}
 
-  /* Spinner */
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .spinner{
-    width:16px;height:16px;border-radius:999px;border:2px solid currentColor;border-top-color:transparent;
-    display:none; animation:spin .9s linear infinite;
-  }
-  .btn.loading{opacity:.85; cursor:wait}
-  .btn.loading .spinner{display:inline-block}
-  .btn .btn-text{display:inline-block}
-  .btn.loading .btn-text{opacity:.9}
-  .btn .btn-icon{display:inline-block}
-
-  .print-header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
-  .print-title{font-size:1.15rem;font-weight:800;color:#7f1d1d}
-  .print-meta{font-size:.92rem;color:#374151}
-
-  .items-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-  .items-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-
-  .quickline{display:flex;gap:8px;align-items:center}
-  .quickline input{flex:1}
-
-  .item{border:1px solid var(--border);border-radius:10px;background:#fff;padding:8px 8px}
-  .item .top{display:flex;align-items:center;gap:8px}
-  .item .top .type{flex:0 0 34%}
-  .item .top .name{flex:1}
-  .item .top .del{flex:0 0 auto}
-
-  .item .bot{display:flex;align-items:center;gap:8px;margin-top:6px}
-  .stepper{display:inline-flex;align-items:center;gap:6px}
-  .stepper .sbtn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:#fff;font-weight:900}
-  .qty{width:60px;text-align:center}
-  .rate{flex:1.2}
-  .amt{margin-left:auto;font-weight:800}
-
-  .container, .card, .items-list, .item, .top, .bot{max-width:100%; overflow-x:hidden}
+  /* FAB */
   .fab{
     position:fixed; right:14px; bottom:14px; z-index:30;
     background:var(--brand); color:#fff; border:none; border-radius:999px; padding:12px 16px;
     box-shadow:0 8px 20px rgba(0,0,0,.25); font-weight:800; font-size:16px;
   }
 
-  .inline-actions{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
-  .btn.sm{padding:8px 10px; font-size:13px; min-height:36px; border-radius:8px}
+  .items-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .items-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .item{border:1px solid var(--border);border-radius:10px;background:var(--card);padding:8px 8px}
+  .item .top{display:flex;align-items:center;gap:8px}
+  .item .top .type{flex:0 0 34%}
+  .item .top .name{flex:1}
+  .item .top .del{flex:0 0 auto}
+  .item .bot{display:flex;align-items:center;gap:8px;margin-top:6px}
+  .stepper{display:inline-flex;align-items:center;gap:6px}
+  .stepper .sbtn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:#fff;font-weight:900}
+  :root[data-theme="dark"] .stepper .sbtn{background:#0f172a;border-color:#334155;color:#e5e7eb}
+  .qty{width:60px;text-align:center}
+  .rate{flex:1.2}
+  .amt{margin-left:auto;font-weight:800}
+
+  .print-header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+  .print-title{font-size:1.15rem;font-weight:800;color:#7f1d1d}
+  .print-meta{font-size:.92rem;color:var(--muted)}
 
   @media print{header{display:none!important}.card{border:none;box-shadow:none}}
 
-  /* ============================
-     Icon-only contacts button
-     ============================ */
+  /* ============== WhatsApp staged button (from your sample) ============== */
+  :root{
+    --wa-green: #25D366;
+    --wa-green-dark: #1fb656;
+    --btn-text: #013b1a;
+    --wa-focus: 0 0 0 3px rgba(37, 211, 102, 0.35);
+    --stage-icon-size: 16px;
+    --wa-icon-size: 18px;
+    --wa-gap: 10px;
+    --easing: cubic-bezier(.2,.7,.2,1);
+  }
+  .wa-btn{
+    display: inline-grid;
+    grid-auto-flow: column;
+    align-items: center;
+    gap: var(--wa-gap);
+    min-height: 44px;
+    padding: 12px 16px;
+    background: var(--wa-green);
+    color: var(--btn-text);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: .2px;
+    user-select: none;
+    transition: background .18s ease, transform .04s ease;
+    position: relative;
+    box-shadow: 0 1px 0 #00000008, 0 1px 10px #0d3b2414, inset 0 -1px 0 #0000000f;
+  }
+  .wa-btn:hover{ background: var(--wa-green-dark); }
+  .wa-btn:active{ transform: translateY(1px); }
+  .wa-btn:focus-visible{ outline: none; box-shadow: var(--wa-focus); }
+  .wa-btn.is-saving,
+  .wa-btn.is-downloading,
+  .wa-btn.is-sending,
+  .wa-btn.is-success{ pointer-events: none; }
+
+  .wa-icon{
+    width: var(--wa-icon-size); height: var(--wa-icon-size);
+    display: inline-block; color: #012f17;
+    opacity: 1; transition: opacity .18s ease;
+  }
+  .wa-btn.is-saving   .wa-icon,
+  .wa-btn.is-downloading .wa-icon,
+  .wa-btn.is-sending  .wa-icon,
+  .wa-btn.is-success  .wa-icon{ opacity:0; width:0; height:0; overflow:hidden; }
+
+  .wa-label{ min-width:8ch; white-space:nowrap; display:inline-grid; grid-auto-flow:column; align-items:center }
+  .wa-label .text-default{ display:inline; }
+  .wa-label .text-saving,
+  .wa-label .text-downloading,
+  .wa-label .text-sending,
+  .wa-label .text-success{ display:none; }
+  .wa-btn.is-saving .text-default{ display:none; }
+  .wa-btn.is-saving .text-saving{ display:inline; }
+  .wa-btn.is-downloading .text-default{ display:none; }
+  .wa-btn.is-downloading .text-downloading{ display:inline; }
+  .wa-btn.is-sending .text-default{ display:none; }
+  .wa-btn.is-sending .text-sending{ display:inline; }
+  .wa-btn.is-success .text-default{ display:none; }
+  .wa-btn.is-success .text-success{ display:inline; }
+
+  .stage-icon{ position:relative; width:var(--stage-icon-size); height:var(--stage-icon-size); display:inline-block }
+  .stage-icon svg{
+    position:absolute; inset:0; width:100%; height:100%;
+    opacity:0; transform:translateY(6px) scale(.92);
+    transition: opacity .22s var(--easing), transform .26s var(--easing);
+    will-change: opacity, transform; color:#fff;
+  }
+  .wa-btn.is-saving      .stage-icon .icon-save,
+  .wa-btn.is-downloading .stage-icon .icon-download,
+  .wa-btn.is-sending     .stage-icon .icon-send{
+    opacity:1; transform:translateY(0) scale(1);
+  }
+
+  .spinner{
+    width: var(--stage-icon-size); height: var(--stage-icon-size);
+    border-radius: 50%;
+    border: 2px solid #ffffffaa; border-top-color:#fff;
+    animation:spin .8s linear infinite; display:none;
+  }
+  .wa-btn.is-saving .spinner,
+  .wa-btn.is-downloading .spinner,
+  .wa-btn.is-sending .spinner{ display:inline-block; }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+
+  .success-check{ width:var(--stage-icon-size); height:var(--stage-icon-size); display:none; color:#fff }
+  .wa-btn.is-success .stage-icon{ display:none; }
+  .wa-btn.is-success .spinner{ display:none; }
+  .wa-btn.is-success .success-check{ display:inline-block; animation:pop-in .28s var(--easing); }
+  @keyframes pop-in{ 0%{ transform:scale(.6); opacity:0 } 60%{ transform:scale(1.08); opacity:1 } 100%{ transform:scale(1) } }
+
+  /* Icon-only contact button */
   .icon-btn{
-    appearance:none; border:none; background: transparent;
-    color: #3b6cff; /* light theme default */
-    cursor:pointer; border-radius:10px;
-    display:inline-flex; align-items:center; justify-content:center;
-    width:36px; height:36px; padding:0;
-    transition: background .15s ease, color .15s ease, transform .05s ease;
+    appearance:none; border:none; background: transparent; color: var(--link);
+    cursor:pointer; border-radius:10px; display:inline-flex; align-items:center; justify-content:center;
+    width:36px; height:36px; padding:0; transition: background .15s ease, color .15s ease, transform .05s ease;
   }
   .icon-btn:hover{ background: color-mix(in lab, currentColor 8%, transparent); }
   .icon-btn:active{ transform: translateY(1px); }
-  .icon-btn:focus-visible{ outline:3px solid #93c5fd; outline-offset: 2px; }
+  .icon-btn:focus-visible{ outline:3px solid #93c5fd; outline-offset:2px; }
   .icon-btn .icon{ width:20px; height:20px; display:block; }
-  @media (prefers-color-scheme: dark){
-    .icon-btn{ color:#9db7ff; }
-    .icon-btn:hover{ background: color-mix(in lab, #fff 6%, transparent); }
-  }
 
-  /* ============================
-     Phone input + inline icon
-     ============================ */
+  /* Phone adorn */
   .phone-field{ display:block; }
   .phone-adorn{ position:relative; }
-  .phone-adorn .phone-input{ padding-right:44px; } /* space for the icon button */
+  .phone-adorn .phone-input{ padding-right:44px; }
   .phone-adorn .icon-btn.inline{
     position:absolute; right:4px; top:50%; transform:translateY(-50%);
     width:36px; height:36px; border-radius:10px;
   }
 
-/* ===============================================
-   Raised Card (filled highlight) segmented control
-   =============================================== */
-.seg-raised{
-  --h: 42px; --pad-x: 16px; --minw: 140px; --radius: 12px; --gap: 8px;
-
-  /* Unselected card surfaces (you can keep your own) */
-  --seg-bg:#f3f4f6;
-  --seg-hover:#ffffff;
-
-  /* Use brand red (same as + Add button) as segment highlight */
-  --segment-highlight: var(--brand);
-
-  /* Selected highlight variable used below */
-  --seg-gold: var(--segment-highlight, #25D366); /* fallback if brand missing */
-  --seg-ink:#ffffff; /* ink on highlight (dark, readable) */
-
-  /* Derived tints for depth */
-  --gold-top: color-mix(in lab, var(--seg-gold) 92%, #fff 8%);
-  --gold-bottom: color-mix(in lab, var(--seg-gold) 78%, #ffffff 22%);
-  --gold-border: color-mix(in lab, var(--seg-gold) 70%, #000 30%);
-  --gold-glow: color-mix(in lab, var(--seg-gold) 35%, transparent);
-
-  display: grid; grid-auto-flow: column; gap: 10px;
-  background: transparent; border: none;
-}
-
-@media (prefers-color-scheme: light){
+  /* ===== Sale Type Segmented (no :has) ===== */
   .seg-raised{
-    --seg-bg:#f4f7ff; --seg-hover:#eef3ff; --seg-ink:#052814; /* slightly darker for light mode */
-    --gold-top: color-mix(in lab, var(--seg-gold) 96%, #fff 4%);
-    --gold-bottom: color-mix(in lab, var(--seg-gold) 80%, #ffffff 20%);
-    --gold-border: color-mix(in lab, var(--seg-gold) 65%, #ffffff 35%);
-    --gold-glow: color-mix(in lab, var(--seg-gold) 28%, transparent);
+    display: grid; grid-auto-flow: column; gap: 10px;
+    background: transparent; border: none;
   }
-}
+  .seg-raised .seg{
+    position: relative;
+    display:grid; grid-auto-flow: column; align-items:center; justify-content:center;
+    gap: 8px; padding: 0 16px;
+    min-width: 140px; height: 42px;
+    border-radius: 12px;
+    background: #f4f7ff;
+    color: var(--text);
+    border:1px solid var(--border);
+    cursor:pointer; user-select:none;
+    transition: transform .16s ease, box-shadow .16s ease, color .16s ease, border-color .16s ease, background .16s ease;
+  }
+  .seg-raised .seg:hover{ transform: translateY(-1px); }
+  .seg-raised .seg input[type="radio"]{
+    position: absolute; inline-size:1px; block-size:1px; margin:-1px; padding:0;
+    overflow:hidden; clip: rect(0 0 0 0); white-space:nowrap; border:0;
+  }
+  /* focus ring */
+  .seg-raised .seg:focus-within{ outline: 3px solid #93c5fd; outline-offset: 3px; }
 
-.seg-raised .seg{
-  position: relative;
-  display:grid; grid-auto-flow: column; align-items:center; justify-content:center;
-  gap: var(--gap); padding: 0 var(--pad-x);
-  min-width: var(--minw); height: var(--h);
-  border-radius: var(--radius);
-  background: var(--seg-bg);
-  color: var(--text);
-  border:1px solid var(--border);
-  cursor:pointer; user-select:none;
-  transition: transform .16s ease, box-shadow .16s ease, color .16s ease, border-color .16s ease, background .16s ease;
-}
-.seg-raised .seg:hover{
-  background: var(--seg-hover);
-  transform: translateY(-1px);
-}
-
-/* Keep radios accessible but visually hidden */
-.seg-raised .seg input[type="radio"]{
-  position: absolute; inline-size:1px; block-size:1px; margin:-1px; padding:0;
-  overflow:hidden; clip: rect(0 0 0 0); white-space:nowrap; border:0;
-}
-
-/* Keyboard focus */
-.seg-raised .seg:has(input[type="radio"]:focus-visible){
-  outline: 3px solid #93c5fd; outline-offset: 3px;
-}
-
-/* Selected card = filled brand highlight (red) */
-.seg-raised .seg:has(input[type="radio"]:checked){
-  background: linear-gradient(180deg, var(--gold-top), var(--gold-bottom));
-  color: var(--seg-ink);
-  border-color: var(--gold-border);
-  box-shadow:
-    0 10px 22px rgba(0,0,0,.26),
-    0 0 0 2px var(--gold-glow) inset,
-    0 1px 0 rgba(255,255,255,.18) inset;
-  transform: translateY(-1px);
-  font-weight: 700;
-}
-
-/* Optional checkmark in selected */
-.seg-raised .check{
-  width: 14px; height: 14px; opacity: 0; transform: scale(.9);
-  transition: opacity .15s ease, transform .15s ease;
-  color: var(--seg-ink);
-}
-.seg-raised .seg:has(input[type="radio"]:checked) .check{
-  opacity: 1; transform: scale(1);
-}
+  /* Selected */
+  .seg-raised .seg.active{
+    background: linear-gradient(180deg, var(--brand), color-mix(in lab, var(--brand) 78%, #ffffff 22%));
+    color: #fff;
+    border-color: color-mix(in lab, var(--brand) 70%, #000 30%);
+    box-shadow:
+      0 10px 22px rgba(0,0,0,.26),
+      0 0 0 2px color-mix(in lab, var(--brand) 30%, transparent) inset,
+      0 1px 0 rgba(255,255,255,.18) inset;
+    transform: translateY(-1px);
+    font-weight: 700;
+  }
+  /* Dark */
+  :root[data-theme="dark"] .seg-raised .seg{
+    background:#0f172a; border-color:#334155; color:#e5e7eb;
+  }
+  :root[data-theme="dark"] .seg-raised .seg.active{
+    background: linear-gradient(180deg, color-mix(in lab, var(--brand) 90%, #000 10%), color-mix(in lab, var(--brand) 65%, #000 35%));
+    border-color: color-mix(in lab, var(--brand) 55%, #000 45%);
+    color:#fff;
+  }
 </style>
 
-<!-- PDF deps -->
+<!-- PDF deps (correct) -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
 <header>
-  <h1>Nusrat Enterprises — Invoice</h1>
-  <div class="header-meta">📞 7978830017 • 9330066455 • 9040366455</div>
-  <div class="header-addr">📍 Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014</div>
+  <div class="hdr-row">
+    <div>
+      <h1>Nusrat Enterprises — Invoice</h1>
+      <div class="header-meta">📞 7978830017 • 9330066455 • 9040366455</div>
+      <div class="header-addr">📍 Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014</div>
+    </div>
+    <!-- Dark mode toggle -->
+    <button id="themeToggle" type="button" class="btn ghost" style="min-width:120px">🌙 Dark Mode</button>
+  </div>
 </header>
 
 <div class="container">
@@ -257,7 +308,6 @@
         </div>
         <div>
           <label>Date</label>
-          <!-- locked (disabled) -->
           <input id="invoiceDate" type="date" disabled />
         </div>
       </div>
@@ -269,8 +319,6 @@
         </div>
         <div>
           <label>Customer WhatsApp (10 digits)</label>
-
-          <!-- Phone input with inline (end-adornment) contacts icon -->
           <div class="phone-field">
             <div class="phone-adorn">
               <input
@@ -284,7 +332,6 @@
                 placeholder="e.g., 9876543210"
               />
               <button type="button" class="icon-btn inline" id="pickContactBtn" aria-label="Pick from contacts">
-                <!-- Address book icon -->
                 <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="M6 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.5"/>
                   <path d="M18 7h2M18 12h2M18 17h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -298,32 +345,20 @@
         </div>
       </div>
 
-      <!-- Sale Type: Raised Card (filled highlight) + hidden #saleType -->
+      <!-- Sale Type -->
       <div class="row cols-2" style="margin-top:8px">
         <div>
           <label>Sale Type</label>
-
-          <!-- Inline style removed; now inherits --segment-highlight from CSS (brand red) -->
           <div class="seg-raised" role="radiogroup" aria-label="Sale Type" id="saleTypeGroup">
             <label class="seg">
               <input type="radio" name="saleTypeRadio" value="Retail" />
               <span>Retail</span>
-              <!-- Optional check icon -->
-              <svg class="check" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
             </label>
-
             <label class="seg">
               <input type="radio" name="saleTypeRadio" value="Wholesale" />
               <span>Wholesale</span>
-              <svg class="check" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
             </label>
           </div>
-
-          <!-- Hidden keeps the same ID so the rest of your code keeps working -->
           <input type="hidden" id="saleType" value="">
           <div class="error"></div>
         </div>
@@ -334,18 +369,17 @@
     <div class="card">
       <div class="items-head">
         <h2>Items</h2>
-        <!-- Clear Items -->
         <button type="button" class="btn link" id="clearItemsBtn">🧹 Clear Items</button>
       </div>
 
-      <!-- Quickline form -->
-      <form id="quicklineForm" class="quickline" style="margin-bottom:8px">
+      <form id="quicklineForm" class="quickline" style="margin-bottom:8px; display:flex; gap:8px; align-items:center">
         <input
           id="quickline"
           placeholder="Quick add: Item  Qty  Rate  →  e.g., Shirt 2 300"
           autocomplete="off"
           enterkeyhint="done"
           aria-label="Quick add item line"
+          style="flex:1"
         />
         <button type="submit" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">Submit</button>
       </form>
@@ -405,23 +439,67 @@
     <div class="card actions-card">
       <h2>Actions</h2>
       <div class="action-buttons">
-        <!-- WhatsApp with spinner -->
-        <button type="button" class="btn primary" id="whatsAppBtn">
-          <span class="btn-icon" aria-hidden="true">💬</span>
-          <span class="btn-text">WhatsApp</span>
+
+        <!-- WhatsApp staged flow button -->
+        <button id="whatsAppBtn" class="wa-btn" type="button" aria-live="polite">
+          <!-- Left: WA icon (idle only) -->
+          <svg class="wa-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="currentColor" d="M20.52 3.48A11.78 11.78 0 0 0 12.04 0C5.49 0 .19 5.3.19 11.85c0 2.09.55 4.05 1.6 5.81L0 24l6.5-1.71a11.73 11.73 0 0 0 5.49 1.4h.01c6.55 0 11.85-5.3 11.85-11.85 0-3.17-1.23-6.15-3.33-8.35zM12 21.33h-.01a9.7 9.7 0 0 1-4.95-1.35l-.35-.2-3.86 1.02 1.03-3.76-.23-.39a9.7 9.7 0 0 1-1.47-5.17C2.16 6.46 6.46 2.16 12 2.16c2.6 0 5.05 1.01 6.89 2.85a9.66 9.66 0 0 1 2.84 6.89c0 5.54-4.3 9.44-9.73 9.43zM17.3 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.23-.65.08-.3-.15-1.29-.48-2.45-1.53-.9-.8-1.5-1.78-1.68-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.53.08-.8.38-.27.3-1.05 1.03-1.05 2.51 0 1.48 1.08 2.91 1.23 3.11.15.2 2.12 3.23 5.14 4.53.72.31 1.28.5 1.72.64.72.23 1.38.2 1.9.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.17-1.41-.08-.13-.27-.2-.57-.35z"/>
+          </svg>
+
+          <!-- Center: dynamic label -->
+          <span class="wa-label">
+            <span class="text-default">WhatsApp</span>
+            <span class="text-saving" aria-hidden="true">Saving…</span>
+            <span class="text-downloading" aria-hidden="true">Downloading…</span>
+            <span class="text-sending" aria-hidden="true">Sending…</span>
+            <span class="text-success" aria-hidden="true">Sent!</span>
+          </span>
+
+          <!-- Right: stage icon stack -->
+          <span class="stage-icon" aria-hidden="true">
+            <!-- Saving -->
+            <svg class="icon-save" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4ZM7 5h8v4H7V5Zm5 14a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/>
+            </svg>
+            <!-- Downloading -->
+            <svg class="icon-download" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42L11 12.6V4a1 1 0 0 1 1-1Zm-7 14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1a1 1 0 1 1 2 0v1a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-1a1 1 0 1 1 2 0v1Z"/>
+            </svg>
+            <!-- Sending -->
+            <svg class="icon-send" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M2.01 3.87a1 1 0 0 1 1.2-.16l18 10a1 1 0  0 1 0 1.78l-18 10a1 1 0 0 1-1.43-1.13l2.22-7.76 8.1-2-8.1-2-2.22-7.76a1 1 0 0 1 .23-.97Z"/>
+            </svg>
+          </span>
+
+          <!-- Furthest right: spinner -->
           <span class="spinner" aria-hidden="true"></span>
+
+          <!-- Success check -->
+          <span class="success-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="100%" height="100%">
+              <circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-opacity=".85" stroke-width="2"/>
+              <path d="M7 12.5l3.2 3.2L17 9.8" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
         </button>
 
-        <button type="button" class="btn outline" id="printBtn">🖨️ Print</button>
+        <!-- PDF -->
+        <button type="button" class="btn outline" id="printBtn">🖨️ Print / PDF</button>
         <button type="button" class="btn ghost" id="previewBtn">👁️ Preview</button>
         <button type="button" class="btn ghost" id="copyTextBtn">📋 Copy Summary</button>
 
-        <!-- Save to Google Sheet with spinner -->
+        
+        <!-- Optional: Manual VCF download -->
+        <button type="button" class="btn ghost" id="vcfBtn">👤 Download .vcf</button>
+
+        <!-- Save to Google Sheet -->
         <button type="button" class="btn primary" id="saveToSheetBtn">
           <span class="btn-icon" aria-hidden="true">📑</span>
           <span class="btn-text">Save to Google Sheet</span>
-          <span class="spinner" aria-hidden="true"></span>
+          <span class="spinner" aria-hidden="true" style="display:none"></span>
         </button>
+        
       </div>
     </div>
 
@@ -433,26 +511,44 @@
   </div>
 </div>
 
-<!-- Offscreen PDF render target -->
-<div id="monoRender" style="position:absolute;left:-99999px;top:0;width:0;height:0;overflow:hidden;opacity:0;pointer-events:none;visibility:hidden;"></div>
+<!-- Offscreen PDF render target (visible but off-screen) -->
+<div id="monoRender" style="position:fixed; left:-10000px; top:0; opacity:0; pointer-events:none; visibility:visible; z-index:-1;"></div>
 
 <!-- Floating Add button -->
 <button type="button" class="fab" id="fabAdd">+ Add</button>
 
 <script>
 (function(){
-  // ====== Config ======
+  // ===== Theme =====
+  const THEME_KEY='nusrat.theme';
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); }
+  function curTheme(){ return document.documentElement.getAttribute('data-theme') || 'light'; }
+  function updateThemeBtn(){
+    const b=document.getElementById('themeToggle'); const isDark = curTheme()==='dark';
+    b.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+  }
+  (function initTheme(){
+    const saved = localStorage.getItem(THEME_KEY);
+    applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+    updateThemeBtn();
+  })();
+  document.getElementById('themeToggle').addEventListener('click', ()=>{
+    const next = curTheme()==='dark' ? 'light' : 'dark';
+    applyTheme(next); localStorage.setItem(THEME_KEY, next); updateThemeBtn();
+  });
+
+  // ===== Config =====
   const LINKS = {
     instagram: "https://www.instagram.com/nusrat_enterprises/",
     waChannel: "https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06",
     googleFeedback: "https://maps.app.goo.gl/4S4U5DYizVB3ZeZj6"
   };
-  // Use your current deployment URL; update if you redeploy and URL changes
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwFcSGSZjTmUtxWtyxnK1fnRWH9uNPZA7VRdd1jr1uT73h-y-eHfOgTQ11u34Ambeyo/exec';
   const AUTH_TOKEN  = '9705322252';
   const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Formal Pant","Track","Half Pant","Under Wear","Vest"];
 
-  // ====== Elements ======
+  // ===== Elements =====
   const els={
     itemsList:document.getElementById('itemsList'),
     quickline:document.getElementById('quickline'),
@@ -483,44 +579,88 @@
     invoicePreview:document.getElementById('invoicePreview'),
     monoRender:document.getElementById('monoRender'),
 
-    // Buttons
     whatsAppBtn: document.getElementById('whatsAppBtn'),
     saveBtn: document.getElementById('saveToSheetBtn'),
     printBtn: document.getElementById('printBtn'),
     previewBtn: document.getElementById('previewBtn'),
     copyBtn: document.getElementById('copyTextBtn'),
     clearItemsBtn: document.getElementById('clearItemsBtn'),
+    vcfBtn: document.getElementById('vcfBtn'),
   };
 
-  // ====== Helpers ======
+  // ===== Sale Type segments: .active toggling & persistence =====
+  (function wireSaleTypeSegments(){
+    const group = document.getElementById('saleTypeGroup');
+    if (!group) return;
+
+    const labels = Array.from(group.querySelectorAll('label.seg'));
+    const radios  = Array.from(group.querySelectorAll('input[type="radio"][name="saleTypeRadio"]'));
+
+    function setActiveByValue(val){
+      labels.forEach(l => l.classList.remove('active'));
+      const match = radios.find(r => r.value === val);
+      if (match){
+        const label = match.closest('label.seg');
+        if (label) label.classList.add('active');
+        const hidden = document.getElementById('saleType');
+        if (hidden) hidden.value = val;
+      }
+    }
+
+    // Restore saved selection
+    try{
+      const saved = localStorage.getItem('nusrat.saleType');
+      if (saved) {
+        setActiveByValue(saved);
+        const match = radios.find(r => r.value === saved);
+        if (match) match.checked = true;
+      }
+    }catch(_){}
+
+    // Change handler
+    radios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        if (radio.checked){
+          setActiveByValue(radio.value);
+          try { localStorage.setItem('nusrat.saleType', radio.value); } catch(_) {}
+          persist(); // keep consistent with other state saves
+        }
+      });
+    });
+  })();
+
+  // ===== Helpers =====
   const pad2=n=>String(n).padStart(2,'0');
   function genInvoice(){ const d=new Date(); return `${pad2(d.getDate())}${pad2(d.getMonth()+1)}${d.getFullYear()}${pad2(d.getHours())}${pad2(d.getMinutes())}`; }
   function toNumber(v){ const n=parseFloat(v); return Number.isFinite(n) ? n : 0; }
   function fit(text, len){ let t=String(text||'').replace(/\s+/g,' ').trim(); return t.length>len ? t.slice(0,len-1)+'…' : t.padEnd(len,' '); }
   function p2(n, width){ return String(n.toFixed(2)).padStart(width,' '); }
-  const RECEIPT_MM = 107; const mmToPx = mm => Math.round(mm * 96 / 25.4);
 
-  // Button loading UX helper
+  const RECEIPT_MM = 107;
+  const mmToPx = mm => Math.round(mm * 96 / 25.4);
+  const mmToPt = mm => (mm * 72 / 25.4);
+
   function setBtnLoading(btn, loading, loadingText, normalText){
     if(!btn) return;
     const textEl = btn.querySelector('.btn-text');
+    const spin = btn.querySelector('.spinner');
     if(loading){
-      btn.classList.add('loading');
-      btn.disabled = true;
+      btn.classList.add('loading'); btn.disabled = true;
       if (textEl && loadingText) textEl.textContent = loadingText;
+      if (spin) spin.style.display='inline-block';
     } else {
-      btn.classList.remove('loading');
-      btn.disabled = false;
+      btn.classList.remove('loading'); btn.disabled = false;
       if (textEl && normalText) textEl.textContent = normalText;
+      if (spin) spin.style.display='none';
     }
   }
 
-  // ====== Init ======
+  // ===== Init header values =====
   els.invoiceNumber.value = genInvoice();
   const today = new Date();
   els.invoiceDate.value = `${today.getFullYear()}-${pad2(today.getMonth()+1)}-${pad2(today.getDate())}`;
 
-  // Phone numeric (10 digits only)
+  // Phone input (10 digits strict)
   els.customerPhone.addEventListener('input', (e)=>{
     e.target.value = e.target.value.replace(/\D/g,'').slice(0,10);
     validatePhone();
@@ -531,20 +671,17 @@
     return ok;
   }
 
-  // Contact Picker API for phone (mobile Chrome/Edge on HTTPS)
+  // Contact Picker
   els.pickContactBtn.addEventListener('click', async ()=>{
     try{
       if (!('contacts' in navigator) || !('select' in navigator.contacts)) {
-        alert('Your browser does not support picking contacts. Try Chrome on Android with HTTPS.');
+        alert('Contact picking is not supported on this browser. Try Chrome on Android with HTTPS.');
         return;
       }
-      const props = ['name','tel'];
-      const opts = { multiple:false };
-      const selected = await navigator.contacts.select(props, opts);
+      const selected = await navigator.contacts.select(['name','tel'], { multiple:false });
       if (!selected || !selected.length) return;
-
       const c = selected[0];
-      // Attempt to read phone and name across variations
+
       let phones = [];
       if (Array.isArray(c.tel)) phones = c.tel;
       else if (Array.isArray(c.phoneNumbers)) phones = c.phoneNumbers.map(p => p.number || p.value || p);
@@ -554,21 +691,11 @@
       const raw = (phones && phones[0]) ? String(phones[0]) : '';
       const digits = raw.replace(/\D/g,'');
       const last10 = digits.slice(-10);
+      if (last10.length === 10) { els.customerPhone.value = last10; validatePhone(); }
 
-      if (last10.length === 10) {
-        els.customerPhone.value = last10;
-        validatePhone();
-      } else {
-        alert('Could not find a valid 10-digit phone in the selected contact.');
-      }
-
-      // Name (best-effort)
       if (c.name) {
-        if (Array.isArray(c.name)) {
-          els.customerName.value = c.name[0] || els.customerName.value;
-        } else if (typeof c.name === 'string') {
-          els.customerName.value = c.name || els.customerName.value;
-        }
+        if (Array.isArray(c.name)) els.customerName.value = c.name[0] || els.customerName.value;
+        else if (typeof c.name === 'string') els.customerName.value = c.name || els.customerName.value;
       }
     }catch(err){
       console.error(err);
@@ -576,7 +703,7 @@
     }
   });
 
-  // ====== Item logic (no per-item discount) ======
+  // ===== Items logic =====
   function compute(obj){ return Math.max(0, obj.qty * obj.rate); }
 
   function liToObj(li){
@@ -645,11 +772,8 @@
         <div class="amt">₹ <span data-f="amt">0.00</span></div>
       </div>
     `;
-    if (atTop && els.itemsList.firstChild) {
-      els.itemsList.insertBefore(li, els.itemsList.firstChild);
-    } else {
-      els.itemsList.appendChild(li);
-    }
+    if (atTop && els.itemsList.firstChild) { els.itemsList.insertBefore(li, els.itemsList.firstChild); }
+    else { els.itemsList.appendChild(li); }
     attachLi(li);
     updateLi(li);
     recalc();
@@ -691,7 +815,8 @@
   });
   els.fabAdd.addEventListener('click', () => addItem({}, { atTop: true }));
 
-  // Clear all items
+  // Clear items
+  const LS='nusrat.vertical.items.v7';
   els.clearItemsBtn.addEventListener('click', ()=>{
     if(!confirm('Clear all items?')) return;
     els.itemsList.innerHTML = '';
@@ -728,61 +853,33 @@
     els.itemsBreakdown.value = breakdown;
     els.itemsCountQty.value = String(countQty);
 
-    // Paid sanitization and cap validation handled outside; here compute negotiated safely
     const paid=toNumber(els.paidAmount.value);
     let negotiated = grand - paid; if(negotiated < 0) negotiated = 0;
     els.dueAmount.value = negotiated.toFixed(2);
 
-    // Validate paid <= grand
     validatePaid();
   }
 
-  // ====== Sale Type radios -> hidden input
-  document.querySelectorAll('input[name="saleTypeRadio"]').forEach(r=>{
-    r.addEventListener('change', ()=>{
-      if (r.checked) {
-        els.saleType.value = r.value;
-        persist();
-      }
-    });
-  });
-
-  // ====== Paid input: only numbers and dot, no e/E/+/- and not > grand total
+  // Paid guards
   els.paidAmount.addEventListener('keydown', (e)=>{
     const blocked = ['e','E','+','-'];
     if (blocked.includes(e.key)) e.preventDefault();
   });
   els.paidAmount.addEventListener('input', (e)=>{
     let v = e.target.value || '';
-    // keep only digits and dot
     v = v.replace(/[^\d.]/g, '');
-    // allow only one dot
     const parts = v.split('.');
     if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
-    // optional: limit to two decimals
-    if (parts.length === 2) {
-      parts[1] = parts[1].slice(0, 2);
-      v = parts[0] + '.' + parts[1];
-    }
+    if (parts.length === 2) { parts[1] = parts[1].slice(0, 2); v = parts[0] + '.' + parts[1]; }
     e.target.value = v;
     recalc(); persist();
   });
-
   function validatePaid(){
     const paid = toNumber(els.paidAmount.value);
     const grand = toNumber(els.grandTotal.value);
-    if (els.paidAmount.value === '') {
-      // will be caught by required check elsewhere
-      els.paidError.style.display='none';
-      return true;
-    }
-    if (paid > grand) {
-      els.paidError.textContent = 'Paid cannot exceed Grand Total.';
-      els.paidError.style.display = 'block';
-      return false;
-    }
-    els.paidError.style.display = 'none';
-    return true;
+    if (els.paidAmount.value === '') { els.paidError.style.display='none'; return true; }
+    if (paid > grand) { els.paidError.textContent='Paid cannot exceed Grand Total.'; els.paidError.style.display='block'; return false; }
+    els.paidError.style.display='none'; return true;
   }
 
   ['taxRate','flatDiscount','paidAmount','paymentMode','saleType'].forEach(id=>{
@@ -792,16 +889,10 @@
     el.addEventListener('change', ()=>{ recalc(); persist(); });
   });
 
-  // Persistence
-  const LS='nusrat.vertical.items.v3';
   function persist(){ try{ localStorage.setItem(LS, JSON.stringify(getItems())); }catch(_){} }
   function load(){
     const raw=localStorage.getItem(LS);
-    if(!raw){
-      // Start with NO items; wait for user to click "+ Add" or use Quick add
-      recalc();
-      return;
-    }
+    if(!raw){ recalc(); return; }
     try{
       const arr=JSON.parse(raw);
       if(Array.isArray(arr) && arr.length){
@@ -813,9 +904,7 @@
           rate: (it.rate===''? '': it.rate)
         }, { atTop: false }));
       }
-    }catch(e){
-      // ignore parse errors; start empty
-    }
+    }catch(e){}
     recalc();
   }
 
@@ -828,13 +917,10 @@
   function hideErrorBelow(el){
     const e=el.parentElement.querySelector('.error'); if(e) e.style.display='none';
   }
-
   function validateAll(forAction='general'){
     let ok=true;
     if(!els.customerName.value.trim()){ showErrorBelow(els.customerName,'Customer name is required.'); ok=false; } else hideErrorBelow(els.customerName);
     if(!/^\d{10}$/.test(els.customerPhone.value)){ els.phoneError.style.display='block'; ok=false; } else els.phoneError.style.display='none';
-
-    // Sale Type mandatory (hidden #saleType)
     if(!els.saleType.value){ showErrorBelow(els.saleType,'Select sale type.'); ok=false; } else { hideErrorBelow(els.saleType); }
 
     const rows = Array.from(els.itemsList.children);
@@ -852,8 +938,6 @@
     if(!hasValid) ok=false;
 
     if(!els.paymentMode.value){ showErrorBelow(els.paymentMode,'Select payment mode.'); ok=false; } else hideErrorBelow(els.paymentMode);
-
-    // Paid required and <= Grand Total
     if(els.paidAmount.value===''){ showErrorBelow(els.paidAmount,'Enter paid amount (0 allowed).'); ok=false; } else hideErrorBelow(els.paidAmount);
     if(!validatePaid()) ok = false;
 
@@ -907,18 +991,12 @@
       </div>`;
   }
 
-  // WhatsApp monospace (Sale Type intentionally excluded)
+  // WhatsApp monospace summary
   function summaryMonospace(){
     const items=getItems();
     const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
     const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.amt);
-    const header = [
-      fit('#',COLS.idx),
-      fit('ITEM',COLS.name),
-      fit('QTY',COLS.qty),
-      fit('RATE',COLS.rate),
-      fit('AMOUNT',COLS.amt)
-    ].join(' ');
+    const header = [ fit('#',COLS.idx), fit('ITEM',COLS.name), fit('QTY',COLS.qty), fit('RATE',COLS.rate), fit('AMOUNT',COLS.amt) ].join(' ');
     const rows = items.map((it,i)=>{
       const idx=String(i+1).padStart(COLS.idx,' ');
       const nm =fit(it.name,COLS.name);
@@ -934,7 +1012,7 @@
     const flat=toNumber(els.flatDiscount.value);
     const grand=toNumber(els.grandTotal.value);
     const paid=toNumber(els.paidAmount.value);
-    const negotiated =toNumber(els.dueAmount.value);
+    const negotiated=toNumber(els.dueAmount.value);
 
     const store1='Nusrat Enterprises';
     const store2='Phones: 7978830017, 9330066455, 9040366455';
@@ -968,7 +1046,7 @@
     return codeBlock + followBlock;
   }
 
-  // PDF (kept available)
+  // PDF content (with anchor tags so we can map live links)
   function buildMonospaceHTML() {
     const items=getItems();
     const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
@@ -992,9 +1070,10 @@
     const negotiated=toNumber(els.dueAmount.value);
 
     function kv(k,v){ const key=(k+':').padEnd(13,' '); const val=String(v); return key + val; }
+
     return `
       <div id="monoBox" style="
-        width:${mmToPx(RECEIPT_MM)}px;padding:12px;border:1px solid #e5e7eb;border-radius:8px;background:#fff;color:#111827;
+        width:${mmToPx(RECEIPT_MM)}px; padding:12px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; color:#111827;
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace; font-size:12px; line-height:1.4;">
         <pre style="margin:0; white-space:pre-wrap;">${
           [
@@ -1012,7 +1091,7 @@
             kv('Grand Total', `₹${grand.toFixed(2)}`),
             ...(els.paymentMode.value ? [kv('Payment Mode', els.paymentMode.value)] : []),
             ...(paid>0 ? [kv('Paid', `₹${paid.toFixed(2)}`)] : []),
-            ...(negotiated>0 ? [kv('Negotiated', `₹${negotiated.toFixed(2)}`)] : []),
+            ...(toNumber(negotiated)>0 ? [kv('Negotiated', `₹${toNumber(negotiated).toFixed(2)}`)] : []),
             '',
             'Thank you for shopping with Nusrat Enterprises!'
           ].join('\n')
@@ -1020,33 +1099,99 @@
         <div style="height:8px"></div>
         <div style="font-size:11px;color:#374151">
           <div style="font-weight:600;margin-bottom:4px">Follow &amp; Feedback:</div>
-          <div>Google Feedback: ${LINKS.googleFeedback}</div>
-          <div>Instagram: ${LINKS.instagram}</div>
-          <div>WhatsApp Channel: ${LINKS.waChannel}</div>
+          <div><a id="gLink" href="${LINKS.googleFeedback}" target="_blank" rel="noopener">Google Feedback: ${LINKS.googleFeedback}</a></div>
+          <div><a id="igLink" href="${LINKS.instagram}" target="_blank" rel="noopener">Instagram: ${LINKS.instagram}</a></div>
+          <div><a id="waLink" href="${LINKS.waChannel}" target="_blank" rel="noopener">WhatsApp Channel: ${LINKS.waChannel}</a></div>
         </div>
       </div>`;
   }
 
   async function generatePdf() {
+    // Render offscreen
     els.monoRender.innerHTML = buildMonospaceHTML();
     await new Promise(r => setTimeout(r, 120));
+
     const box = els.monoRender.querySelector('#monoBox');
-    const canvas = await html2canvas(box, { scale: 2, backgroundColor:'#ffffff', useCORS:true });
-    const { jsPDF } = window.jspdf;
-    const pageWpt = (RECEIPT_MM * 72 / 25.4);
+    const ig = els.monoRender.querySelector('#igLink');
+    const wa = els.monoRender.querySelector('#waLink');
+    const gl = els.monoRender.querySelector('#gLink');
+
+    const canvas = await html2canvas(box, { scale:2, backgroundColor:'#ffffff', useCORS:true });
+
+    const pageWpt = mmToPt(RECEIPT_MM);
     const margin = 8;
     const targetWidth = pageWpt - margin * 2;
     const ratio = canvas.height / canvas.width;
     const targetHeight = targetWidth * ratio;
     const pageHpt = targetHeight + margin * 2;
-    const pdf = new jsPDF({ unit: 'pt', format: [pageWpt, pageHpt] });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit:'pt', format:[pageWpt, pageHpt] });
+
     const x=margin, y=margin, w=targetWidth, h=targetHeight;
     pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, w, h, undefined, 'FAST');
+
+    // map links
+    const scaleX = w / canvas.width;
+    const scaleY = h / canvas.height;
+    function addLinkHotspot(el, url){
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const base = box.getBoundingClientRect();
+      const dx = r.left - base.left;
+      const dy = r.top  - base.top;
+      const lw = r.width, lh = r.height;
+      const lx = x + dx * scaleX;
+      const ly = y + dy * scaleY;
+      const lW = lw * scaleX, lH = lh * scaleY;
+      try { pdf.link(lx, ly, lW, lH, { url }); } catch(_) {}
+    }
+    addLinkHotspot(ig, LINKS.instagram);
+    addLinkHotspot(wa, LINKS.waChannel);
+    addLinkHotspot(gl, LINKS.googleFeedback);
+
     const cust = (els.customerName.value || 'Customer').replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'_');
     pdf.save(`Invoice_${cust}_${els.invoiceDate.value}.pdf`);
   }
 
-  // ====== Google Sheet Sync (FormData to avoid preflight/CORS) ======
+  // VCF
+  function sanitizeName(s){ return (s||'').replace(/[\n\r;:,]/g,' ').trim(); }
+  function makeVCard(){
+    const first = sanitizeName(els.customerName.value || '');
+    const last = sanitizeName(els.saleType.value || '');
+    const phone10 = (els.customerPhone.value || '').replace(/\D/g,'').slice(-10);
+    const msisdn = phone10 ? `+91${phone10}` : '';
+    const org = 'Nusrat Enterprises';
+    const title = last || '';
+    const fn = (first + (last ? (' ' + last) : '')).trim() || 'Customer';
+    const lines = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      `N:${last};${first};;;`,
+      `FN:${fn}`,
+      ...(title ? [`TITLE:${title}`] : []),
+      `ORG:${org}`,
+      ...(msisdn ? [`TEL;TYPE=CELL,VOICE:${msisdn}`] : []),
+      ...(phone10 ? [`X-WA-ID:91${phone10}`] : []),
+      `NOTE:Invoice ${els.invoiceNumber.value || ''}${els.paymentMode.value ? (' | Payment ' + els.paymentMode.value) : ''}`,
+      'END:VCARD'
+    ];
+    return lines.join('\r\n');
+  }
+  function downloadVcfNow(){
+    const vcf = makeVCard();
+    const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
+    const a = document.createElement('a');
+    const safeName = (els.customerName.value || 'Customer').replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'_');
+    const safeSale = (els.saleType.value || 'Sale').replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'_');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${safeName}_${safeSale}.vcf`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 300);
+  }
+
+  // Google Sheet
   async function collectInvoicePayload() {
     const items = getItems();
     return {
@@ -1063,45 +1208,25 @@
       grandTotal: els.grandTotal.value || '0',
       paymentMode: els.paymentMode.value || '',
       paidAmount: els.paidAmount.value || '0',
-      dueAmount: els.dueAmount.value || '0', // server ignores this
-      saleType: els.saleType.value || '',    // Only for Google Sheet
+      dueAmount: els.dueAmount.value || '0',
+      saleType: els.saleType.value || '',
       items
     };
   }
-
   async function pushToGoogleSheet(opts = {}) {
     const { alertOnResult = true } = opts;
-
-    if (!validateAll('push')) {
-      if (alertOnResult) alert('Please correct highlighted fields.');
-      return false;
-    }
-
+    if (!validateAll('push')) { if (alertOnResult) alert('Please correct highlighted fields.'); return false; }
     const payload = await collectInvoicePayload();
-
     try {
-      const form = new FormData();
-      form.append('payload', JSON.stringify(payload));
-
-      const res = await fetch(WEB_APP_URL, { method: 'POST', body: form });
-
+      const form = new FormData(); form.append('payload', JSON.stringify(payload));
+      const res = await fetch(WEB_APP_URL, { method:'POST', body: form });
       let ok = false;
-      try {
-        const json = await res.json();
-        ok = !!(json && json.ok);
-      } catch (_) {
-        ok = res.ok;
-      }
-
-      if (ok) {
-        return true;
-      } else {
+      try { const json = await res.json(); ok = !!(json && json.ok); } catch (_) { ok = res.ok; }
+      if (!ok && alertOnResult) {
         const txt = await res.text().catch(()=> '');
-        if (alertOnResult) {
-          alert('Failed to save to Google Sheet ❌\n' + (txt ? txt.slice(0,500) : 'No response body'));
-        }
-        return false;
+        alert('Failed to save to Google Sheet ❌' + (txt ? '\n' + txt.slice(0,500) : ''));
       }
+      return ok;
     } catch (err) {
       console.error(err);
       if (alertOnResult) alert('Network error while saving to Google Sheet.');
@@ -1109,48 +1234,7 @@
     }
   }
 
-  // ====== Print (robust system print) ======
-  async function systemPrint(){
-    const html = buildMonospaceHTML();
-
-    const w = window.open('', '_blank', 'noopener,noreferrer');
-    if(!w){
-      alert('Popup blocked. Please allow popups for this site to print.');
-      return;
-    }
-
-    const doc = `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8"/>
-<title>Print Invoice</title>
-<style>
-  @page { margin: 10mm; }
-  html,body{margin:0;padding:0;background:#fff}
-  #monoBox{ margin:0 auto; }
-  @media print{
-    body{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  }
-</style>
-</head>
-<body>
-${html}
-<script>
-  window.onload = function(){
-    try{ window.focus(); window.print(); }catch(e){}
-    setTimeout(function(){ window.close(); }, 500);
-  };
-<\/script>
-</body>
-</html>`;
-
-    w.document.open();
-    w.document.write(doc);
-    w.document.close();
-  }
-
-  // ====== Actions ======
+  // Actions
   document.getElementById('previewBtn').addEventListener('click', ()=>{
     if (!validateAll('preview')) return;
     els.previewCard.style.display='block';
@@ -1160,32 +1244,21 @@ ${html}
   document.getElementById('printBtn').addEventListener('click', async (e)=>{
     e.preventDefault();
     if (!validateAll('print')) return;
-    try {
-      await systemPrint();
-    } catch (err) {
-      console.error(err);
-      alert('Print failed or was blocked by the browser.');
-    }
+    try { await generatePdf(); } catch (err) { console.error(err); alert('PDF generation failed. Please try again.'); }
   });
 
-  // WhatsApp: save to sheet first; only open if saved
-  els.whatsAppBtn.addEventListener('click', async ()=>{
-    if (!validateAll('whatsapp')) return;
-
-    setBtnLoading(els.whatsAppBtn, true, 'Saving & Sending…', null);
+  // Save button (standalone)
+  els.saveBtn.addEventListener('click', async ()=>{
+    if (!validateAll('push')) return;
+    setBtnLoading(els.saveBtn, true, 'Saving…', null);
     try {
-      const saved = await pushToGoogleSheet({ alertOnResult: true });
-      if (!saved) return;
-
-      const phone = `91${els.customerPhone.value}`;
-      const msg = summaryMonospace();
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener,noreferrer');
+      await pushToGoogleSheet({ alertOnResult: true });
     } finally {
-      setBtnLoading(els.whatsAppBtn, false, null, 'WhatsApp');
+      setBtnLoading(els.saveBtn, false, null, 'Save to Google Sheet');
     }
   });
 
-  // Copy text
+  // Copy summary (alert only on failure)
   els.copyBtn.addEventListener('click', ()=>{
     if (!validateAll('copy')) return;
     const items=getItems(); const lines=[];
@@ -1216,18 +1289,66 @@ ${html}
     lines.push(`WhatsApp Channel: ${LINKS.waChannel}`);
     lines.push(`Google Feedback: ${LINKS.googleFeedback}`);
     navigator.clipboard.writeText(lines.join('\n'))
-      .then(()=>alert('Copied'))
       .catch(()=>alert('Copy failed (permission denied).'));
   });
 
-  // Save to Google Sheet (green button) with spinner
-  els.saveBtn.addEventListener('click', async ()=>{
-    if (!validateAll('push')) return;
-    setBtnLoading(els.saveBtn, true, 'Saving…', null);
+  // Manual VCF button
+  els.vcfBtn.addEventListener('click', ()=>{
+    const nameOk = !!els.customerName.value.trim();
+    const phoneOk = /^\d{10}$/.test(els.customerPhone.value || '');
+    const saleOk = !!els.saleType.value;
+    if (!nameOk || !phoneOk || !saleOk) {
+      validateAll('vcf');
+      alert('Please ensure Customer Name, 10-digit WhatsApp number, and Sale Type are filled.');
+      return;
+    }
+    downloadVcfNow();
+  });
+
+  // ===== WhatsApp staged flow: Saving -> Downloading -> Sending (alert only if fails) =====
+  function setWaState(stateClass){
+    const btn = els.whatsAppBtn;
+    btn.classList.remove('is-saving','is-downloading','is-sending','is-success');
+    btn.removeAttribute('aria-busy');
+    if(stateClass){
+      btn.classList.add(stateClass);
+      if(stateClass !== 'is-success'){ btn.setAttribute('aria-busy','true'); }
+    }
+  }
+
+  els.whatsAppBtn.addEventListener('click', async ()=>{
+    if (!validateAll('whatsapp')) return;
+
     try {
-      await pushToGoogleSheet({ alertOnResult: true });
-    } finally {
-      setBtnLoading(els.saveBtn, false, null, 'Save to Google Sheet');
+      // 1) Saving…
+      setWaState('is-saving');
+      const saved = await pushToGoogleSheet({ alertOnResult: false });
+      if (!saved) {
+        setWaState('');
+        alert('Saving to Google Sheet failed. Please try again.');
+        return;
+      }
+
+      // 2) Downloading…
+      setWaState('is-downloading');
+      downloadVcfNow();
+
+      // 3) Sending…
+      setWaState('is-sending');
+      const phone = `91${els.customerPhone.value}`;
+      const msg = summaryMonospace();
+      setTimeout(()=>{
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener,noreferrer');
+
+        // Success pulse then reset
+        setWaState('is-success');
+        setTimeout(()=> setWaState(''), 1400);
+      }, 500);
+
+    } catch (err) {
+      console.error(err);
+      setWaState('');
+      alert('Something went wrong while processing the WhatsApp flow.');
     }
   });
 
