@@ -109,6 +109,9 @@
     box-shadow:0 8px 20px rgba(0,0,0,.25); font-weight:800; font-size:16px;
   }
 
+  .inline-actions{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap}
+  .btn.sm{padding:8px 10px; font-size:13px; min-height:36px; border-radius:8px}
+
   @media print{header{display:none!important}.card{border:none;box-shadow:none}}
 </style>
 
@@ -135,7 +138,8 @@
         </div>
         <div>
           <label>Date</label>
-          <input id="invoiceDate" type="date" readonly />
+          <!-- locked (disabled) -->
+          <input id="invoiceDate" type="date" disabled />
         </div>
       </div>
       <div class="row cols-2" style="margin-top:8px">
@@ -148,6 +152,31 @@
           <label>Customer WhatsApp (10 digits)</label>
           <input id="customerPhone" type="tel" inputmode="tel" autocomplete="tel" pattern="[0-9]*" maxlength="10" placeholder="e.g., 9876543210"/>
           <div id="phoneError" class="error">Enter exactly 10 digits.</div>
+
+          <!-- Pick from Contacts (browser support required) -->
+          <div class="inline-actions">
+            <button type="button" class="btn link sm" id="pickContactBtn">📇 Pick from Contacts</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sale Type (Option B: radios + hidden #saleType) -->
+      <div class="row cols-2" style="margin-top:8px">
+        <div>
+          <label>Sale Type</label>
+          <div role="radiogroup" aria-label="Sale Type" style="display:flex;gap:12px;align-items:center">
+            <label style="display:inline-flex;gap:6px;align-items:center">
+              <input type="radio" name="saleTypeRadio" value="Retail" />
+              Retail
+            </label>
+            <label style="display:inline-flex;gap:6px;align-items:center">
+              <input type="radio" name="saleTypeRadio" value="Wholesale" />
+              Wholesale
+            </label>
+          </div>
+          <!-- Hidden keeps the same ID so the rest of your code keeps working -->
+          <input type="hidden" id="saleType" value="">
+          <div class="error"></div>
         </div>
       </div>
     </div>
@@ -156,6 +185,8 @@
     <div class="card">
       <div class="items-head">
         <h2>Items</h2>
+        <!-- Clear Items -->
+        <button type="button" class="btn link" id="clearItemsBtn">🧹 Clear Items</button>
       </div>
 
       <!-- Quickline form -->
@@ -210,8 +241,8 @@
           </div>
           <div>
             <label>Paid (₹)</label>
-            <input id="paidAmount" type="number" min="0" step="0.01" placeholder="0.00" inputmode="decimal"/>
-            <div class="error"></div>
+            <input id="paidAmount" type="text" inputmode="decimal" placeholder="0.00" />
+            <div id="paidError" class="error"></div>
           </div>
         </div>
         <div>
@@ -236,7 +267,7 @@
         <button type="button" class="btn ghost" id="previewBtn">👁️ Preview</button>
         <button type="button" class="btn ghost" id="copyTextBtn">📋 Copy Summary</button>
 
-        <!-- Save to Google Sheet with spinner (WhatsApp-like green) -->
+        <!-- Save to Google Sheet with spinner -->
         <button type="button" class="btn primary" id="saveToSheetBtn">
           <span class="btn-icon" aria-hidden="true">📑</span>
           <span class="btn-text">Save to Google Sheet</span>
@@ -284,6 +315,9 @@
     customerName:document.getElementById('customerName'),
     customerPhone:document.getElementById('customerPhone'),
     phoneError:document.getElementById('phoneError'),
+    pickContactBtn:document.getElementById('pickContactBtn'),
+
+    saleType:document.getElementById('saleType'),
 
     subtotal:document.getElementById('subtotal'),
     itemsBreakdown:document.getElementById('itemsBreakdown'),
@@ -293,6 +327,7 @@
     grandTotal:document.getElementById('grandTotal'),
     paymentMode:document.getElementById('paymentMode'),
     paidAmount:document.getElementById('paidAmount'),
+    paidError:document.getElementById('paidError'),
     dueAmount:document.getElementById('dueAmount'),
 
     previewCard:document.getElementById('previewCard'),
@@ -305,6 +340,7 @@
     printBtn: document.getElementById('printBtn'),
     previewBtn: document.getElementById('previewBtn'),
     copyBtn: document.getElementById('copyTextBtn'),
+    clearItemsBtn: document.getElementById('clearItemsBtn'),
   };
 
   // ====== Helpers ======
@@ -335,9 +371,61 @@
   const today = new Date();
   els.invoiceDate.value = `${today.getFullYear()}-${pad2(today.getMonth()+1)}-${pad2(today.getDate())}`;
 
-  // phone numeric
-  els.customerPhone.addEventListener('input', (e)=>{ e.target.value = e.target.value.replace(/\D/g,'').slice(0,10); validatePhone(); });
-  function validatePhone(){ const ok = /^\d{10}$/.test(els.customerPhone.value); els.phoneError.style.display = ok || els.customerPhone.value.length===0 ? 'none' : 'block'; return ok; }
+  // Phone numeric (10 digits only)
+  els.customerPhone.addEventListener('input', (e)=>{
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,10);
+    validatePhone();
+  });
+  function validatePhone(){
+    const ok = /^\d{10}$/.test(els.customerPhone.value);
+    els.phoneError.style.display = ok || els.customerPhone.value.length===0 ? 'none' : 'block';
+    return ok;
+  }
+
+  // Contact Picker API for phone (mobile Chrome/Edge on HTTPS)
+  els.pickContactBtn.addEventListener('click', async ()=>{
+    try{
+      if (!('contacts' in navigator) || !('select' in navigator.contacts)) {
+        alert('Your browser does not support picking contacts. Try Chrome on Android with HTTPS.');
+        return;
+      }
+      const props = ['name','tel'];
+      const opts = { multiple:false };
+      const selected = await navigator.contacts.select(props, opts);
+      if (!selected || !selected.length) return;
+
+      const c = selected[0];
+      // Attempt to read phone and name across variations
+      let phones = [];
+      if (Array.isArray(c.tel)) phones = c.tel;
+      else if (Array.isArray(c.phoneNumbers)) phones = c.phoneNumbers.map(p => p.number || p.value || p);
+      else if (c.tel) phones = [c.tel];
+      else if (c.phoneNumber) phones = [c.phoneNumber];
+
+      const raw = (phones && phones[0]) ? String(phones[0]) : '';
+      const digits = raw.replace(/\D/g,'');
+      const last10 = digits.slice(-10);
+
+      if (last10.length === 10) {
+        els.customerPhone.value = last10;
+        validatePhone();
+      } else {
+        alert('Could not find a valid 10-digit phone in the selected contact.');
+      }
+
+      // Name (best-effort)
+      if (c.name) {
+        if (Array.isArray(c.name)) {
+          els.customerName.value = c.name[0] || els.customerName.value;
+        } else if (typeof c.name === 'string') {
+          els.customerName.value = c.name || els.customerName.value;
+        }
+      }
+    }catch(err){
+      console.error(err);
+      alert('Contact picking was cancelled or failed.');
+    }
+  });
 
   // ====== Item logic (no per-item discount) ======
   function compute(obj){ return Math.max(0, obj.qty * obj.rate); }
@@ -454,6 +542,14 @@
   });
   els.fabAdd.addEventListener('click', () => addItem({}, { atTop: true }));
 
+  // Clear all items
+  els.clearItemsBtn.addEventListener('click', ()=>{
+    if(!confirm('Clear all items?')) return;
+    els.itemsList.innerHTML = '';
+    try { localStorage.removeItem(LS); } catch(_) {}
+    recalc();
+  });
+
   // Summary
   function buildItemsBreakdown(items){
     const map = new Map();
@@ -483,14 +579,68 @@
     els.itemsBreakdown.value = breakdown;
     els.itemsCountQty.value = String(countQty);
 
+    // Paid sanitization and cap validation handled outside; here compute negotiated safely
     const paid=toNumber(els.paidAmount.value);
     let negotiated = grand - paid; if(negotiated < 0) negotiated = 0;
     els.dueAmount.value = negotiated.toFixed(2);
+
+    // Validate paid <= grand
+    validatePaid();
   }
 
-  ['taxRate','flatDiscount','paidAmount','paymentMode'].forEach(id=>{
-    document.getElementById(id).addEventListener('input', ()=>{ recalc(); persist(); });
-    document.getElementById(id).addEventListener('change', ()=>{ recalc(); persist(); });
+  // ====== Sale Type radios -> hidden input
+  document.querySelectorAll('input[name="saleTypeRadio"]').forEach(r=>{
+    r.addEventListener('change', ()=>{
+      if (r.checked) {
+        els.saleType.value = r.value;
+        persist();
+      }
+    });
+  });
+
+  // ====== Paid input: only numbers and dot, no e/E/+/- and not > grand total
+  els.paidAmount.addEventListener('keydown', (e)=>{
+    const blocked = ['e','E','+','-'];
+    if (blocked.includes(e.key)) e.preventDefault();
+  });
+  els.paidAmount.addEventListener('input', (e)=>{
+    let v = e.target.value || '';
+    // keep only digits and dot
+    v = v.replace(/[^\d.]/g, '');
+    // allow only one dot
+    const parts = v.split('.');
+    if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('');
+    // optional: limit to two decimals
+    if (parts.length === 2) {
+      parts[1] = parts[1].slice(0, 2);
+      v = parts[0] + '.' + parts[1];
+    }
+    e.target.value = v;
+    recalc(); persist();
+  });
+
+  function validatePaid(){
+    const paid = toNumber(els.paidAmount.value);
+    const grand = toNumber(els.grandTotal.value);
+    if (els.paidAmount.value === '') {
+      // will be caught by required check elsewhere
+      els.paidError.style.display='none';
+      return true;
+    }
+    if (paid > grand) {
+      els.paidError.textContent = 'Paid cannot exceed Grand Total.';
+      els.paidError.style.display = 'block';
+      return false;
+    }
+    els.paidError.style.display = 'none';
+    return true;
+  }
+
+  ['taxRate','flatDiscount','paidAmount','paymentMode','saleType'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('input', ()=>{ recalc(); persist(); });
+    el.addEventListener('change', ()=>{ recalc(); persist(); });
   });
 
   // Persistence
@@ -498,7 +648,11 @@
   function persist(){ try{ localStorage.setItem(LS, JSON.stringify(getItems())); }catch(_){} }
   function load(){
     const raw=localStorage.getItem(LS);
-    if(!raw){ addItem({}, { atTop: true }); recalc(); return; }
+    if(!raw){
+      // Start with NO items; wait for user to click "+ Add" or use Quick add
+      recalc();
+      return;
+    }
     try{
       const arr=JSON.parse(raw);
       if(Array.isArray(arr) && arr.length){
@@ -509,11 +663,9 @@
           qty: it.qty||1,
           rate: (it.rate===''? '': it.rate)
         }, { atTop: false }));
-      }else{
-        addItem({}, { atTop: true });
       }
     }catch(e){
-      addItem({}, { atTop: true });
+      // ignore parse errors; start empty
     }
     recalc();
   }
@@ -533,6 +685,9 @@
     if(!els.customerName.value.trim()){ showErrorBelow(els.customerName,'Customer name is required.'); ok=false; } else hideErrorBelow(els.customerName);
     if(!/^\d{10}$/.test(els.customerPhone.value)){ els.phoneError.style.display='block'; ok=false; } else els.phoneError.style.display='none';
 
+    // Sale Type mandatory (hidden #saleType)
+    if(!els.saleType.value){ showErrorBelow(els.saleType,'Select sale type.'); ok=false; } else { hideErrorBelow(els.saleType); }
+
     const rows = Array.from(els.itemsList.children);
     if(!rows.length){ ok=false; alert('Add at least one item.'); }
     let hasValid=false;
@@ -548,7 +703,10 @@
     if(!hasValid) ok=false;
 
     if(!els.paymentMode.value){ showErrorBelow(els.paymentMode,'Select payment mode.'); ok=false; } else hideErrorBelow(els.paymentMode);
+
+    // Paid required and <= Grand Total
     if(els.paidAmount.value===''){ showErrorBelow(els.paidAmount,'Enter paid amount (0 allowed).'); ok=false; } else hideErrorBelow(els.paidAmount);
+    if(!validatePaid()) ok = false;
 
     if(!ok && forAction!=='general'){ alert('Please correct highlighted fields.'); }
     return ok;
@@ -600,7 +758,7 @@
       </div>`;
   }
 
-  // WhatsApp monospace
+  // WhatsApp monospace (Sale Type intentionally excluded)
   function summaryMonospace(){
     const items=getItems();
     const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
@@ -661,7 +819,7 @@
     return codeBlock + followBlock;
   }
 
-  // PDF
+  // PDF (kept available)
   function buildMonospaceHTML() {
     const items=getItems();
     const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
@@ -757,16 +915,11 @@
       paymentMode: els.paymentMode.value || '',
       paidAmount: els.paidAmount.value || '0',
       dueAmount: els.dueAmount.value || '0', // server ignores this
+      saleType: els.saleType.value || '',    // Only for Google Sheet
       items
     };
   }
 
-  /**
-   * Pushes to Google Sheet.
-   * @param {Object} [opts]
-   * @param {boolean} [opts.alertOnResult=true] - Whether to show alert dialogs.
-   * @returns {Promise<boolean>} true if saved, false otherwise
-   */
   async function pushToGoogleSheet(opts = {}) {
     const { alertOnResult = true } = opts;
 
@@ -778,13 +931,11 @@
     const payload = await collectInvoicePayload();
 
     try {
-      // Build FormData so the request is "simple" (no preflight)
       const form = new FormData();
       form.append('payload', JSON.stringify(payload));
 
       const res = await fetch(WEB_APP_URL, { method: 'POST', body: form });
 
-      // Try JSON; fall back to HTTP status
       let ok = false;
       try {
         const json = await res.json();
@@ -794,7 +945,6 @@
       }
 
       if (ok) {
-        // if (alertOnResult) alert('Saved to Google Sheet ✅');
         return true;
       } else {
         const txt = await res.text().catch(()=> '');
@@ -810,7 +960,48 @@
     }
   }
 
-  // Actions
+  // ====== Print (robust system print) ======
+  async function systemPrint(){
+    const html = buildMonospaceHTML();
+
+    const w = window.open('', '_blank', 'noopener,noreferrer');
+    if(!w){
+      alert('Popup blocked. Please allow popups for this site to print.');
+      return;
+    }
+
+    const doc = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Print Invoice</title>
+<style>
+  @page { margin: 10mm; }
+  html,body{margin:0;padding:0;background:#fff}
+  #monoBox{ margin:0 auto; }
+  @media print{
+    body{ -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+${html}
+<script>
+  window.onload = function(){
+    try{ window.focus(); window.print(); }catch(e){}
+    setTimeout(function(){ window.close(); }, 500);
+  };
+<\/script>
+</body>
+</html>`;
+
+    w.document.open();
+    w.document.write(doc);
+    w.document.close();
+  }
+
+  // ====== Actions ======
   document.getElementById('previewBtn').addEventListener('click', ()=>{
     if (!validateAll('preview')) return;
     els.previewCard.style.display='block';
@@ -820,18 +1011,22 @@
   document.getElementById('printBtn').addEventListener('click', async (e)=>{
     e.preventDefault();
     if (!validateAll('print')) return;
-    try { await generatePdf(); }
-    catch (err) { console.error(err); alert('PDF generation failed.'); }
+    try {
+      await systemPrint();
+    } catch (err) {
+      console.error(err);
+      alert('Print failed or was blocked by the browser.');
+    }
   });
 
-  // ✅ WhatsApp: save to sheet (with alerts), then open WhatsApp ONLY if save succeeded
+  // WhatsApp: save to sheet first; only open if saved
   els.whatsAppBtn.addEventListener('click', async ()=>{
     if (!validateAll('whatsapp')) return;
 
     setBtnLoading(els.whatsAppBtn, true, 'Saving & Sending…', null);
     try {
       const saved = await pushToGoogleSheet({ alertOnResult: true });
-      if (!saved) return; // stop if save failed
+      if (!saved) return;
 
       const phone = `91${els.customerPhone.value}`;
       const msg = summaryMonospace();
@@ -878,6 +1073,7 @@
 
   // Save to Google Sheet (green button) with spinner
   els.saveBtn.addEventListener('click', async ()=>{
+    if (!validateAll('push')) return;
     setBtnLoading(els.saveBtn, true, 'Saving…', null);
     try {
       await pushToGoogleSheet({ alertOnResult: true });
