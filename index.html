@@ -553,8 +553,8 @@
     };
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwFcSGSZjTmUtxWtyxnK1fnRWH9uNPZA7VRdd1jr1uT73h-y-eHfOgTQ11u34Ambeyo/exec';
     const AUTH_TOKEN  = '9705322252';
-    const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Formal Pant","Track","Half Pant","Under Wear","Vest"];
-    const NAME_MAX = 27; // <= Enforce Item Name max characters
+    const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Cargo Pant","Formal Pant","Track","Half Pant","Under Wear","Vest"];
+    const NAME_MAX = 22; // <= Enforce Item Name max characters
 
     /* -----------------------------
        3) ELEMENT REFERENCES
@@ -806,8 +806,8 @@
           </div>
           <!-- Name field with live counter -->
           <div class="name name-wrap">
-            <input class="name" data-f="name" placeholder="Name" maxlength="27" value="${safeName}"/>
-            <div class="char-counter" data-f="cc" aria-live="polite">0/27</div>
+            <input class="name" data-f="name" placeholder="Name" maxlength="22" value="${safeName}"/>
+            <div class="char-counter" data-f="cc" aria-live="polite">0/22</div>
           </div>
           <button type="button" class="btn danger del" title="Delete">✕</button>
         </div>
@@ -1058,91 +1058,95 @@
         </div>`;
     }
 
-    /* -----------------------------
-       10) WHATSAPP MONOSPACE SUMMARY (45 chars/row)
-       ----------------------------- */
-    function summaryMonospace() {
-      const items = getItems();
+/* -----------------------------
+   10) WHATSAPP MONOSPACE SUMMARY (40 chars/row)
+   ----------------------------- */
+function summaryMonospace() {
+  const items = getItems();
 
-      const toAscii = s => String(s || '').replace(/[^\x00-\x7F]/g, '');
-      const padEnd = (s, n) => (s.length > n ? s.slice(0, n) : s.padEnd(n, ' '));
-      const padStart = (s, n) => (s.length > n ? s.slice(-n) : s.padStart(n, ' '));
+  const toAscii = s => String(s || '').replace(/[^\x00-\x7F]/g, '');
+  const padEnd = (s, n) => (s.length > n ? s.slice(0, n) : s.padEnd(n, ' '));
+  const padStart = (s, n) => (s.length > n ? s.slice(-n) : s.padStart(n, ' '));
 
-      function fmtNoDecimal(n) {
-        if (n == null || n === '') return '';
-        const num = Number(n);
-        if (Number.isNaN(num)) return String(n);
-        const raw = Number.isInteger(num)
-          ? String(num)
-          : num.toFixed(2).replace(/\.?0+$/, '');
-        return toAscii(raw);
-      }
+  function fmtNoDecimal(n) {
+    if (n == null || n === '') return '';
+    const num = Number(n);
+    if (Number.isNaN(num)) return String(n);
+    const raw = Number.isInteger(num)
+      ? String(num)
+      : num.toFixed(2).replace(/\.?0+$/, '');
+    return toAscii(raw);
+  }
 
-      // EXACT width mapping: idx(3) name(27) qty(3) rate(3) amt(5) => 45
-      function makeLine45(idx, name, qty, rate, amount) {
-        const W = { idx: 3, name: 27, qty: 3, rate: 3, amt: 5 };
-        const fIdx  = padStart(toAscii(idx), W.idx);
-        const fName = padEnd(toAscii(name).slice(0, W.name), W.name);
-        const fQty  = padStart(fmtNoDecimal(qty), W.qty);
-        const fRate = padStart(fmtNoDecimal(rate), W.rate);
-        const fAmt  = padStart(fmtNoDecimal(amount), W.amt);
-        return `${fIdx} ${fName} ${fQty} ${fRate} ${fAmt}`;
-      }
+  // EXACT width mapping: idx(3) name(22) qty(3) rate(3) amt(5) => 40 chars
+  function makeLine40(idx, name, qty, rate, amount) {
+    const W = { idx: 3, name: 22, qty: 3, rate: 3, amt: 5 };
 
-      const rows = items.map((it, i) => {
-        const qty = Number(it.qty) || 0;
-        const rate = Number(it.rate) || 0;
-        const amount = qty * rate;
-        return makeLine45(i + 1, it.name, qty, rate, amount);
-      });
+    const fIdx  = padStart(toAscii(idx), W.idx);
+    const fName = padEnd(toAscii(name).slice(0, W.name), W.name);
+    const fQty  = padStart(fmtNoDecimal(qty), W.qty);
+    const fRate = padStart(fmtNoDecimal(rate), W.rate);
+    const fAmt  = padStart(fmtNoDecimal(amount), W.amt);
 
-      const subtotal = toNumber(els.subtotal.value);
-      const gstRate  = toNumber(els.taxRate.value);
-      const gstAmt   = subtotal * (gstRate / 100);
-      const flat     = toNumber(els.flatDiscount.value);
-      const grand    = toNumber(els.grandTotal.value);
-      const paid     = toNumber(els.paidAmount.value);
-      const due      = toNumber(els.dueAmount.value);
+    // space separated → 3+1+22+1+3+1+3+1+5 = 40 chars
+    return `${fIdx} ${fName} ${fQty} ${fRate} ${fAmt}`;
+  }
 
-      function kv(k, v) {
-        return (k + ':').padEnd(15, ' ') + v;
-      }
+  const rows = items.map((it, i) => {
+    const qty = Number(it.qty) || 0;
+    const rate = Number(it.rate) || 0;
+    const amount = qty * rate;
+    return makeLine40(i + 1, it.name, qty, rate, amount);
+  });
 
-      const totals = [];
-      if (gstRate > 0 && gstAmt > 0) totals.push(kv(`GST ${gstRate}%`, `Rs ${gstAmt.toFixed(2)}`));
-      if (flat > 0) totals.push(kv('Discount', `-Rs ${flat.toFixed(2)}`));
-      totals.push(kv('Grand Total', `Rs ${grand.toFixed(2)}`));
-      if (els.paymentMode.value) totals.push(kv('Payment Mode', els.paymentMode.value));
-      if (paid > 0) totals.push(kv('Paid', `Rs ${paid.toFixed(2)}`));
-      if (due > 0) totals.push(kv('Due', `Rs ${due.toFixed(2)}`));
+  const subtotal = toNumber(els.subtotal.value);
+  const gstRate  = toNumber(els.taxRate.value);
+  const gstAmt   = subtotal * (gstRate / 100);
+  const flat     = toNumber(els.flatDiscount.value);
+  const grand    = toNumber(els.grandTotal.value);
+  const paid     = toNumber(els.paidAmount.value);
+  const due      = toNumber(els.dueAmount.value);
 
-      const store1 = 'Nusrat Enterprises';
-      const store2 = 'Phones: 7978830017, 9330066455, 9040366455';
-      const store3 = 'Address: Plot 53, Goutam Nagar, Bhubaneswar - 751014';
+  function kv(k, v) {
+    return (k + ':').padEnd(15, ' ') + v;
+  }
 
-      const invLine  = `Invoice: ${els.invoiceNumber.value}`;
-      const dateLine = els.invoiceDate.value ? `Date: ${els.invoiceDate.value}` : '';
-      const custLine = els.customerName.value ? `Customer: ${els.customerName.value}` : '';
+  const totals = [];
+  if (gstRate > 0 && gstAmt > 0) totals.push(kv(`GST ${gstRate}%`, `Rs ${gstAmt.toFixed(2)}`));
+  if (flat > 0) totals.push(kv('Discount', `-Rs ${flat.toFixed(2)}`));
+  totals.push(kv('Grand Total', `Rs ${grand.toFixed(2)}`));
+  if (els.paymentMode.value) totals.push(kv('Payment Mode', els.paymentMode.value));
+  if (paid > 0) totals.push(kv('Paid', `Rs ${paid.toFixed(2)}`));
+  if (due > 0) totals.push(kv('Due', `Rs ${due.toFixed(2)}`));
 
-      const lines = [
-        store1,
-        store2,
-        store3,
-        '',
-        invLine + (dateLine ? ' | ' + dateLine : ''),
-        custLine,
-        '',
-        ...rows,
-        '',
-        ...totals,
-        '',
-        'Thank you for shopping with Nusrat Enterprises!'
-      ];
+  const store1 = 'Nusrat Enterprises';
+  const store2 = 'Phones: 7978830017, 9330066455, 9040366455';
+  const store3 = 'Address: Plot 53, Goutam Nagar, Bhubaneswar - 751014';
 
-      const codeBlock = '```' + '\n' + lines.join('\n') + '\n' + '```';
-      const followBlock = `\nFollow & Feedback:\n\n⭐ Write a Review: ${LINKS.googleFeedback}\n\nWhatsApp Channel: ${LINKS.waChannel}\n\nInstagram: ${LINKS.instagram}`;
-      return codeBlock + followBlock;
-    }
+  const invLine  = `Invoice: ${els.invoiceNumber.value}`;
+  const dateLine = els.invoiceDate.value ? `Date: ${els.invoiceDate.value}` : '';
+  const custLine = els.customerName.value ? `Customer: ${els.customerName.value}` : '';
+
+  const lines = [
+    store1,
+    store2,
+    store3,
+    '',
+    invLine + (dateLine ? ' | ' + dateLine : ''),
+    custLine,
+    '',
+    ...rows,
+    '',
+    ...totals,
+    '',
+    'Thank you for shopping with Nusrat Enterprises!'
+  ];
+
+  const codeBlock = '```' + '\n' + lines.join('\n') + '\n' + '```';
+  const followBlock = `\nFollow & Feedback:\n\n⭐ Write a Review: ${LINKS.googleFeedback}\n\nWhatsApp Channel: ${LINKS.waChannel}\n\nInstagram: ${LINKS.instagram}`;
+
+  return codeBlock + followBlock;
+}
 
     /* -----------------------------
        11) PDF BUILDER (Monospace)
