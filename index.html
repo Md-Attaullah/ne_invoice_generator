@@ -283,7 +283,7 @@
       <div>
         <h1>Nusrat Enterprises — Invoice</h1>
         <div class="header-meta">📞 7978830017 • 9330066455 • 9040366455</div>
-        <div class="header-addr">📍 Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014</div>
+        <div class="header-addr">📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014</div>
       </div>
       <!-- Dark mode toggle -->
       <button id="themeToggle" type="button" class="btn ghost" style="min-width:120px">🌙 Dark Mode</button>
@@ -1043,8 +1043,8 @@
         <div class="print-header">
           <div>
             <div class="print-title">Nusrat Enterprises</div>
-            <div class="print-meta">Phones: 7978830017, 9330066455, 9040366455</div>
-            <div class="print-meta">Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014</div>
+            <div class="print-meta">📞 7978830017, 9330066455, 9040366455</div>
+            <div class="print-meta">📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014</div>
           </div>
           <div style="text-align:right" class="print-meta">
             <div><b>Invoice #:</b> ${els.invoiceNumber.value}</div>
@@ -1078,21 +1078,14 @@ function summaryMonospace() {
     return toAscii(raw);
   }
 
-  // EXACT width mapping = 40 chars:
-  // idx(3) name(15) qty(3) rate(3) amt(5)
+  // EXACT width = 40 chars
   function makeLine40(idx, name, qty, rate, amount) {
     const W = { idx: 2, name: 15, qty: 3, rate: 3, amt: 5 };
-
     const fIdx  = padEnd(toAscii(idx), W.idx);
     const fName = padEnd(toAscii(name).slice(0, W.name), W.name);
     const fQty  = padStart(fmtNoDecimal(qty), W.qty);
     const fRate = padStart(fmtNoDecimal(rate), W.rate);
-
-    // LEFT aligned amount
     const fAmt  = padEnd(fmtNoDecimal(amount), W.amt);
-
-    // Final format you liked:
-    // "III NAME(15) QQQXRRR=AAAAA"
     return `${fIdx} ${fName} ${fQty}X${fRate}=${fAmt}`;
   }
 
@@ -1103,29 +1096,19 @@ function summaryMonospace() {
     return makeLine40(i + 1, it.name, qty, rate, amount);
   });
 
-  const subtotal = toNumber(els.subtotal.value);
-  const gstRate  = toNumber(els.taxRate.value);
-  const gstAmt   = subtotal * (gstRate / 100);
-  const flat     = toNumber(els.flatDiscount.value);
-  const grand    = toNumber(els.grandTotal.value);
-  const paid     = toNumber(els.paidAmount.value);
-  const due      = toNumber(els.dueAmount.value);
-
-  function kv(k, v) {
-    return (k + ':').padEnd(15, ' ') + v;
-  }
-
-  const totals = [];
-  if (gstRate > 0 && gstAmt > 0) totals.push(kv(`GST ${gstRate}%`, `Rs ${gstAmt.toFixed(2)}`));
-  if (flat > 0) totals.push(kv('Discount', `-Rs ${flat.toFixed(2)}`));
-  totals.push(kv('Grand Total', `Rs ${grand.toFixed(2)}`));
-  if (els.paymentMode.value) totals.push(kv('Payment Mode', els.paymentMode.value));
-  if (paid > 0) totals.push(kv('Paid', `Rs ${paid.toFixed(2)}`));
-  if (due > 0) totals.push(kv('Due', `Rs ${due.toFixed(2)}`));
+  // --------------------
+  // NEW HEADER ADDED HERE
+  // --------------------
+  const columnHeader = "# Name            Qty  Rate Amt";
 
   const store1 = 'Nusrat Enterprises';
   const store2 = 'Phones: 7978830017, 9330066455, 9040366455';
   const store3 = 'Address: Plot 53, Goutam Nagar, Bhubaneswar - 751014';
+
+  // ---------------------
+  // NEW "Trusted Since 2008"
+  // ---------------------
+  const trusted = 'Trusted Since 2008';
 
   const invLine  = `Invoice: ${els.invoiceNumber.value}`;
   const dateLine = els.invoiceDate.value ? `Date: ${els.invoiceDate.value}` : '';
@@ -1135,10 +1118,12 @@ function summaryMonospace() {
     store1,
     store2,
     store3,
+    trusted,        // ← Added here
     '',
     invLine + (dateLine ? ' | ' + dateLine : ''),
     custLine,
     '',
+    columnHeader,   // ← Column header added here
     ...rows,
     '',
     ...totals,
@@ -1156,113 +1141,121 @@ function summaryMonospace() {
   return codeBlock + followBlock;
 }
 
-    /* -----------------------------
-       11) PDF BUILDER (Monospace)
-       ----------------------------- */
-    function buildMonospaceHTML() {
-      const items=getItems();
-      const COLS = { idx:3, name:25, qty:3, rate:8, amt:10 };
-      const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.amt);
-      const header = [ fit('#',COLS.idx), fit('ITEM',COLS.name), fit('QTY',COLS.qty), fit('RATE',COLS.rate), fit('AMOUNT',COLS.amt) ].join(' ');
-      const rows = items.map((it,i)=>{
-        const idx=String(i+1).padStart(COLS.idx,' ');
-        const nm =fit(it.name,COLS.name);
-        const qt =String(toNumber(it.qty)).padStart(COLS.qty,' ');
-        const rt =p2(toNumber(it.rate),COLS.rate);
-        const am =p2(toNumber(it.amount),COLS.amt);
-        return `${idx} ${nm} ${qt} ${rt} ${am}`;
-      });
+// ===== PDF Block (with link anchors carrying IDs for mapping) =====
+  function buildMonospaceHTML() {
+    const items=getItems();
+    const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
+    const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.amt);
+    const header = [ fit('#',COLS.idx), fit('ITEM',COLS.name), fit('QTY',COLS.qty), fit('RATE',COLS.rate), fit('AMOUNT',COLS.amt) ].join(' ');
+    const rows = items.map((it,i)=>{
+      const idx=String(i+1).padStart(COLS.idx,' ');
+      const nm =fit(it.name,COLS.name);
+      const qt =String(toNumber(it.qty)).padStart(COLS.qty,' ');
+      const rt =p2(toNumber(it.rate),COLS.rate);
+      const am =p2(toNumber(it.amount),COLS.amt);
+      return `${idx} ${nm} ${qt} ${rt} ${am}`;
+    });
 
-      const subtotal=toNumber(els.subtotal.value);
-      const gstRate=toNumber(els.taxRate.value);
-      const gstAmt=subtotal*(gstRate/100);
-      const flat=toNumber(els.flatDiscount.value);
-      const grand=toNumber(els.grandTotal.value);
-      const paid=toNumber(els.paidAmount.value);
+    const subtotal=toNumber(els.subtotal.value);
+    const gstRate=toNumber(els.taxRate.value);
+    const gstAmt=subtotal*(gstRate/100);
+    const flat=toNumber(els.flatDiscount.value);
+    const grand=toNumber(els.grandTotal.value);
+    const paid=toNumber(els.paidAmount.value);
+    const negotiated=toNumber(els.dueAmount.value);
 
-      function kv(k,v){ const key=(k+':').padEnd(13,' '); const val=String(v); return key + val; }
+    function kv(k,v){ const key=(k+':').padEnd(13,' '); const val=String(v); return key + val; }
+    return `
+      <div id="monoBox" style="
+        width:${mmToPx(RECEIPT_MM)}px; padding:12px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; color:#111827;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace; font-size:12px; line-height:1.4;">
+        <pre style="margin:0; white-space:pre-wrap;">${
+          [
+            'Nusrat Enterprises',
+            '📞 7978830017, 9330066455, 9040366455',
+            '📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014',
+            '',
+            `Invoice: ${els.invoiceNumber.value}` + (els.invoiceDate.value ? ` | Date: ${els.invoiceDate.value}` : ''),
+            els.customerName.value ? `Customer: ${els.customerName.value}` : '',
+            '',
+            header, lineSep, ...rows, lineSep,
+            kv('Subtotal', `₹${subtotal.toFixed(2)}`),
+            ...(gstRate>0 && gstAmt>0 ? [kv(`GST ${gstRate}%`, `₹${gstAmt.toFixed(2)}`)] : []),
+            ...(flat>0 ? [kv('Discount', `-₹${flat.toFixed(2)}`)] : []),
+            kv('Grand Total', `₹${grand.toFixed(2)}`),
+            ...(els.paymentMode.value ? [kv('Payment Mode', els.paymentMode.value)] : []),
+            ...(paid>0 ? [kv('Paid', `₹${paid.toFixed(2)}`)] : []),
+            ...(toNumber(negotiated)>0 ? [kv('Negotiated', `₹${toNumber(negotiated).toFixed(2)}`)] : []),
+            '',
+            'Thank you for shopping with Nusrat Enterprises!'
+          ].join('\n')
+        }</pre>
+        <div style="height:8px"></div>
+        <div style="font-size:11px;color:#374151">
+          <div style="font-weight:600;margin-bottom:4px">Follow &amp; Feedback:</div>
+          <div><a id="gLink" href="${LINKS.googleFeedback}" target="_blank" rel="noopener">Google Feedback: ${LINKS.googleFeedback}</a></div>
+          <div><a id="igLink" href="${LINKS.instagram}" target="_blank" rel="noopener">Instagram: ${LINKS.instagram}</a></div>
+          <div><a id="waLink" href="${LINKS.waChannel}" target="_blank" rel="noopener">WhatsApp Channel: ${LINKS.waChannel}</a></div>
+        </div>
+      </div>`;
+  }
 
-      return `
-        <div id="monoBox" style="
-          width:${mmToPx(RECEIPT_MM)}px; padding:12px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; color:#111827;
-          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace; font-size:12px; line-height:1.4;">
-          <pre style="margin:0; white-space:pre-wrap;">${
-            [
-              'Nusrat Enterprises',
-              'Phones: 7978830017, 9330066455, 9040366455',
-              'Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014',
-              '',
-              `Invoice: ${els.invoiceNumber.value}` + (els.invoiceDate.value ? ` | Date: ${els.invoiceDate.value}` : ''),
-              els.customerName.value ? `Customer: ${els.customerName.value}` : '',
-              '',
-              header, lineSep, ...rows, lineSep,
-              kv('Subtotal', `₹${subtotal.toFixed(2)}`),
-              ...(gstRate>0 && gstAmt>0 ? [kv(`GST ${gstRate}%`, `₹${gstAmt.toFixed(2)}`)] : []),
-              ...(flat>0 ? [kv('Discount', `-₹${flat.toFixed(2)}`)] : []),
-              kv('Grand Total', `₹${grand.toFixed(2)}`),
-              ...(els.paymentMode.value ? [kv('Payment Mode', els.paymentMode.value)] : []),
-              ...(paid>0 ? [kv('Paid', `₹${paid.toFixed(2)}`)] : []),
-              '',
-              'Thank you for shopping with Nusrat Enterprises!'
-            ].join('\n')
-          }</pre>
-          <div style="height:8px"></div>
-          <div style="font-size:11px;color:#374151">
-            <div style="font-weight:600;margin-bottom:4px">Follow &amp; Feedback:</div>
-            <div><a id="gLink" href="${LINKS.googleFeedback}" target="_blank" rel="noopener">⭐ Write a Review: ${LINKS.googleFeedback}</a></div>
-            <div><a id="igLink" href="${LINKS.instagram}" target="_blank" rel="noopener">Instagram: ${LINKS.instagram}</a></div>
-            <div><a id="waLink" href="${LINKS.waChannel}" target="_blank" rel="noopener">WhatsApp Channel: ${LINKS.waChannel}</a></div>
-          </div>
-        </div>`;
+  async function generatePdf() {
+    // Render visible-offscreen DOM
+    els.monoRender.innerHTML = buildMonospaceHTML();
+    await new Promise(r => setTimeout(r, 120)); // allow layout
+
+    const box = els.monoRender.querySelector('#monoBox');
+    const ig = els.monoRender.querySelector('#igLink');
+    const wa = els.monoRender.querySelector('#waLink');
+    const gl = els.monoRender.querySelector('#gLink');
+
+    // Rasterize
+    const canvas = await html2canvas(box, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      useCORS: true
+    });
+
+    const pageWpt = mmToPt(RECEIPT_MM);
+    const margin = 8;
+    const targetWidth = pageWpt - margin * 2;
+    const ratio = canvas.height / canvas.width;
+    const targetHeight = targetWidth * ratio;
+    const pageHpt = targetHeight + margin * 2;
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'pt', format: [pageWpt, pageHpt] });
+
+    const x = margin, y = margin, w = targetWidth, h = targetHeight;
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', x, y, w, h, undefined, 'FAST');
+
+    // Overlay link rectangles
+    const scaleX = w / canvas.width;
+    const scaleY = h / canvas.height;
+    function addLinkHotspot(el, url) {
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const base = box.getBoundingClientRect();
+      const dx = r.left - base.left;
+      const dy = r.top  - base.top;
+      const lw = r.width;
+      const lh = r.height;
+      const lx = x + dx * scaleX;
+      const ly = y + dy * scaleY;
+      const lW = lw * scaleX;
+      const lH = lh * scaleY;
+      try { pdf.link(lx, ly, lW, lH, { url }); } catch(_) {}
     }
+    addLinkHotspot(ig, LINKS.instagram);
+    addLinkHotspot(wa, LINKS.waChannel);
+    addLinkHotspot(gl, LINKS.googleFeedback);
 
-    async function generatePdf() {
-      // Render offscreen
-      els.monoRender.innerHTML = buildMonospaceHTML();
-      await new Promise(r => setTimeout(r, 120));
-
-      const box = els.monoRender.querySelector('#monoBox');
-      const ig = els.monoRender.querySelector('#igLink');
-      const wa = els.monoRender.querySelector('#waLink');
-      const gl = els.monoRender.querySelector('#gLink');
-
-      const canvas = await html2canvas(box, { scale:2, backgroundColor:'#ffffff', useCORS:true });
-
-      const pageWpt = mmToPt(RECEIPT_MM);
-      const margin = 8;
-      const targetWidth = pageWpt - margin * 2;
-      const ratio = canvas.height / canvas.width;
-      const targetHeight = targetWidth * ratio;
-      const pageHpt = targetHeight + margin * 2;
-
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ unit:'pt', format:[pageWpt, pageHpt] });
-
-      const x=margin, y=margin, w=targetWidth, h=targetHeight;
-      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, w, h, undefined, 'FAST');
-
-      // Map live links
-      const scaleX = w / canvas.width;
-      const scaleY = h / canvas.height;
-      function addLinkHotspot(el, url){
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        const base = box.getBoundingClientRect();
-        const dx = r.left - base.left;
-        const dy = r.top  - base.top;
-        const lw = r.width, lh = r.height;
-        const lx = x + dx * scaleX;
-        const ly = y + dy * scaleY;
-        const lW = lw * scaleX, lH = lh * scaleY;
-        try { pdf.link(lx, ly, lW, lH, { url }); } catch(_) {}
-      }
-      addLinkHotspot(ig, LINKS.instagram);
-      addLinkHotspot(wa, LINKS.waChannel);
-      addLinkHotspot(gl, LINKS.googleFeedback);
-
-      const cust = (els.customerName.value || 'Customer').replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'_');
-      pdf.save(`Invoice_${cust}_${els.invoiceDate.value}.pdf`);
-    }
+    const cust = (els.customerName.value || 'Customer').replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'_');
+    const filename = `Invoice_${cust}_${els.invoiceDate.value}.pdf`;
+    pdf.save(filename);
+  }
 
     /* -----------------------------
        12) VCF CREATION
@@ -1377,8 +1370,8 @@ function summaryMonospace() {
       if (!validateAll('copy')) return;
       const items=getItems(); const lines=[];
       lines.push('Nusrat Enterprises');
-      lines.push('Phones: 7978830017, 9330066455, 9040366455');
-      lines.push('Address: Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014');
+      lines.push('📞 7978830017, 9330066455, 9040366455');
+      lines.push('📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014');
       lines.push('');
       lines.push(`Invoice: ${els.invoiceNumber.value}`);
       if(els.invoiceDate.value) lines.push(`Date: ${els.invoiceDate.value}`);
