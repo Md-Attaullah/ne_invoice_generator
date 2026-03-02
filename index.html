@@ -1078,14 +1078,13 @@ function summaryMonospace() {
     return toAscii(raw);
   }
 
-  // EXACT width = 40 chars
   function makeLine40(idx, name, qty, rate, amount) {
     const W = { idx: 2, name: 15, qty: 3, rate: 3, amt: 5 };
-    const fIdx  = padEnd(toAscii(idx), W.idx);
+    const fIdx = padEnd(toAscii(idx), W.idx);
     const fName = padEnd(toAscii(name).slice(0, W.name), W.name);
-    const fQty  = padStart(fmtNoDecimal(qty), W.qty);
+    const fQty = padStart(fmtNoDecimal(qty), W.qty);
     const fRate = padStart(fmtNoDecimal(rate), W.rate);
-    const fAmt  = padEnd(fmtNoDecimal(amount), W.amt);
+    const fAmt = padEnd(fmtNoDecimal(amount), W.amt);
     return `${fIdx} ${fName} ${fQty}X${fRate}=${fAmt}`;
   }
 
@@ -1096,49 +1095,53 @@ function summaryMonospace() {
     return makeLine40(i + 1, it.name, qty, rate, amount);
   });
 
-  // --------------------
-  // NEW HEADER ADDED HERE
-  // --------------------
+  // ===== FIXED TOTALS BLOCK (previously missing) =====
+  const subtotal = Number(els.subtotal.value || 0);
+  const gstRate = Number(els.taxRate.value || 0);
+  const flat = Number(els.flatDiscount.value || 0);
+  const gstAmt = subtotal * (gstRate / 100);
+  const grand = Number(els.grandTotal.value || 0);
+  const paid = Number(els.paidAmount.value || 0);
+  const due = Number(els.dueAmount.value || 0);
+
+  const totals = [
+    `Subtotal: ₹${subtotal.toFixed(2)}`,
+    ...(gstRate > 0 ? [`GST ${gstRate}%: ₹${gstAmt.toFixed(2)}`] : []),
+    ...(flat > 0 ? [`Discount: -₹${flat.toFixed(2)}`] : []),
+    `Grand Total: ₹${grand.toFixed(2)}`,
+    ...(paid > 0 ? [`Paid: ₹${paid.toFixed(2)}`] : []),
+    ...(due > 0 ? [`Negotiated: ₹${due.toFixed(2)}`] : []),
+  ];
+  // ======================================================
+
   const columnHeader = "# Name            Qty  Rate Amt";
 
-  const store1 = 'Nusrat Enterprises';
-  const store2 = 'Phones: 7978830017, 9330066455, 9040366455';
-  const store3 = 'Address: Plot 53, Goutam Nagar, Bhubaneswar - 751014';
-
-  // ---------------------
-  // NEW "Trusted Since 2008"
-  // ---------------------
-  const trusted = 'Trusted Since 2008';
-
-  const invLine  = `Invoice: ${els.invoiceNumber.value}`;
-  const dateLine = els.invoiceDate.value ? `Date: ${els.invoiceDate.value}` : '';
-  const custLine = els.customerName.value ? `Customer: ${els.customerName.value}` : '';
-
   const lines = [
-    store1,
-    store2,
-    store3,
-    trusted,        // ← Added here
-    '',
-    invLine + (dateLine ? ' | ' + dateLine : ''),
-    custLine,
-    '',
-    columnHeader,   // ← Column header added here
+    "Nusrat Enterprises",
+    "Phones: 7978830017, 9330066455, 9040366455",
+    "Address: Plot 53, Goutam Nagar, Bhubaneswar - 751014",
+    "Trusted Since 2008",
+    "",
+    `Invoice: ${els.invoiceNumber.value} | Date: ${els.invoiceDate.value}`,
+    `Customer: ${els.customerName.value}`,
+    "",
+    columnHeader,
     ...rows,
-    '',
+    "",
     ...totals,
-    '',
-    'Thank you for shopping with Nusrat Enterprises!'
+    "",
+    "Thank you for shopping with Nusrat Enterprises!",
+    "",
+    `Review: ${LINKS.googleFeedback}`,
+    `WA Channel: ${LINKS.waChannel}`,
+    `Instagram: ${LINKS.instagram}`
   ];
 
-  const codeBlock = '```' + '\n' + lines.join('\n') + '\n' + '```';
-  const followBlock =
-    `\nFollow & Feedback:\n\n` +
-    `⭐ Write a Review: ${LINKS.googleFeedback}\n\n` +
-    `WhatsApp Channel: ${LINKS.waChannel}\n\n` +
-    `Instagram: ${LINKS.instagram}`;
-
-  return codeBlock + followBlock;
+  return (
+    "```\n" +
+    lines.join("\n") +
+    "\n```"
+  );
 }
 
 // ===== PDF Block (with link anchors carrying IDs for mapping) =====
