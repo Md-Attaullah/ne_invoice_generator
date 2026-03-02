@@ -554,7 +554,7 @@
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwFcSGSZjTmUtxWtyxnK1fnRWH9uNPZA7VRdd1jr1uT73h-y-eHfOgTQ11u34Ambeyo/exec';
     const AUTH_TOKEN  = '9705322252';
     const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Cargo Pant","Formal Pant","Track","Half Pant","Under Wear","Vest"];
-    const NAME_MAX = 22; // <= Enforce Item Name max characters
+    const NAME_MAX = 20; // <= Enforce Item Name max characters
 
     /* -----------------------------
        3) ELEMENT REFERENCES
@@ -806,8 +806,8 @@
           </div>
           <!-- Name field with live counter -->
           <div class="name name-wrap">
-            <input class="name" data-f="name" placeholder="Name" maxlength="22" value="${safeName}"/>
-            <div class="char-counter" data-f="cc" aria-live="polite">0/22</div>
+            <input class="name" data-f="name" placeholder="Name" maxlength="20" value="${safeName}"/>
+            <div class="char-counter" data-f="cc" aria-live="polite">0/20</div>
           </div>
           <button type="button" class="btn danger del" title="Delete">✕</button>
         </div>
@@ -1078,17 +1078,21 @@ function summaryMonospace() {
     return toAscii(raw);
   }
 
-  // EXACT width mapping: idx(3) name(22) qty(3) rate(3) amt(5) => 40 chars
+  // EXACT width mapping = 40 chars:
+  // idx(3) name(20) qty(3) rate(3) amt(5)
   function makeLine40(idx, name, qty, rate, amount) {
-    const W = { idx: 3, name: 22, qty: 3, rate: 3, amt: 5 };
+    const W = { idx: 3, name: 20, qty: 3, rate: 3, amt: 5 };
 
     const fIdx  = padStart(toAscii(idx), W.idx);
     const fName = padEnd(toAscii(name).slice(0, W.name), W.name);
     const fQty  = padStart(fmtNoDecimal(qty), W.qty);
     const fRate = padStart(fmtNoDecimal(rate), W.rate);
-    const fAmt  = padStart(fmtNoDecimal(amount), W.amt);
 
-    // space separated → 3+1+22+1+3+1+3+1+5 = 40 chars
+    // LEFT aligned amount
+    const fAmt  = padEnd(fmtNoDecimal(amount), W.amt);
+
+    // Final format you liked:
+    // "III NAME(20) QQQXRRR=AAAAA"
     return `${fIdx} ${fName} ${fQty}X${fRate}=${fAmt}`;
   }
 
@@ -1143,7 +1147,11 @@ function summaryMonospace() {
   ];
 
   const codeBlock = '```' + '\n' + lines.join('\n') + '\n' + '```';
-  const followBlock = `\nFollow & Feedback:\n\n⭐ Write a Review: ${LINKS.googleFeedback}\n\nWhatsApp Channel: ${LINKS.waChannel}\n\nInstagram: ${LINKS.instagram}`;
+  const followBlock =
+    `\nFollow & Feedback:\n\n` +
+    `⭐ Write a Review: ${LINKS.googleFeedback}\n\n` +
+    `WhatsApp Channel: ${LINKS.waChannel}\n\n` +
+    `Instagram: ${LINKS.instagram}`;
 
   return codeBlock + followBlock;
 }
@@ -1153,7 +1161,7 @@ function summaryMonospace() {
        ----------------------------- */
     function buildMonospaceHTML() {
       const items=getItems();
-      const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
+      const COLS = { idx:3, name:20, qty:3, rate:8, amt:10 };
       const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.amt);
       const header = [ fit('#',COLS.idx), fit('ITEM',COLS.name), fit('QTY',COLS.qty), fit('RATE',COLS.rate), fit('AMOUNT',COLS.amt) ].join(' ');
       const rows = items.map((it,i)=>{
