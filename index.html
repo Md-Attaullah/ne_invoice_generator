@@ -121,7 +121,7 @@
 
     /* Name field adorn (counter) */
     .name-wrap{ position:relative; }
-    .name-wrap > input{ padding-right:64px; } /* room for counter */
+    .name-wrap > input{ padding-right:64px; }
     .char-counter{
       position:absolute; right:8px; top:50%; transform:translateY(-50%);
       font-size:12px; color:var(--muted); pointer-events:none; user-select:none;
@@ -129,11 +129,11 @@
 
     /* Print/Preview */
     .print-header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
-    .print-title{font-size:1.15rem;font-weight:800;color:#7f1d1d}
+    .print-title{font-size:1.15rem;font-weight:800;color:var(--brand-2)}
     .print-meta{font-size:.92rem;color:var(--muted)}
     @media print{header{display:none!important}.card{border:none;box-shadow:none}}
 
-    /* WhatsApp staged button */
+    /* WhatsApp staged button (functional base) */
     :root{
       --wa-green: #4ebe77;
       --wa-green-dark: #1fb656;
@@ -159,11 +159,6 @@
     .wa-btn.is-downloading,
     .wa-btn.is-sending,
     .wa-btn.is-success{ pointer-events: none; }
-    .wa-icon{ width: var(--wa-icon-size); height: var(--wa-icon-size); display: inline-block; color: #012f17; opacity: 1; transition: opacity .18s ease; }
-    .wa-btn.is-saving .wa-icon,
-    .wa-btn.is-downloading .wa-icon,
-    .wa-btn.is-sending .wa-icon,
-    .wa-btn.is-success .wa-icon{ opacity:0; width:0; height:0; overflow:hidden; }
     .wa-label{ min-width:8ch; white-space:nowrap; display:inline-grid; grid-auto-flow:column; align-items:center }
     .wa-label .text-default{ display:inline; }
     .wa-label .text-saving,
@@ -267,6 +262,35 @@
     :root[data-theme="dark"] .seg-raised .seg.active{
       background: linear-gradient(180deg, color-mix(in lab, var(--brand) 90%, #000 10%), color-mix(in lab, var(--brand) 65%, #000 35%));
       border-color: color-mix(in lab, var(--brand) 55%, #000 45%); color:#fff;
+    }
+
+    /* ================================
+       UPDATED Professional Yellow Button — overrides for WA button
+       ================================ */
+    .wa-btn.btn-yellow{
+      background: linear-gradient(180deg, #facc15, #eab308);
+      color: #1f2937;
+      padding: 14px 22px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      box-shadow:
+        0 10px 24px rgba(250, 204, 21, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+    .wa-btn.btn-yellow:hover{
+      background: linear-gradient(180deg, #fcd34d, #facc15);
+      transform: translateY(-2px);
+      box-shadow:
+        0 14px 28px rgba(250, 204, 21, 0.30),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    .wa-btn.btn-yellow:active{
+      transform: translateY(1px);
+      box-shadow:
+        0 6px 16px rgba(250, 204, 21, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
     }
   </style>
 
@@ -435,22 +459,16 @@
           </div>
         </div>
       </div>
-
-      <!-- Actions -->
+<!-- Actions -->
       <div class="card actions-card">
         <h2>Actions</h2>
         <div class="action-buttons">
 
-          <!-- WhatsApp staged flow button -->
-          <button id="whatsAppBtn" class="wa-btn" type="button" aria-live="polite">
-            <!-- Left: WA icon (idle only) -->
-            <svg class="wa-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <path fill="currentColor" d="M20.52 3.48A11.78 11.78 0 0 0 12.04 0C5.49 0 .19 5.3.19 11.85c0 2.09.55 4.05 1.6 5.81L0 24l6.5-1.71a11.73 11.73 0 0 0 5.49 1.4h.01c6.55 0 11.85-5.3 11.85-11.85 0-3.17-1.23-6.15-3.33-8.35zM12 21.33h-.01a9.7 9.7 0 0 1-4.95-1.35l-.35-.2-3.86 1.02 1.03-3.76-.23-.39a9.7 9.7 0 0 1-1.47-5.17C2.16 6.46 6.46 2.16 12 2.16c2.6 0 5.05 1.01 6.89 2.85a9.66 9.66 0 0 1 2.84 6.89c0 5.54-4.3 9.44-9.73 9.43zM17.3 14.4c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.23-.65.08-.3-.15-1.29-.48-2.45-1.53-.9-.8-1.5-1.78-1.68-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.53.08-.8.38-.27.3-1.05 1.03-1.05 2.51 0 1.48 1.08 2.91 1.23 3.11.15.2 2.12 3.23 5.14 4.53.72.31 1.28.5 1.72.64.72.23 1.38.2 1.9.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.17-1.41-.08-.13-.27-.2-.57-.35z"/>
-            </svg>
-
+          <!-- Complete Invoice Process — Staged flow (icon removed as requested) -->
+          <button id="whatsAppBtn" class="wa-btn btn-yellow" type="button" aria-live="polite">
             <!-- Center: dynamic label -->
             <span class="wa-label">
-              <span class="text-default">WhatsApp</span>
+              <span class="text-default">💼 Complete Invoice Process</span>
               <span class="text-saving" aria-hidden="true">Saving…</span>
               <span class="text-downloading" aria-hidden="true">Downloading…</span>
               <span class="text-sending" aria-hidden="true">Sending…</span>
@@ -465,7 +483,7 @@
               </svg>
               <!-- Downloading -->
               <svg class="icon-download" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42L11 12.6V4a1 1 0 0 1 1-1Zm-7 14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1a1 1 0 1 1 2 0v1a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-1a1 1 0 1 1 2 0v1Z"/>
+                <path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42L11 12.6V4a1 1 0 0 1 1-1Zm-7 14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1a1 1 0 1 1 2 0v1Z"/>
               </svg>
               <!-- Sending -->
               <svg class="icon-send" viewBox="0 0 24 24">
@@ -485,8 +503,11 @@
             </span>
           </button>
 
+          <!-- NEW: WhatsApp Invoice ONLY (ghost) -->
+          <button type="button" class="btn ghost" id="waInvoiceBtn">📲 WhatsApp Invoice</button>
+
           <!-- Print / PDF -->
-          <button type="button" class="btn outline" id="printBtn">🖨️ Print / PDF</button>
+          <button type="button" class="btn ghost" id="printBtn">🖨️ Print / PDF</button>
           <button type="button" class="btn ghost" id="previewBtn">👁️ Preview</button>
           <button type="button" class="btn ghost" id="copyTextBtn">📋 Copy Summary</button>
 
@@ -516,15 +537,12 @@
 
   <!-- Floating Add button -->
   <button type="button" class="fab" id="fabAdd">+ Add</button>
-
   <!-- ================================
        APPLICATION SCRIPT
        ================================ -->
   <script>
   (function(){
-    /* -----------------------------
-       1) THEME INITIALIZATION
-       ----------------------------- */
+    /* ----------------------------- 1) THEME ----------------------------- */
     const THEME_KEY='nusrat.theme';
     const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); }
@@ -543,9 +561,7 @@
       applyTheme(next); localStorage.setItem(THEME_KEY, next); updateThemeBtn();
     });
 
-    /* -----------------------------
-       2) CONFIG / CONSTANTS
-       ----------------------------- */
+    /* ----------------------------- 2) CONFIG ----------------------------- */
     const LINKS = {
       instagram: "https://www.instagram.com/nusrat_enterprises/",
       waChannel: "https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06",
@@ -554,26 +570,21 @@
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwFcSGSZjTmUtxWtyxnK1fnRWH9uNPZA7VRdd1jr1uT73h-y-eHfOgTQ11u34Ambeyo/exec';
     const AUTH_TOKEN  = '9705322252';
     const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Cargo Pant","Formal Pant","Track","Half Pant","Under Wear","Vest"];
-    const NAME_MAX = 15; // <= Enforce Item Name max characters
+    const NAME_MAX = 15;
 
-    /* -----------------------------
-       3) ELEMENT REFERENCES
-       ----------------------------- */
+    /* ----------------------------- 3) EL REFS ----------------------------- */
     const els={
       itemsList:document.getElementById('itemsList'),
       quickline:document.getElementById('quickline'),
       quicklineForm:document.getElementById('quicklineForm'),
       fabAdd:document.getElementById('fabAdd'),
-
       invoiceNumber:document.getElementById('invoiceNumber'),
       invoiceDate:document.getElementById('invoiceDate'),
       customerName:document.getElementById('customerName'),
       customerPhone:document.getElementById('customerPhone'),
       phoneError:document.getElementById('phoneError'),
       pickContactBtn:document.getElementById('pickContactBtn'),
-
       saleType:document.getElementById('saleType'),
-
       subtotal:document.getElementById('subtotal'),
       itemsBreakdown:document.getElementById('itemsBreakdown'),
       itemsCountQty:document.getElementById('itemsCountQty'),
@@ -584,12 +595,11 @@
       paidAmount:document.getElementById('paidAmount'),
       paidError:document.getElementById('paidError'),
       dueAmount:document.getElementById('dueAmount'),
-
       previewCard:document.getElementById('previewCard'),
       invoicePreview:document.getElementById('invoicePreview'),
       monoRender:document.getElementById('monoRender'),
-
       whatsAppBtn: document.getElementById('whatsAppBtn'),
+      waInvoiceBtn: document.getElementById('waInvoiceBtn'),
       saveBtn: document.getElementById('saveToSheetBtn'),
       printBtn: document.getElementById('printBtn'),
       previewBtn: document.getElementById('previewBtn'),
@@ -598,16 +608,12 @@
       vcfBtn: document.getElementById('vcfBtn'),
     };
 
-    /* -----------------------------
-       4) SALE TYPE SEGMENTED CONTROL
-       ----------------------------- */
+    /* ----------------------------- 4) SALE TYPE ----------------------------- */
     (function wireSaleTypeSegments(){
       const group = document.getElementById('saleTypeGroup');
       if (!group) return;
-
       const labels = Array.from(group.querySelectorAll('label.seg'));
       const radios  = Array.from(group.querySelectorAll('input[type="radio"][name="saleTypeRadio"]'));
-
       function setActiveByValue(val){
         labels.forEach(l => l.classList.remove('active'));
         const match = radios.find(r => r.value === val);
@@ -618,25 +624,17 @@
           if (hidden) hidden.value = val;
         }
       }
-
-      // Ensure nothing is checked on load
       radios.forEach(r => { r.checked = false; });
       els.saleType.value = '';
       labels.forEach(l => l.classList.remove('active'));
-
       radios.forEach(radio => {
         radio.addEventListener('change', () => {
-          if (radio.checked){
-            setActiveByValue(radio.value);
-            persist();
-          }
+          if (radio.checked){ setActiveByValue(radio.value); persist(); }
         });
       });
     })();
 
-    /* -----------------------------
-       5) HELPERS
-       ----------------------------- */
+    /* ----------------------------- 5) HELPERS ----------------------------- */
     const pad2=n=>String(n).padStart(2,'0');
     function genInvoice(){ const d=new Date(); return `${pad2(d.getDate())}${pad2(d.getMonth()+1)}${d.getFullYear()}${pad2(d.getHours())}${pad2(d.getMinutes())}`; }
     function toNumber(v){ const n=parseFloat(v); return Number.isFinite(n) ? n : 0; }
@@ -645,7 +643,6 @@
     const RECEIPT_MM = 107;
     const mmToPx = mm => Math.round(mm * 96 / 25.4);
     const mmToPt = mm => (mm * 72 / 25.4);
-
     function setBtnLoading(btn, loading, loadingText, normalText){
       if(!btn) return;
       const textEl = btn.querySelector('.btn-text');
@@ -661,9 +658,7 @@
       }
     }
 
-    /* -----------------------------
-       6) INIT HEADER VALUES
-       ----------------------------- */
+    /* ----------------------------- 6) INIT HEADER ----------------------------- */
     els.invoiceNumber.value = genInvoice();
     const today = new Date();
     els.invoiceDate.value = `${today.getFullYear()}-${pad2(today.getMonth()+1)}-${pad2(today.getDate())}`;
@@ -711,12 +706,9 @@
       }
     });
 
-    /* -----------------------------
-       7) ITEMS LOGIC (with Live Counter)
-       ----------------------------- */
+    /* ----------------------------- 7) ITEMS ----------------------------- */
     const LS='nusrat.vertical.items.v7';
     function compute(obj){ return Math.max(0, obj.qty * obj.rate); }
-
     function liToObj(li){
       const obj = {
         type: li.querySelector('[data-f="type"]').value || '',
@@ -724,7 +716,6 @@
         qty:  toNumber(li.querySelector('[data-f="qty"]').value),
         rate: toNumber(li.querySelector('[data-f="rate"]').value)
       };
-      // Enforce name max at read time (defensive)
       if (obj.name.length > NAME_MAX) obj.name = obj.name.slice(0, NAME_MAX);
       obj.amount = compute(obj);
       return obj;
@@ -734,39 +725,26 @@
       const amt = liToObj(li).amount;
       li.querySelector('[data-f="amt"]').textContent = amt.toFixed(2);
     }
-
     function updateNameCounter(nameEl, ccEl){
       if(!nameEl) return;
       const len = nameEl.value.length;
       if (ccEl) ccEl.textContent = `${len}/${NAME_MAX}`;
-      // Show helper at limit (non-blocking)
-      if (len === NAME_MAX){
-        showErrorBelow(nameEl, `Max ${NAME_MAX} characters reached.`);
-      } else if (len < NAME_MAX){
-        // Hide helper when below limit
-        hideErrorBelow(nameEl);
-      }
+      if (len === NAME_MAX){ showErrorBelow(nameEl, `Max ${NAME_MAX} characters reached.`); }
+      else { hideErrorBelow(nameEl); }
     }
-
     function attachLi(li){
       const typeEl = li.querySelector('[data-f="type"]');
       const nameEl = li.querySelector('[data-f="name"]');
       const qtyEl  = li.querySelector('[data-f="qty"]');
       const ccEl   = li.querySelector('[data-f="cc"]');
 
-      // Initialize counter on mount
       updateNameCounter(nameEl, ccEl);
 
-      // Name: hard limit + live counter + helper text
       nameEl.addEventListener('input', () => {
-        if (nameEl.value.length > NAME_MAX) {
-          nameEl.value = nameEl.value.slice(0, NAME_MAX);
-        }
-        updateNameCounter(nameEl, ccEl);
-        updateLi(li); recalc(); persist();
+        if (nameEl.value.length > NAME_MAX) nameEl.value = nameEl.value.slice(0, NAME_MAX);
+        updateNameCounter(nameEl, ccEl); updateLi(li); recalc(); persist();
       });
 
-      // Qty stepper
       li.querySelector('[data-act="minus"]').addEventListener('click', ()=>{
         qtyEl.value = Math.max(1, (parseInt(qtyEl.value||'1',10)-1));
         updateLi(li); recalc(); persist();
@@ -776,7 +754,6 @@
         updateLi(li); recalc(); persist();
       });
 
-      // Type change -> optionally set name (respect max) and update counter
       li.addEventListener('input', (e)=>{
         if (e.target === typeEl){
           if ((!nameEl.value || ITEM_OPTIONS.includes(nameEl.value)) && typeEl.value) {
@@ -788,12 +765,9 @@
       });
       li.addEventListener('change', ()=>{ updateLi(li); recalc(); persist(); });
 
-      // Delete row
       li.querySelector('.del').addEventListener('click', ()=>{ li.remove(); recalc(); persist(); });
     }
-
     function addItem(obj={type:'',name:'',qty:1,rate:''}, { atTop = true } = {}){
-      // Normalize name to max length before rendering
       const safeName = (obj.name || obj.type || '').slice(0, NAME_MAX).replace(/"/g,'&quot;');
       const li = document.createElement('li'); li.className='item';
       li.innerHTML = `
@@ -804,7 +778,6 @@
               ${ITEM_OPTIONS.map(x=>`<option value="${x}" ${x===obj.type?'selected':''}>${x}</option>`).join('')}
             </select>
           </div>
-          <!-- Name field with live counter -->
           <div class="name name-wrap">
             <input class="name" data-f="name" placeholder="Name" maxlength="15" value="${safeName}"/>
             <div class="char-counter" data-f="cc" aria-live="polite">0/15</div>
@@ -821,14 +794,12 @@
           <div class="amt">₹ <span data-f="amt">0.00</span></div>
         </div>
       `;
-      if (atTop && els.itemsList.firstChild) { els.itemsList.insertBefore(li, els.itemsList.firstChild); }
-      else { els.itemsList.appendChild(li); }
-      attachLi(li);
-      updateLi(li);
-      recalc();
+      if (atTop && els.itemsList.firstChild) els.itemsList.insertBefore(li, els.itemsList.firstChild);
+      else els.itemsList.appendChild(li);
+      attachLi(li); updateLi(li); recalc();
     }
 
-    // Quickline parse: "Name Qty Rate"
+    // Quickline parse & actions
     function parseQuickline(s){
       const parts = (s||'').trim().split(/\s+/);
       if(!parts.length) return null;
@@ -840,23 +811,16 @@
         name = parts.slice(0, i+1); break;
       }
       if(name.length===0) name = [parts[0]];
-      // Enforce name max at parse time
       const nm = name.join(' ').slice(0, NAME_MAX);
       return { name: nm, qty, rate: rate===''?'':rate };
     }
     function addFromQuickline(){
       const parsed = parseQuickline(els.quickline.value);
-      if(!parsed || parsed.rate===''){
-        alert('Use: Item  Qty  Rate. Example: "Shirt 2 300"');
-        return;
-      }
+      if(!parsed || parsed.rate===''){ alert('Use: Item  Qty  Rate. Example: "Shirt 2 300"'); return; }
       let typeMatch = ITEM_OPTIONS.find(x => parsed.name.toLowerCase().includes(x.toLowerCase()));
       addItem({ type:typeMatch||'', name:parsed.name, qty:parsed.qty, rate:parsed.rate }, { atTop: true });
-      els.quickline.value='';
-      persist();
+      els.quickline.value=''; persist();
     }
-
-    // Events for items controls
     els.quicklineForm.addEventListener('submit', (e) => { e.preventDefault(); addFromQuickline(); });
     els.quickline.addEventListener('keydown', (e) => {
       if ((e.key && e.key.toLowerCase() === 'enter') || e.keyCode === 13) { e.preventDefault(); addFromQuickline(); }
@@ -894,9 +858,7 @@
       recalc();
     }
 
-    /* -----------------------------
-       8) SUMMARY / TOTALS
-       ----------------------------- */
+    /* ----------------------------- 8) TOTALS ----------------------------- */
     function buildItemsBreakdown(items){
       const map = new Map();
       items.forEach(it=>{
@@ -908,7 +870,6 @@
       const parts=[]; for (const [name,qty] of map.entries()) parts.push(`${qty}x ${name}`);
       return parts.join(', ');
     }
-
     function recalc(){
       const items=getItems();
       const countQty = items.reduce((s,i)=> s + toNumber(i.qty), 0);
@@ -932,7 +893,7 @@
       validatePaid();
     }
 
-    // Paid guards/validation
+    // Paid validation
     els.paidAmount.addEventListener('keydown', (e)=>{
       const blocked = ['e','E','+','-'];
       if (blocked.includes(e.key)) e.preventDefault();
@@ -961,7 +922,7 @@
       el.addEventListener('change', ()=>{ recalc(); persist(); });
     });
 
-    // Validation Helpers
+    // Validation helpers
     function showErrorBelow(el, msg){
       let e=el.parentElement.querySelector('.error');
       if(!e){ e=document.createElement('div'); e.className='error'; el.parentElement.appendChild(e);}
@@ -987,18 +948,9 @@
         if(!sel.value){ showErrorBelow(sel,'Select an item.'); ok=false; } else hideErrorBelow(sel);
         if(!qty.value){ showErrorBelow(qty,'Enter quantity.'); ok=false; } else hideErrorBelow(qty);
         if(rate.value===''){ showErrorBelow(rate,'Enter rate.'); ok=false; } else hideErrorBelow(rate);
-
-        // Name length validation (defensive; should not exceed due to trim)
-        if (name.value.length > NAME_MAX){
-          showErrorBelow(name, `Item name cannot exceed ${NAME_MAX} characters.`);
-          ok=false;
-        } else if (name.value.length === NAME_MAX) {
-          // Show helper at limit, do not fail
-          showErrorBelow(name, `Max ${NAME_MAX} characters reached.`);
-        } else {
-          hideErrorBelow(name);
-        }
-
+        if (name.value.length > NAME_MAX){ showErrorBelow(name, `Item name cannot exceed ${NAME_MAX} characters.`); ok=false; }
+        else if (name.value.length === NAME_MAX) { showErrorBelow(name, `Max ${NAME_MAX} characters reached.`); }
+        else { hideErrorBelow(name); }
         if (sel.value && qty.value && rate.value!=='') hasValid=true;
       });
       if(!hasValid) ok=false;
@@ -1011,9 +963,7 @@
       return ok;
     }
 
-    /* -----------------------------
-       9) PREVIEW RENDER
-       ----------------------------- */
+    /* ----------------------------- 9) PREVIEW ----------------------------- */
     function renderPreview(){
       const items=getItems();
       const rowsHtml = items.map(it=>`
@@ -1058,211 +1008,183 @@
         </div>`;
     }
 
-/* -----------------------------
-   10) WHATSAPP MONOSPACE SUMMARY (40 chars/row)
-   ----------------------------- */
-function summaryMonospace() {
-  const items = getItems();
+    /* ----------------------------- 10) WA SUMMARY ----------------------------- */
+    function summaryMonospace() {
+      const items = getItems();
+      const toAscii = s => String(s || '').replace(/[^\x00-\x7F]/g, '');
+      const padEnd = (s, n) => (s.length > n ? s.slice(0, n) : s.padEnd(n, ' '));
+      const padStart = (s, n) => (s.length > n ? s.slice(-n) : s.padStart(n, ' '));
+      function fmtNoDecimal(n) {
+        if (n == null || n === '') return '';
+        const num = Number(n);
+        if (Number.isNaN(num)) return String(n);
+        const raw = Number.isInteger(num) ? String(num) : num.toFixed(2).replace(/\.?0+$/, '');
+        return toAscii(raw);
+      }
+      function makeLine40(idx, name, qty, rate, amount) {
+        const W = { idx: 2, name: 15, qty: 3, rate: 3, amt: 5 };
+        const fIdx = padEnd(toAscii(idx), W.idx);
+        const fName = padEnd(toAscii(name).slice(0, W.name), W.name);
+        const fQty = padStart(fmtNoDecimal(qty), W.qty);
+        const fRate = padStart(fmtNoDecimal(rate), W.rate);
+        const fAmt = padEnd(fmtNoDecimal(amount), W.amt);
+        return `${fIdx} ${fName} ${fQty}X${fRate}=${fAmt}`;
+      }
+      const rows = items.map((it, i) => {
+        const qty = Number(it.qty) || 0;
+        const rate = Number(it.rate) || 0;
+        const amount = qty * rate;
+        return makeLine40(i + 1, it.name, qty, rate, amount);
+      });
 
-  const toAscii = s => String(s || '').replace(/[^\x00-\x7F]/g, '');
-  const padEnd = (s, n) => (s.length > n ? s.slice(0, n) : s.padEnd(n, ' '));
-  const padStart = (s, n) => (s.length > n ? s.slice(-n) : s.padStart(n, ' '));
+      const subtotal = Number(els.subtotal.value || 0);
+      const gstRate = Number(els.taxRate.value || 0);
+      const flat = Number(els.flatDiscount.value || 0);
+      const gstAmt = subtotal * (gstRate / 100);
+      const grand = Number(els.grandTotal.value || 0);
+      const paid = Number(els.paidAmount.value || 0);
+      const due = Number(els.dueAmount.value || 0);
 
-  function fmtNoDecimal(n) {
-    if (n == null || n === '') return '';
-    const num = Number(n);
-    if (Number.isNaN(num)) return String(n);
-    const raw = Number.isInteger(num)
-      ? String(num)
-      : num.toFixed(2).replace(/\.?0+$/, '');
-    return toAscii(raw);
-  }
+      const totals = [
+        `Subtotal: ₹${subtotal.toFixed(2)}`,
+        ...(gstRate > 0 ? [`GST ${gstRate}%: ₹${gstAmt.toFixed(2)}`] : []),
+        ...(flat > 0 ? [`Discount: -₹${flat.toFixed(2)}`] : []),
+        `Grand Total: ₹${grand.toFixed(2)}`,
+        ...(paid > 0 ? [`Paid: ₹${paid.toFixed(2)}`] : []),
+        ...(due > 0 ? [`Negotiated: ₹${due.toFixed(2)}`] : []),
+      ];
 
-  function makeLine40(idx, name, qty, rate, amount) {
-    const W = { idx: 2, name: 15, qty: 3, rate: 3, amt: 5 };
-    const fIdx = padEnd(toAscii(idx), W.idx);
-    const fName = padEnd(toAscii(name).slice(0, W.name), W.name);
-    const fQty = padStart(fmtNoDecimal(qty), W.qty);
-    const fRate = padStart(fmtNoDecimal(rate), W.rate);
-    const fAmt = padEnd(fmtNoDecimal(amount), W.amt);
-    return `${fIdx} ${fName} ${fQty}X${fRate}=${fAmt}`;
-  }
-
-  const rows = items.map((it, i) => {
-    const qty = Number(it.qty) || 0;
-    const rate = Number(it.rate) || 0;
-    const amount = qty * rate;
-    return makeLine40(i + 1, it.name, qty, rate, amount);
-  });
-
-  // ===== FIXED TOTALS BLOCK (previously missing) =====
-  const subtotal = Number(els.subtotal.value || 0);
-  const gstRate = Number(els.taxRate.value || 0);
-  const flat = Number(els.flatDiscount.value || 0);
-  const gstAmt = subtotal * (gstRate / 100);
-  const grand = Number(els.grandTotal.value || 0);
-  const paid = Number(els.paidAmount.value || 0);
-  const due = Number(els.dueAmount.value || 0);
-
-  const totals = [
-    `Subtotal: ₹${subtotal.toFixed(2)}`,
-    ...(gstRate > 0 ? [`GST ${gstRate}%: ₹${gstAmt.toFixed(2)}`] : []),
-    ...(flat > 0 ? [`Discount: -₹${flat.toFixed(2)}`] : []),
-    `Grand Total: ₹${grand.toFixed(2)}`,
-    ...(paid > 0 ? [`Paid: ₹${paid.toFixed(2)}`] : []),
-    ...(due > 0 ? [`Negotiated: ₹${due.toFixed(2)}`] : []),
-  ];
-  // ======================================================
-
-  const columnHeader = "# Name            Qty  Rate Amt";
-
-  const lines = [
-    "Nusrat Enterprises",
-    "Phones: 7978830017, 9330066455, 9040366455",
-    "Address: Plot 53, Goutam Nagar, Bhubaneswar - 751014",
-    "Trusted Since 2008",
-    "",
-    `Invoice: ${els.invoiceNumber.value} | Date: ${els.invoiceDate.value}`,
-    `Customer: ${els.customerName.value}`,
-    "",
-    columnHeader,
-    ...rows,
-    "",
-    ...totals,
-    "",
-    "Thank you for shopping with Nusrat Enterprises!",
-    "",
-    `Review: ${LINKS.googleFeedback}`,
-    `WA Channel: ${LINKS.waChannel}`,
-    `Instagram: ${LINKS.instagram}`
-  ];
-
-  return (
-    "```\n" +
-    lines.join("\n") +
-    "\n```"
-  );
-}
-
-// ===== PDF Block (with link anchors carrying IDs for mapping) =====
-  function buildMonospaceHTML() {
-    const items=getItems();
-    const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
-    const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.amt);
-    const header = [ fit('#',COLS.idx), fit('ITEM',COLS.name), fit('QTY',COLS.qty), fit('RATE',COLS.rate), fit('AMOUNT',COLS.amt) ].join(' ');
-    const rows = items.map((it,i)=>{
-      const idx=String(i+1).padStart(COLS.idx,' ');
-      const nm =fit(it.name,COLS.name);
-      const qt =String(toNumber(it.qty)).padStart(COLS.qty,' ');
-      const rt =p2(toNumber(it.rate),COLS.rate);
-      const am =p2(toNumber(it.amount),COLS.amt);
-      return `${idx} ${nm} ${qt} ${rt} ${am}`;
-    });
-
-    const subtotal=toNumber(els.subtotal.value);
-    const gstRate=toNumber(els.taxRate.value);
-    const gstAmt=subtotal*(gstRate/100);
-    const flat=toNumber(els.flatDiscount.value);
-    const grand=toNumber(els.grandTotal.value);
-    const paid=toNumber(els.paidAmount.value);
-    const negotiated=toNumber(els.dueAmount.value);
-
-    function kv(k,v){ const key=(k+':').padEnd(13,' '); const val=String(v); return key + val; }
-    return `
-      <div id="monoBox" style="
-        width:${mmToPx(RECEIPT_MM)}px; padding:12px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; color:#111827;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace; font-size:12px; line-height:1.4;">
-        <pre style="margin:0; white-space:pre-wrap;">${
-          [
-            'Nusrat Enterprises',
-            '📞 7978830017, 9330066455, 9040366455',
-            '📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014',
-            '',
-            `Invoice: ${els.invoiceNumber.value}` + (els.invoiceDate.value ? ` | Date: ${els.invoiceDate.value}` : ''),
-            els.customerName.value ? `Customer: ${els.customerName.value}` : '',
-            '',
-            header, lineSep, ...rows, lineSep,
-            kv('Subtotal', `₹${subtotal.toFixed(2)}`),
-            ...(gstRate>0 && gstAmt>0 ? [kv(`GST ${gstRate}%`, `₹${gstAmt.toFixed(2)}`)] : []),
-            ...(flat>0 ? [kv('Discount', `-₹${flat.toFixed(2)}`)] : []),
-            kv('Grand Total', `₹${grand.toFixed(2)}`),
-            ...(els.paymentMode.value ? [kv('Payment Mode', els.paymentMode.value)] : []),
-            ...(paid>0 ? [kv('Paid', `₹${paid.toFixed(2)}`)] : []),
-            ...(toNumber(negotiated)>0 ? [kv('Negotiated', `₹${toNumber(negotiated).toFixed(2)}`)] : []),
-            '',
-            'Thank you for shopping with Nusrat Enterprises!'
-          ].join('\n')
-        }</pre>
-        <div style="height:8px"></div>
-        <div style="font-size:11px;color:#374151">
-          <div style="font-weight:600;margin-bottom:4px">Follow &amp; Feedback:</div>
-          <div><a id="gLink" href="${LINKS.googleFeedback}" target="_blank" rel="noopener">Google Feedback: ${LINKS.googleFeedback}</a></div>
-          <div><a id="igLink" href="${LINKS.instagram}" target="_blank" rel="noopener">Instagram: ${LINKS.instagram}</a></div>
-          <div><a id="waLink" href="${LINKS.waChannel}" target="_blank" rel="noopener">WhatsApp Channel: ${LINKS.waChannel}</a></div>
-        </div>
-      </div>`;
-  }
-
-  async function generatePdf() {
-    // Render visible-offscreen DOM
-    els.monoRender.innerHTML = buildMonospaceHTML();
-    await new Promise(r => setTimeout(r, 120)); // allow layout
-
-    const box = els.monoRender.querySelector('#monoBox');
-    const ig = els.monoRender.querySelector('#igLink');
-    const wa = els.monoRender.querySelector('#waLink');
-    const gl = els.monoRender.querySelector('#gLink');
-
-    // Rasterize
-    const canvas = await html2canvas(box, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      useCORS: true
-    });
-
-    const pageWpt = mmToPt(RECEIPT_MM);
-    const margin = 8;
-    const targetWidth = pageWpt - margin * 2;
-    const ratio = canvas.height / canvas.width;
-    const targetHeight = targetWidth * ratio;
-    const pageHpt = targetHeight + margin * 2;
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit: 'pt', format: [pageWpt, pageHpt] });
-
-    const x = margin, y = margin, w = targetWidth, h = targetHeight;
-    const imgData = canvas.toDataURL('image/png');
-    pdf.addImage(imgData, 'PNG', x, y, w, h, undefined, 'FAST');
-
-    // Overlay link rectangles
-    const scaleX = w / canvas.width;
-    const scaleY = h / canvas.height;
-    function addLinkHotspot(el, url) {
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      const base = box.getBoundingClientRect();
-      const dx = r.left - base.left;
-      const dy = r.top  - base.top;
-      const lw = r.width;
-      const lh = r.height;
-      const lx = x + dx * scaleX;
-      const ly = y + dy * scaleY;
-      const lW = lw * scaleX;
-      const lH = lh * scaleY;
-      try { pdf.link(lx, ly, lW, lH, { url }); } catch(_) {}
+      const columnHeader = "# Name            Qty  Rate Amt";
+      const lines = [
+        "Nusrat Enterprises",
+        "Phones: 7978830017, 9330066455, 9040366455",
+        "Address: Plot 53, Goutam Nagar, Bhubaneswar - 751014",
+        "Trusted Since 2008",
+        "",
+        `Invoice: ${els.invoiceNumber.value} | Date: ${els.invoiceDate.value}`,
+        `Customer: ${els.customerName.value}`,
+        "",
+        columnHeader,
+        ...rows,
+        "",
+        ...totals,
+        "",
+        "Thank you for shopping with Nusrat Enterprises!",
+        "",
+        `Review: ${LINKS.googleFeedback}`,
+        `WA Channel: ${LINKS.waChannel}`,
+        `Instagram: ${LINKS.instagram}`
+      ];
+      return "```\n" + lines.join("\n") + "\n```";
     }
-    addLinkHotspot(ig, LINKS.instagram);
-    addLinkHotspot(wa, LINKS.waChannel);
-    addLinkHotspot(gl, LINKS.googleFeedback);
 
-    const cust = (els.customerName.value || 'Customer').replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'_');
-    const filename = `Invoice_${cust}_${els.invoiceDate.value}.pdf`;
-    pdf.save(filename);
-  }
+    /* ----------------------------- 11) PDF (monospace) ----------------------------- */
+    function buildMonospaceHTML() {
+      const items=getItems();
+      const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
+      const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.amt);
+      const header = [ fit('#',COLS.idx), fit('ITEM',COLS.name), fit('QTY',COLS.qty), fit('RATE',COLS.rate), fit('AMOUNT',COLS.amt) ].join(' ');
+      const rows = items.map((it,i)=>{
+        const idx=String(i+1).padStart(COLS.idx,' ');
+        const nm =fit(it.name,COLS.name);
+        const qt =String(toNumber(it.qty)).padStart(COLS.qty,' ');
+        const rt =p2(toNumber(it.rate),COLS.rate);
+        const am =p2(toNumber(it.amount),COLS.amt);
+        return `${idx} ${nm} ${qt} ${rt} ${am}`;
+      });
 
-    /* -----------------------------
-       12) VCF CREATION
-       ----------------------------- */
+      const subtotal=toNumber(els.subtotal.value);
+      const gstRate=toNumber(els.taxRate.value);
+      const gstAmt=subtotal*(gstRate/100);
+      const flat=toNumber(els.flatDiscount.value);
+      const grand=toNumber(els.grandTotal.value);
+      const paid=toNumber(els.paidAmount.value);
+      const negotiated=toNumber(els.dueAmount.value);
+
+      function kv(k,v){ const key=(k+':').padEnd(13,' '); const val=String(v); return key + val; }
+      return `
+        <div id="monoBox" style="
+          width:${mmToPx(RECEIPT_MM)}px; padding:12px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; color:#111827;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace; font-size:12px; line-height:1.4;">
+          <pre style="margin:0; white-space:pre-wrap;">${
+            [
+              'Nusrat Enterprises',
+              '📞 7978830017, 9330066455, 9040366455',
+              '📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014',
+              '',
+              `Invoice: ${els.invoiceNumber.value}` + (els.invoiceDate.value ? ` | Date: ${els.invoiceDate.value}` : ''),
+              els.customerName.value ? `Customer: ${els.customerName.value}` : '',
+              '',
+              header, lineSep, ...rows, lineSep,
+              kv('Subtotal', `₹${subtotal.toFixed(2)}`),
+              ...(gstRate>0 && gstAmt>0 ? [kv(`GST ${gstRate}%`, `₹${gstAmt.toFixed(2)}`)] : []),
+              ...(flat>0 ? [kv('Discount', `-₹${flat.toFixed(2)}`)] : []),
+              kv('Grand Total', `₹${grand.toFixed(2)}`),
+              ...(els.paymentMode.value ? [kv('Payment Mode', els.paymentMode.value)] : []),
+              ...(paid>0 ? [kv('Paid', `₹${paid.toFixed(2)}`)] : []),
+              ...(toNumber(negotiated)>0 ? [kv('Negotiated', `₹${toNumber(negotiated).toFixed(2)}`)] : []),
+              '',
+              'Thank you for shopping with Nusrat Enterprises!'
+            ].join('\n')
+          }</pre>
+          <div style="height:8px"></div>
+          <div style="font-size:11px;color:#374151">
+            <div style="font-weight:600;margin-bottom:4px">Follow &amp; Feedback:</div>
+            <div><a id="gLink" href="${LINKS.googleFeedback}" target="_blank" rel="noopener">Google Feedback: ${LINKS.googleFeedback}</a></div>
+            <div><a id="igLink" href="${LINKS.instagram}" target="_blank" rel="noopener">Instagram: ${LINKS.instagram}</a></div>
+            <div><a id="waLink" href="${LINKS.waChannel}" target="_blank" rel="noopener">WhatsApp Channel: ${LINKS.waChannel}</a></div>
+          </div>
+        </div>`;
+    }
+
+    async function generatePdf() {
+      els.monoRender.innerHTML = buildMonospaceHTML();
+      await new Promise(r => setTimeout(r, 120));
+      const box = els.monoRender.querySelector('#monoBox');
+      const ig = els.monoRender.querySelector('#igLink');
+      const wa = els.monoRender.querySelector('#waLink');
+      const gl = els.monoRender.querySelector('#gLink');
+
+      const canvas = await html2canvas(box, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+
+      const pageWpt = mmToPt(RECEIPT_MM);
+      const margin = 8;
+      const targetWidth = pageWpt - margin * 2;
+      const ratio = canvas.height / canvas.width;
+      const targetHeight = targetWidth * ratio;
+      const pageHpt = targetHeight + margin * 2;
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'pt', format: [pageWpt, pageHpt] });
+
+      const x = margin, y = margin, w = targetWidth, h = targetHeight;
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', x, y, w, h, undefined, 'FAST');
+
+      const scaleX = w / canvas.width;
+      const scaleY = h / canvas.height;
+      function addLinkHotspot(el, url) {
+        if (!el) return;
+        const r = el.getBoundingClientRect();
+        const base = box.getBoundingClientRect();
+        const dx = r.left - base.left;
+        const dy = r.top  - base.top;
+        const lx = x + dx * scaleX;
+        const ly = y + dy * scaleY;
+        const lW = r.width * scaleX;
+        const lH = r.height * scaleY;
+        try { pdf.link(lx, ly, lW, lH, { url }); } catch(_) {}
+      }
+      addLinkHotspot(ig, LINKS.instagram);
+      addLinkHotspot(wa, LINKS.waChannel);
+      addLinkHotspot(gl, LINKS.googleFeedback);
+
+      const cust = (els.customerName.value || 'Customer').replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'_');
+      const filename = `Invoice_${cust}_${els.invoiceDate.value}.pdf`;
+      pdf.save(filename);
+    }
+
+    /* ----------------------------- 12) VCF ----------------------------- */
     function sanitizeName(s){ return (s||'').replace(/[\n\r;:,]/g,' ').trim(); }
     function makeVCard(){
       const first = sanitizeName(els.customerName.value || '');
@@ -1273,10 +1195,8 @@ function summaryMonospace() {
       const title = last || '';
       const fn = (first + (last ? (' ' + last) : '')).trim() || 'Customer';
       const lines = [
-        'BEGIN:VCARD',
-        'VERSION:3.0',
-        `N:${last};${first};;;`,
-        `FN:${fn}`,
+        'BEGIN:VCARD','VERSION:3.0',
+        `N:${last};${first};;;`,`FN:${fn}`,
         ...(title ? [`TITLE:${title}`] : []),
         `ORG:${org}`,
         ...(msisdn ? [`TEL;TYPE=CELL,VOICE:${msisdn}`] : []),
@@ -1299,9 +1219,7 @@ function summaryMonospace() {
       setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 300);
     }
 
-    /* -----------------------------
-       13) GOOGLE SHEET PUSH
-       ----------------------------- */
+    /* ----------------------------- 13) GOOGLE SHEET ----------------------------- */
     async function collectInvoicePayload() {
       const items = getItems();
       return {
@@ -1344,9 +1262,7 @@ function summaryMonospace() {
       }
     }
 
-    /* -----------------------------
-       14) ACTIONS / EVENT WIRING
-       ----------------------------- */
+    /* ----------------------------- 14) ACTIONS ----------------------------- */
     document.getElementById('previewBtn').addEventListener('click', ()=>{
       if (!validateAll('preview')) return;
       els.previewCard.style.display='block';
@@ -1401,6 +1317,7 @@ function summaryMonospace() {
         .catch(()=>alert('Copy failed (permission denied).'));
     });
 
+    // Manual VCF button
     els.vcfBtn.addEventListener('click', ()=>{
       const nameOk = !!els.customerName.value.trim();
       const phoneOk = /^\d{10}$/.test(els.customerPhone.value || '');
@@ -1413,7 +1330,7 @@ function summaryMonospace() {
       downloadVcfNow();
     });
 
-    // WhatsApp staged flow
+    // Staged flow: Save -> VCF -> WhatsApp (Complete Invoice Process)
     function setWaState(stateClass){
       const btn = els.whatsAppBtn;
       btn.classList.remove('is-saving','is-downloading','is-sending','is-success');
@@ -1425,33 +1342,20 @@ function summaryMonospace() {
     }
     els.whatsAppBtn.addEventListener('click', async ()=>{
       if (!validateAll('whatsapp')) return;
-
       try {
-        // 1) Saving…
         setWaState('is-saving');
         const saved = await pushToGoogleSheet({ alertOnResult: false });
-        if (!saved) {
-          setWaState('');
-          alert('Saving to Google Sheet failed. Please try again.');
-          return;
-        }
-
-        // 2) Downloading…
+        if (!saved) { setWaState(''); alert('Saving to Google Sheet failed. Please try again.'); return; }
         setWaState('is-downloading');
         downloadVcfNow();
-
-        // 3) Sending…
         setWaState('is-sending');
         const phone = `91${els.customerPhone.value}`;
         const msg = summaryMonospace();
         setTimeout(()=>{
           window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener,noreferrer');
-
-          // Success pulse then reset
           setWaState('is-success');
           setTimeout(()=> setWaState(''), 1400);
         }, 500);
-
       } catch (err) {
         console.error(err);
         setWaState('');
@@ -1459,9 +1363,19 @@ function summaryMonospace() {
       }
     });
 
+    // NEW: WhatsApp Invoice ONLY (ghost button)
+    if (els.waInvoiceBtn){
+      els.waInvoiceBtn.addEventListener('click', ()=>{
+        if (!validateAll('whatsappInvoice')) return;
+        const phone = `91${els.customerPhone.value}`;
+        const msg = summaryMonospace();
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener,noreferrer');
+      });
+    }
+
     // Boot
     load();
   })();
   </script>
-</body>
+  </body>
 </html>
