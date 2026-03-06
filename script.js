@@ -444,7 +444,9 @@ function genInvoice() {
       const flat=toNumber(els.flatDiscount.value);
       const grand=toNumber(els.grandTotal.value);
       const paid=toNumber(els.paidAmount.value);
+
       const negotiated=toNumber(els.dueAmount.value);
+      
 
       const lines=[];
       if (gstRate>0 && gstAmt > 0) lines.push(`<tr><td>GST ${gstRate}%</td><td style="text-align:right">₹${gstAmt.toFixed(2)}</td></tr>`);
@@ -465,83 +467,108 @@ function genInvoice() {
             <div><b>Invoice #:</b> ${els.invoiceNumber.value}</div>
             <div><b>Date:</b> ${els.invoiceDate.value || ''}</div>
             <div><b>Customer:</b> ${els.customerName.value || ''}</div>
+            
           </div>
         </div>
         ${rowsHtml}
         <div style="display:flex;justify-content:flex-end;margin-top:8px">
           <table>${lines.join('')}</table>
+          <div>
         </div>`;
     }
 
-    /* ----------------------------- 10) WA SUMMARY ----------------------------- */
-    function summaryMonospace() {
-      const items = getItems();
-      const toAscii = s => String(s || '').replace(/[^\x00-\x7F]/g, '');
-      const padEnd = (s, n) => (s.length > n ? s.slice(0, n) : s.padEnd(n, ' '));
-      const padStart = (s, n) => (s.length > n ? s.slice(-n) : s.padStart(n, ' '));
-      function fmtNoDecimal(n) {
-        if (n == null || n === '') return '';
-        const num = Number(n);
-        if (Number.isNaN(num)) return String(n);
-        const raw = Number.isInteger(num) ? String(num) : num.toFixed(2).replace(/\.?0+$/, '');
-        return toAscii(raw);
-      }
-      function makeLine40(idx, name, qty, rate, amount) {
-        const W = { idx: 2, name: 15, qty: 3, rate: 3, amt: 5 };
-        const fIdx = padEnd(toAscii(idx), W.idx);
-        const fName = padEnd(toAscii(name).slice(0, W.name), W.name);
-        const fQty = padEnd(fmtNoDecimal(qty), W.qty);
-        const fRate = padEnd(fmtNoDecimal(rate), W.rate);
-        const fAmt = padEnd(fmtNoDecimal(amount), W.amt);
-        return `${fIdx} ${fName} ${fQty} ${fRate}=${fAmt}`;
-      }
-      const rows = items.map((it, i) => {
-        const qty = Number(it.qty) || 0;
-        const rate = Number(it.rate) || 0;
-        const amount = qty * rate;
-        return makeLine40(i + 1, it.name, qty, rate, amount);
-      });
+/* ----------------------------- 10) WA SUMMARY ----------------------------- */
+function summaryMonospace() {
 
-      const subtotal = Number(els.subtotal.value || 0);
-      const gstRate = Number(els.taxRate.value || 0);
-      const flat = Number(els.flatDiscount.value || 0);
-      const gstAmt = subtotal * (gstRate / 100);
-      const grand = Number(els.grandTotal.value || 0);
-      const paid = Number(els.paidAmount.value || 0);
-      const due = Number(els.dueAmount.value || 0);
+  const items = getItems();
+  const toAscii = s => String(s || '').replace(/[^\x00-\x7F]/g, '');
+  const padEnd = (s, n) => (s.length > n ? s.slice(0, n) : s.padEnd(n, ' '));
+  const padStart = (s, n) => (s.length > n ? s.slice(-n) : s.padStart(n, ' '));
 
-      const totals = [
-        // `Subtotal: ₹${subtotal.toFixed(2)}`,
-        ...(gstRate > 0 ? [`GST ${gstRate}%: ₹${gstAmt.toFixed(2)}`] : []),
-        ...(flat > 0 ? [`Discount: -₹${flat.toFixed(2)}`] : []),
-        `Grand Total: ₹${grand.toFixed(2)}`,
-        ...(paid > 0 ? [`Paid: ₹${paid.toFixed(2)}`] : []),
-        // ...(due > 0 ? [`Negotiated: ₹${due.toFixed(2)}`] : []),
-      ];
+  function fmtNoDecimal(n) {
+    if (n == null || n === '') return '';
+    const num = Number(n);
+    if (Number.isNaN(num)) return String(n);
+    const raw = Number.isInteger(num) ? String(num) : num.toFixed(2).replace(/\.?0+$/, '');
+    return toAscii(raw);
+  }
 
-      const columnHeader = "#  Name           Qty  Rate Amt";
-      const lines = [
-        "Nusrat Enterprises",
-        "📞: 7978830017, 9330066455, 9040366455",
-        "📍: Plot 53, Goutam Nagar, Bhubaneswar - 751014",
-        "Trusted Since 2008",
-        "",
-        `Invoice: ${els.invoiceNumber.value} | Date: ${els.invoiceDate.value}`,
-        `Name: ${els.customerName.value}`,
-        "-------------------------------",
-        columnHeader,
-        ...rows,
-        "-------------------------------",
-        ...totals,
-        "",
-        "Thank you for shopping with Nusrat Enterprises!",
-        "",
-        `Review: ${LINKS.googleFeedback}`,
-        `WA Channel: ${LINKS.waChannel}`,
-        `Instagram: ${LINKS.instagram}`
-      ];
-      return "```\n" + lines.join("\n") + "\n```";
-    }
+  function makeLine40(idx, name, qty, rate, amount) {
+    const W = { idx: 2, name: 15, qty: 3, rate: 3, amt: 5 };
+    const fIdx = padEnd(toAscii(idx), W.idx);
+    const fName = padEnd(toAscii(name).slice(0, W.name), W.name);
+    const fQty = padEnd(fmtNoDecimal(qty), W.qty);
+    const fRate = padEnd(fmtNoDecimal(rate), W.rate);
+    const fAmt = padEnd(fmtNoDecimal(amount), W.amt);
+    return `${fIdx} ${fName} ${fQty} ${fRate} ${fAmt}`;
+  }
+
+  const rows = items.map((it, i) => {
+    const qty = Number(it.qty) || 0;
+    const rate = Number(it.rate) || 0;
+    const amount = qty * rate;
+    return makeLine40(i + 1, it.name, qty, rate, amount);
+  });
+
+  const subtotal = Number(els.subtotal.value || 0);
+  const gstRate = Number(els.taxRate.value || 0);
+  const flat = Number(els.flatDiscount.value || 0);
+  const gstAmt = subtotal * (gstRate / 100);
+  const grand = Number(els.grandTotal.value || 0);
+  const paid = Number(els.paidAmount.value || 0);
+  const due = Number(els.dueAmount.value || 0);
+
+  const totals = [
+    ...(gstRate > 0 ? [`GST ${gstRate}%: ₹${gstAmt.toFixed(2)}`] : []),
+    ...(flat > 0 ? [`Discount: -₹${flat.toFixed(2)}`] : []),
+    `Grand Total: ₹${grand.toFixed(2)}`,
+    ...(paid > 0 ? [`Paid: ₹${paid.toFixed(2)}`] : []),
+  ];
+
+  /* ----------------------------- COUPON LOGIC ----------------------------- */
+  let couponLine = "";
+  if (els.saleType.value === "retail") {
+
+    const amount = grand;
+    const couponValue = amount >= 1000 ? 100 : amount >= 500 ? 50 : 0;
+
+    // invoice number = coupon number
+    const couponNumber = els.invoiceNumber.value;
+
+    // validity = 2 months from today
+    const dt = new Date();
+    dt.setMonth(dt.getMonth() + 2);
+    const validTill = `${pad2(dt.getDate())}-${pad2(dt.getMonth() + 1)}-${dt.getFullYear()}`;
+
+    couponLine = `Coupon: ${couponNumber} | Value: Rs ${couponValue} (Redeem before ${validTill})`;
+  }
+  /* ------------------------------------------------------------------------ */
+
+  const columnHeader = "#  Name            Qty Rs Amt ";
+
+  const lines = [
+    "Nusrat Enterprises",
+    "📞: 7978830017, 9330066455, 9040366455",
+    "📍: Plot 53, Goutam Nagar, Bhubaneswar - 751014",
+    "Trusted Since 2008",
+    "",
+    `Invoice: ${els.invoiceNumber.value} | Date: ${els.invoiceDate.value}`,
+    `Name: ${els.customerName.value}`,
+    "-------------------------------",
+    columnHeader,
+    ...rows,
+    "-------------------------------",
+    ...totals,
+    "Thank you for shopping with Nusrat Enterprises!",
+    ...(couponLine ? [couponLine] : []), // add coupon only for retail
+    "",
+    `Review: ${LINKS.googleFeedback}`,
+    `WA Channel: ${LINKS.waChannel}`,
+    `Instagram: ${LINKS.instagram}`
+  ];
+
+  return "```\n" + lines.join("\n") + "\n```";
+}
 
     /* ----------------------------- 11) PDF (monospace) ----------------------------- */
     function buildMonospaceHTML() {
