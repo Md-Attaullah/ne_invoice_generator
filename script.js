@@ -428,54 +428,94 @@ function genInvoice() {
       return ok;
     }
 
-    /* ----------------------------- 9) PREVIEW ----------------------------- */
-    function renderPreview(){
-      const items=getItems();
-      const rowsHtml = items.map(it=>`
-        <div style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:6px 0">
-          <div>${it.name}</div>
-          <div>Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)} = <b>₹${toNumber(it.amount).toFixed(2)}</b></div>
-        </div>
-      `).join('');
+/* ----------------------------- 9) PREVIEW ----------------------------- */
+function renderPreview(){
+  const items = getItems();
+  
+  const rowsHtml = items.map(it => `
+    <div style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:6px 0">
+      <div>${it.name}</div>
+      <div>Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)} = <b>₹${toNumber(it.amount).toFixed(2)}</b></div>
+    </div>
+  `).join('');
 
-      const subtotal=toNumber(els.subtotal.value);
-      const gstRate=toNumber(els.taxRate.value);
-      const gstAmt=subtotal*(gstRate/100);
-      const flat=toNumber(els.flatDiscount.value);
-      const grand=toNumber(els.grandTotal.value);
-      const paid=toNumber(els.paidAmount.value);
+  const subtotal = toNumber(els.subtotal.value);
+  const gstRate = toNumber(els.taxRate.value);
+  const gstAmt = subtotal * (gstRate / 100);
+  const flat = toNumber(els.flatDiscount.value);
+  const grand = toNumber(els.grandTotal.value);
+  const paid = toNumber(els.paidAmount.value);
+  const negotiated = toNumber(els.dueAmount.value);
 
-      const negotiated=toNumber(els.dueAmount.value);
-      
+  let totalsHtml = "";
 
-      const lines=[];
-      if (gstRate>0 && gstAmt > 0) lines.push(`<tr><td>GST ${gstRate}%</td><td style="text-align:right">₹${gstAmt.toFixed(2)}</td></tr>`);
-      if (flat>0) lines.push(`<tr><td>Discount</td><td style="text-align:right">-₹${flat.toFixed(2)}</td></tr>`);
-      lines.push(`<tr><td><b>Grand Total</b></td><td style="text-align:right"><b>₹${grand.toFixed(2)}</b></td></tr>`);
-      if (els.paymentMode.value) lines.push(`<tr><td>Payment Mode</td><td style="text-align:right">${els.paymentMode.value}</td></tr>`);
-      if (paid>0) lines.push(`<tr><td>Paid</td><td style="text-align:right">₹${paid.toFixed(2)}</td></tr>`);
-      if (negotiated>0) lines.push(`<tr><td><b>Negotiated</b></td><td style="text-align:right"><b>₹${negotiated.toFixed(2)}</b></td></tr>`);
+  if (gstRate > 0 && gstAmt > 0)
+    totalsHtml += `<tr><td>GST ${gstRate}%</td><td style="text-align:right">₹${gstAmt.toFixed(2)}</td></tr>`;
 
-      els.invoicePreview.innerHTML = `
-        <div class="print-header">
-          <div>
-            <div class="print-title">Nusrat Enterprises</div>
-            <div class="print-meta">📞 7978830017, 9330066455, 9040366455</div>
-            <div class="print-meta">📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014</div>
-          </div>
-          <div style="text-align:right" class="print-meta">
-            <div><b>Invoice #:</b> ${els.invoiceNumber.value}</div>
-            <div><b>Date:</b> ${els.invoiceDate.value || ''}</div>
-            <div><b>Customer:</b> ${els.customerName.value || ''}</div>
-            
-          </div>
-        </div>
-        ${rowsHtml}
-        <div style="display:flex;justify-content:flex-end;margin-top:8px">
-          <table>${lines.join('')}</table>
-          <div>
-        </div>`;
-    }
+  if (flat > 0)
+    totalsHtml += `<tr><td>Discount</td><td style="text-align:right">-₹${flat.toFixed(2)}</td></tr>`;
+
+  totalsHtml += `<tr><td><b>Grand Total</b></td><td style="text-align:right"><b>₹${grand.toFixed(2)}</b></td></tr>`;
+
+  if (els.paymentMode.value)
+    totalsHtml += `<tr><td>Payment Mode</td><td style="text-align:right">${els.paymentMode.value}</td></tr>`;
+
+  if (paid > 0)
+    totalsHtml += `<tr><td>Paid</td><td style="text-align:right">₹${paid.toFixed(2)}</td></tr>`;
+
+  if (negotiated > 0)
+    totalsHtml += `<tr><td><b>Negotiated</b></td><td style="text-align:right"><b>₹${negotiated.toFixed(2)}</b></td></tr>`;
+
+
+  /* ----------------------------- COUPON LOGIC ----------------------------- */
+  let couponHtml = "";
+  if (els.saleType.value === "Retail") {
+
+    const couponValue = grand > 1000 ? 100 : 50;
+    const couponNumber = els.invoiceNumber.value;
+
+    const pad2 = n => (n < 10 ? "0" + n : n);
+
+    const dt = new Date();
+    dt.setMonth(dt.getMonth() + 2);
+    const validTill = `${pad2(dt.getDate())}-${pad2(dt.getMonth() + 1)}-${dt.getFullYear()}`;
+
+    couponHtml = `
+      <tr>
+        <td><b>Coupon (${couponNumber})</b><br><small>Valid till ${validTill}</small></td>
+        <td style="text-align:right"><b>₹${couponValue}</b></td>
+      </tr>
+    `;
+  }
+  /* ------------------------------------------------------------------------ */
+
+
+  /* ---------- FINAL PREVIEW HTML WITH COUPON INSERTED ---------- */
+  els.invoicePreview.innerHTML = `
+    <div class="print-header">
+      <div>
+        <div class="print-title">Nusrat Enterprises</div>
+        <div class="print-meta">📞 7978830017, 9330066455, 9040366455</div>
+        <div class="print-meta">📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014</div>
+      </div>
+
+      <div style="text-align:right" class="print-meta">
+        <div><b>Invoice #:</b> ${els.invoiceNumber.value}</div>
+        <div><b>Date:</b> ${els.invoiceDate.value || ''}</div>
+        <div><b>Customer:</b> ${els.customerName.value || ''}</div>
+      </div>
+    </div>
+
+    ${rowsHtml}
+
+    <div style="display:flex;justify-content:flex-end;margin-top:8px">
+      <table>
+        ${totalsHtml}
+        ${couponHtml}   <!-- 🔥 Coupon now appears here -->
+      </table>
+    </div>
+  `;
+}
 
 /* ----------------------------- 10) WA SUMMARY ----------------------------- */
 function summaryMonospace() {
@@ -527,7 +567,7 @@ function summaryMonospace() {
 
   /* ----------------------------- COUPON LOGIC ----------------------------- */
   let couponLine = "";
-  if (els.saleType.value === "retail") {
+  if (els.saleType.value === "Retail") {
 
     const amount = grand;
     const couponValue = amount >= 1000 ? 100 : amount >= 500 ? 50 : 0;
@@ -544,7 +584,7 @@ function summaryMonospace() {
   }
   /* ------------------------------------------------------------------------ */
 
-  const columnHeader = "#  Name            Qty Rs Amt ";
+  const columnHeader = "#  Name             Qty Rs Amt ";
 
   const lines = [
     "Nusrat Enterprises",
@@ -585,6 +625,26 @@ function summaryMonospace() {
         return `${idx} ${nm} ${qt} ${rt} ${am}`;
       });
 
+       /* ----------------------------- COUPON LOGIC ----------------------------- */
+  let couponText = "";
+  if (els.saleType.value === "Retail") {
+      
+      const couponValue = grand > 1000 ? 100 : 50;
+      const couponNumber = els.invoiceNumber.value;
+
+      const pad2 = n => (n < 10 ? "0" + n : n);
+
+      const dt = new Date();
+      dt.setMonth(dt.getMonth() + 2);
+      const validTill = `${pad2(dt.getDate())}-${pad2(dt.getMonth() + 1)}-${dt.getFullYear()}`;
+
+      couponText =
+        kv("Coupon", couponNumber) + "\n" +
+        kv("Value", `₹${couponValue}`) + "\n" +
+        kv("Valid Till", validTill) + "\n";
+  }
+  /* ------------------------------------------------------------------------ */
+
       const subtotal=toNumber(els.subtotal.value);
       const gstRate=toNumber(els.taxRate.value);
       const gstAmt=subtotal*(gstRate/100);
@@ -616,6 +676,7 @@ function summaryMonospace() {
               ...(paid>0 ? [kv('Paid', `₹${paid.toFixed(2)}`)] : []),
             //   ...(toNumber(negotiated)>0 ? [kv('Negotiated', `₹${toNumber(negotiated).toFixed(2)}`)] : []),
               '',
+              couponText,
               'Thank you for shopping with Nusrat Enterprises!'
             ].join('\n')
           }</pre>
