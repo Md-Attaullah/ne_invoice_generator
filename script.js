@@ -99,8 +99,11 @@ function genInvoice() {
     const dd = pad2(d.getDate());
     const mm = pad2(d.getMonth() + 1);
     const yyyy = d.getFullYear();
+    const hh = pad2(d.getHours());
+    const min = pad2(d.getMinutes());
 
-    return `NE${dd}${yyyy}${mm}`;  // NEddyyyymm
+
+    return `NE${dd}${yyyy}${mm}${hh}${min}`;  // NEddyyyymm
 }
     function toNumber(v){ const n=parseFloat(v); return Number.isFinite(n) ? n : 0; }
     function fit(text, len){ let t=String(text||'').replace(/\s+/g,' ').trim(); return t.length>len ? t.slice(0,len-1)+'…' : t.padEnd(len,' '); }
@@ -467,15 +470,16 @@ function renderPreview(){
     totalsHtml += `<tr><td><b>Negotiated</b></td><td style="text-align:right"><b>₹${negotiated.toFixed(2)}</b></td></tr>`;
 
 
-  /* ----------------------------- COUPON LOGIC ----------------------------- */
-  let couponHtml = "";
-  if (els.saleType.value === "Retail") {
+/* ----------------------------- COUPON LOGIC ----------------------------- */
+let couponHtml = ""; // ✅ Always initialize so it’s safe to inject later
+const couponToggleEl = document.getElementById("couponToggle");
+const couponEnabled = !!(couponToggleEl && couponToggleEl.checked); // ✅ Safe read
 
-    const couponValue = grand > 1000 ? 100 : 50;
+if (els.saleType.value === "Retail" && couponEnabled) {
+  const couponValue = grand >= 1000 ? 100 : grand > 0 ? 50 : 0; // optional: no coupon for zero bill
+  if (couponValue > 0) {
     const couponNumber = els.invoiceNumber.value;
-
     const pad2 = n => (n < 10 ? "0" + n : n);
-
     const dt = new Date();
     dt.setMonth(dt.getMonth() + 2);
     const validTill = `${pad2(dt.getDate())}-${pad2(dt.getMonth() + 1)}-${dt.getFullYear()}`;
@@ -487,7 +491,8 @@ function renderPreview(){
       </tr>
     `;
   }
-  /* ------------------------------------------------------------------------ */
+}
+/* ------------------------------------------------------------------------ */
 
 
   /* ---------- FINAL PREVIEW HTML WITH COUPON INSERTED ---------- */
@@ -540,7 +545,7 @@ function summaryMonospace() {
     const fQty = padEnd(fmtNoDecimal(qty), W.qty);
     const fRate = padEnd(fmtNoDecimal(rate), W.rate);
     const fAmt = padEnd(fmtNoDecimal(amount), W.amt);
-    return `${fIdx} ${fName} ${fQty} ${fRate} ${fAmt}`;
+    return `${fIdx} ${fName} ${fQty}X${fRate}=${fAmt}`;
   }
 
   const rows = items.map((it, i) => {
@@ -565,26 +570,30 @@ function summaryMonospace() {
     ...(paid > 0 ? [`Paid: ₹${paid.toFixed(2)}`] : []),
   ];
 
-  /* ----------------------------- COUPON LOGIC ----------------------------- */
-  let couponLine = "";
-  if (els.saleType.value === "Retail") {
+/* ----------------------------- COUPON LOGIC ----------------------------- */
+let couponLine = "";
+const couponEnabled = document.getElementById("couponToggle").checked;
 
-    const amount = grand;
-    const couponValue = amount >= 1000 ? 100 : amount >= 500 ? 50 : 0;
+if (els.saleType.value === "Retail" && couponEnabled) {
 
-    // invoice number = coupon number
-    const couponNumber = els.invoiceNumber.value;
+  const amount = grand;
+  const couponValue = amount >= 1000 ? 100 : amount >= 500 ? 50 : 0;
 
-    // validity = 2 months from today
-    const dt = new Date();
-    dt.setMonth(dt.getMonth() + 2);
-    const validTill = `${pad2(dt.getDate())}-${pad2(dt.getMonth() + 1)}-${dt.getFullYear()}`;
+  // invoice number = coupon number
+  const couponNumber = els.invoiceNumber.value;
 
-    couponLine = `Coupon: ${couponNumber} | Value: Rs ${couponValue} (Redeem before ${validTill})`;
-  }
-  /* ------------------------------------------------------------------------ */
+  // validity = 2 months from today
+  const dt = new Date();
+  dt.setMonth(dt.getMonth() + 2);
+  const validTill = `${pad2(dt.getDate())}-${pad2(dt.getMonth() + 1)}-${dt.getFullYear()}`;
 
-  const columnHeader = "#  Name             Qty Rs Amt ";
+  // bold coupon display (WhatsApp safe)
+  couponLine =
+    `*𝐂𝐨𝐮𝐩𝐨𝐧: ${couponNumber} | 𝐕𝐚𝐥𝐮𝐞: 𝐑𝐬 ${couponValue} (𝐑𝐞𝐝𝐞𝐞𝐦 𝐛𝐞𝐟𝐨𝐫𝐞 ${validTill})*`;
+}
+/* ------------------------------------------------------------------------ */
+
+  const columnHeader = "#  Name           Qty  Rs  Amt ";
 
   const lines = [
     "Nusrat Enterprises",
@@ -594,12 +603,13 @@ function summaryMonospace() {
     "",
     `Invoice: ${els.invoiceNumber.value} | Date: ${els.invoiceDate.value}`,
     `Name: ${els.customerName.value}`,
-    "-------------------------------",
+    "--------------------------------",
     columnHeader,
     ...rows,
-    "-------------------------------",
+    "--------------------------------",
     ...totals,
     "Thank you for shopping with Nusrat Enterprises!",
+    "",
     ...(couponLine ? [couponLine] : []), // add coupon only for retail
     "",
     `Review: ${LINKS.googleFeedback}`,
@@ -610,29 +620,57 @@ function summaryMonospace() {
   return "```\n" + lines.join("\n") + "\n```";
 }
 
-    /* ----------------------------- 11) PDF (monospace) ----------------------------- */
-    function buildMonospaceHTML() {
-      const items=getItems();
-      const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
-      const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.amt);
-      const header = [ fit('#',COLS.idx), fit('ITEM',COLS.name), fit('QTY',COLS.qty), fit('RATE',COLS.rate), fit('AMOUNT',COLS.amt) ].join(' ');
-      const rows = items.map((it,i)=>{
-        const idx=String(i+1).padStart(COLS.idx,' ');
-        const nm =fit(it.name,COLS.name);
-        const qt =String(toNumber(it.qty)).padStart(COLS.qty,' ');
-        const rt =p2(toNumber(it.rate),COLS.rate);
-        const am =p2(toNumber(it.amount),COLS.amt);
-        return `${idx} ${nm} ${qt} ${rt} ${am}`;
-      });
+/* ----------------------------- 11) PDF (monospace) ----------------------------- */
+function buildMonospaceHTML() {
+  const items = getItems();
 
-       /* ----------------------------- COUPON LOGIC ----------------------------- */
+  // Layout widths for monospace table
+  const COLS = { idx: 3, name: 24, qty: 3, rate: 8, amt: 10 };
+  const lineSep = '-'.repeat(COLS.idx + 1 + COLS.name + 1 + COLS.qty + 1 + COLS.rate + 1 + COLS.amt);
+  const header = [
+    fit('#', COLS.idx),
+    fit('ITEM', COLS.name),
+    fit('QTY', COLS.qty),
+    fit('RATE', COLS.rate),
+    fit('AMOUNT', COLS.amt)
+  ].join(' ');
+
+  const rows = items.map((it, i) => {
+    const idx = String(i + 1).padStart(COLS.idx, ' ');
+    const nm = fit(it.name, COLS.name);
+    const qt = String(toNumber(it.qty)).padStart(COLS.qty, ' ');
+    const rt = p2(toNumber(it.rate), COLS.rate);
+    const am = p2(toNumber(it.amount), COLS.amt);
+    return `${idx} ${nm} ${qt} ${rt} ${am}`;
+  });
+
+  // ---------------------- totals (computed before coupon) ----------------------
+  const subtotal = toNumber(els.subtotal.value);
+  const gstRate = toNumber(els.taxRate.value);
+  const gstAmt = subtotal * (gstRate / 100);
+  const flat = toNumber(els.flatDiscount.value);
+  const grand = toNumber(els.grandTotal.value);
+  const paid = toNumber(els.paidAmount.value);
+  const negotiated = toNumber(els.dueAmount.value);
+
+  function kv(k, v) {
+    const key = (k + ':').padEnd(13, ' ');
+    const val = String(v);
+    return key + val;
+  }
+
+  /* ----------------------------- COUPON LOGIC ----------------------------- */
   let couponText = "";
-  if (els.saleType.value === "Retail") {
-      
-      const couponValue = grand > 1000 ? 100 : 50;
-      const couponNumber = els.invoiceNumber.value;
+  const couponToggleEl = document.getElementById("couponToggle");
+  const couponEnabled = !!(couponToggleEl && couponToggleEl.checked);
+  const isRetail = (els.saleType.value === "Retail");
 
-      const pad2 = n => (n < 10 ? "0" + n : n);
+  if (isRetail && couponEnabled) {
+    const couponValue = grand >= 1000 ? 100 : (grand > 0 ? 50 : 0);
+
+    if (couponValue > 0) {
+      const couponNumber = els.invoiceNumber.value || '-';
+      const pad2 = n => String(n).padStart(2, '0');
 
       const dt = new Date();
       dt.setMonth(dt.getMonth() + 2);
@@ -642,100 +680,110 @@ function summaryMonospace() {
         kv("Coupon", couponNumber) + "\n" +
         kv("Value", `₹${couponValue}`) + "\n" +
         kv("Valid Till", validTill) + "\n";
+    }
   }
   /* ------------------------------------------------------------------------ */
 
-      const subtotal=toNumber(els.subtotal.value);
-      const gstRate=toNumber(els.taxRate.value);
-      const gstAmt=subtotal*(gstRate/100);
-      const flat=toNumber(els.flatDiscount.value);
-      const grand=toNumber(els.grandTotal.value);
-      const paid=toNumber(els.paidAmount.value);
-      const negotiated=toNumber(els.dueAmount.value);
+  return `
+    <div id="monoBox" style="
+      width:${mmToPx(RECEIPT_MM)}px; padding:12px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; color:#111827;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace; font-size:12px; line-height:1.4;">
+      <pre style="margin:0; white-space:pre-wrap;">${
+        [
+          'Nusrat Enterprises',
+          '📞 7978830017, 9330066455, 9040366455',
+          '📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014',
+          '',
+          `Invoice: ${els.invoiceNumber.value}` + (els.invoiceDate.value ? ` | Date: ${els.invoiceDate.value}` : ''),
+          els.customerName.value ? `Customer: ${els.customerName.value}` : '',
+          '',
+          header,
+          lineSep,
+          ...rows,
+          lineSep,
+          ...(gstRate > 0 && gstAmt > 0 ? [kv(`GST ${gstRate}%`, `₹${gstAmt.toFixed(2)}`)] : []),
+          ...(flat > 0 ? [kv('Discount', `-₹${flat.toFixed(2)}`)] : []),
+          kv('Grand Total', `₹${grand.toFixed(2)}`),
+          ...(els.paymentMode.value ? [kv('Payment Mode', els.paymentMode.value)] : []),
+          ...(paid > 0 ? [kv('Paid', `₹${paid.toFixed(2)}`)] : []),
+          '',
+          couponText, // safe even if empty
+          'Thank you for shopping with Nusrat Enterprises!'
+        ].join('\n')
+      }</pre>
 
-      function kv(k,v){ const key=(k+':').padEnd(13,' '); const val=String(v); return key + val; }
-      return `
-        <div id="monoBox" style="
-          width:${mmToPx(RECEIPT_MM)}px; padding:12px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; color:#111827;
-          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono','Courier New', monospace; font-size:12px; line-height:1.4;">
-          <pre style="margin:0; white-space:pre-wrap;">${
-            [
-              'Nusrat Enterprises',
-              '📞 7978830017, 9330066455, 9040366455',
-              '📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014',
-              '',
-              `Invoice: ${els.invoiceNumber.value}` + (els.invoiceDate.value ? ` | Date: ${els.invoiceDate.value}` : ''),
-              els.customerName.value ? `Customer: ${els.customerName.value}` : '',
-              '',
-              header, lineSep, ...rows, lineSep,
-            //   kv('Subtotal', `₹${subtotal.toFixed(2)}`),
-              ...(gstRate>0 && gstAmt>0 ? [kv(`GST ${gstRate}%`, `₹${gstAmt.toFixed(2)}`)] : []),
-              ...(flat>0 ? [kv('Discount', `-₹${flat.toFixed(2)}`)] : []),
-              kv('Grand Total', `₹${grand.toFixed(2)}`),
-              ...(els.paymentMode.value ? [kv('Payment Mode', els.paymentMode.value)] : []),
-              ...(paid>0 ? [kv('Paid', `₹${paid.toFixed(2)}`)] : []),
-            //   ...(toNumber(negotiated)>0 ? [kv('Negotiated', `₹${toNumber(negotiated).toFixed(2)}`)] : []),
-              '',
-              couponText,
-              'Thank you for shopping with Nusrat Enterprises!'
-            ].join('\n')
-          }</pre>
-          <div style="height:8px"></div>
-          <div style="font-size:11px;color:#374151">
-            <div style="font-weight:600;margin-bottom:4px">Follow &amp; Feedback:</div>
-            <div><a id="gLink" href="${LINKS.googleFeedback}" target="_blank" rel="noopener">Google Feedback: ${LINKS.googleFeedback}</a></div>
-            <div><a id="igLink" href="${LINKS.instagram}" target="_blank" rel="noopener">Instagram: ${LINKS.instagram}</a></div>
-            <div><a id="waLink" href="${LINKS.waChannel}" target="_blank" rel="noopener">WhatsApp Channel: ${LINKS.waChannel}</a></div>
-          </div>
-        </div>`;
-    }
+      <div style="height:8px"></div>
+      <div style="font-size:11px;color:#374151">
+        <div style="font-weight:600;margin-bottom:4px">Follow &amp; Feedback:</div>
+        <div><a id="gLink" href="${LINKS.googleFeedback}" target="_blank">Google Feedback: ${LINKS.googleFeedback}</a></div>
+        <div><a id="igLink" href="${LINKS.instagram}" target="_blank">Instagram: ${LINKS.instagram}</a></div>
+        <div><a id="waLink" href="${LINKS.waChannel}" target="_blank">WhatsApp Channel: ${LINKS.waChannel}</a></div>
+      </div>
+    </div>
+  `;
+}
 
-    async function generatePdf() {
-      els.monoRender.innerHTML = buildMonospaceHTML();
-      await new Promise(r => setTimeout(r, 120));
-      const box = els.monoRender.querySelector('#monoBox');
-      const ig = els.monoRender.querySelector('#igLink');
-      const wa = els.monoRender.querySelector('#waLink');
-      const gl = els.monoRender.querySelector('#gLink');
 
-      const canvas = await html2canvas(box, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+/* ----------------------------- GENERATE PDF ----------------------------- */
+async function generatePdf() {
+  els.monoRender.innerHTML = buildMonospaceHTML();
+  await new Promise(r => setTimeout(r, 120));
 
-      const pageWpt = mmToPt(RECEIPT_MM);
-      const margin = 8;
-      const targetWidth = pageWpt - margin * 2;
-      const ratio = canvas.height / canvas.width;
-      const targetHeight = targetWidth * ratio;
-      const pageHpt = targetHeight + margin * 2;
+  const box = els.monoRender.querySelector('#monoBox');
+  const ig = els.monoRender.querySelector('#igLink');
+  const wa = els.monoRender.querySelector('#waLink');
+  const gl = els.monoRender.querySelector('#gLink');
 
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ unit: 'pt', format: [pageWpt, pageHpt] });
+  const canvas = await html2canvas(box, {
+    scale: 2,
+    backgroundColor: '#ffffff',
+    useCORS: true
+  });
 
-      const x = margin, y = margin, w = targetWidth, h = targetHeight;
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addImage(imgData, 'PNG', x, y, w, h, undefined, 'FAST');
+  const pageWpt = mmToPt(RECEIPT_MM);
+  const margin = 8;
+  const targetWidth = pageWpt - margin * 2;
+  const ratio = canvas.height / canvas.width;
+  const targetHeight = targetWidth * ratio;
+  const pageHpt = targetHeight + margin * 2;
 
-      const scaleX = w / canvas.width;
-      const scaleY = h / canvas.height;
-      function addLinkHotspot(el, url) {
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        const base = box.getBoundingClientRect();
-        const dx = r.left - base.left;
-        const dy = r.top  - base.top;
-        const lx = x + dx * scaleX;
-        const ly = y + dy * scaleY;
-        const lW = r.width * scaleX;
-        const lH = r.height * scaleY;
-        try { pdf.link(lx, ly, lW, lH, { url }); } catch(_) {}
-      }
-      addLinkHotspot(ig, LINKS.instagram);
-      addLinkHotspot(wa, LINKS.waChannel);
-      addLinkHotspot(gl, LINKS.googleFeedback);
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ unit: 'pt', format: [pageWpt, pageHpt] });
 
-      const cust = (els.customerName.value || 'Customer').replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'_');
-      const filename = `Invoice_${cust}_${els.invoiceDate.value}.pdf`;
-      pdf.save(filename);
-    }
+  const x = margin, y = margin, w = targetWidth, h = targetHeight;
+  const imgData = canvas.toDataURL('image/png');
+
+  pdf.addImage(imgData, 'PNG', x, y, w, h, undefined, 'FAST');
+
+  const scaleX = w / canvas.width;
+  const scaleY = h / canvas.height;
+
+  function addLinkHotspot(el, url) {
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const base = box.getBoundingClientRect();
+    const dx = r.left - base.left;
+    const dy = r.top - base.top;
+    const lx = x + dx * scaleX;
+    const ly = y + dy * scaleY;
+    const lW = r.width * scaleX;
+    const lH = r.height * scaleY;
+    try { pdf.link(lx, ly, lW, lH, { url }); } catch (_) {}
+  }
+
+  addLinkHotspot(ig, LINKS.instagram);
+  addLinkHotspot(wa, LINKS.waChannel);
+  addLinkHotspot(gl, LINKS.googleFeedback);
+
+  const cust =
+    (els.customerName.value || 'Customer')
+      .replace(/[^\w\s-]+/g, '')
+      .trim()
+      .replace(/\s+/g, '_');
+
+  const filename = `Invoice_${cust}_${els.invoiceDate.value}.pdf`;
+  pdf.save(filename);
+}
 
     /* ----------------------------- 12) VCF ----------------------------- */
     function sanitizeName(s){ return (s||'').replace(/[\n\r;:,]/g,' ').trim(); }
