@@ -93,7 +93,15 @@
 
     /* ----------------------------- 5) HELPERS ----------------------------- */
     const pad2=n=>String(n).padStart(2,'0');
-    function genInvoice(){ const d=new Date(); return `${pad2(d.getDate())}${pad2(d.getMonth()+1)}${d.getFullYear()}${pad2(d.getHours())}${pad2(d.getMinutes())}`; }
+
+function genInvoice() {
+    const d = new Date();
+    const dd = pad2(d.getDate());
+    const mm = pad2(d.getMonth() + 1);
+    const yyyy = d.getFullYear();
+
+    return `NE${dd}${yyyy}${mm}`;  // NEddyyyymm
+}
     function toNumber(v){ const n=parseFloat(v); return Number.isFinite(n) ? n : 0; }
     function fit(text, len){ let t=String(text||'').replace(/\s+/g,' ').trim(); return t.length>len ? t.slice(0,len-1)+'…' : t.padEnd(len,' '); }
     function p2(n, width){ return String(n.toFixed(2)).padStart(width,' '); }
@@ -480,11 +488,11 @@
       }
       function makeLine40(idx, name, qty, rate, amount) {
         const W = { idx: 2, name: 15, qty: 3, rate: 3, amt: 5 };
-        const fIdx = padStart(toAscii(idx), W.idx);
-        const fName = padStart(toAscii(name).slice(0, W.name), W.name);
-        const fQty = padStart(fmtNoDecimal(qty), W.qty);
-        const fRate = padStart(fmtNoDecimal(rate), W.rate);
-        const fAmt = padStart(fmtNoDecimal(amount), W.amt);
+        const fIdx = padEnd(toAscii(idx), W.idx);
+        const fName = padEnd(toAscii(name).slice(0, W.name), W.name);
+        const fQty = padEnd(fmtNoDecimal(qty), W.qty);
+        const fRate = padEnd(fmtNoDecimal(rate), W.rate);
+        const fAmt = padEnd(fmtNoDecimal(amount), W.amt);
         return `${fIdx} ${fName} ${fQty} ${fRate}=${fAmt}`;
       }
       const rows = items.map((it, i) => {
@@ -520,12 +528,10 @@
         "",
         `Invoice: ${els.invoiceNumber.value} | Date: ${els.invoiceDate.value}`,
         `Name: ${els.customerName.value}`,
-        "",
-        "-----------------------------------",
+        "-------------------------------",
         columnHeader,
         ...rows,
-        "-----------------------------------",
-        "",
+        "-------------------------------",
         ...totals,
         "",
         "Thank you for shopping with Nusrat Enterprises!",
