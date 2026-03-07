@@ -565,7 +565,7 @@
     return ok;
   }
 
-  /* ----------------------------- 9) PREVIEW ----------------------------- */
+/* ----------------------------- 9) PREVIEW ----------------------------- */
   function renderPreview(){
     const items = getItems();
 
@@ -599,8 +599,8 @@
 
     // COUPON LOGIC
     let couponHtml = "";
-    if (els.saleType.value === "Retail") {
-      const couponValue = grand > 1000 ? 100 : 50;
+    if (els.saleType.value === "Retail" && couponEnabled) {
+      const couponValue = grand > 1000 ? 50 : 50;
       const couponNumber = els.invoiceNumber.value;
       const p2d = n => (n < 10 ? "0" + n : n);
       const dt = new Date(); dt.setMonth(dt.getMonth() + 2);
@@ -657,6 +657,7 @@
     `;
   }
 
+
   /* ----------------------------- 10) WA SUMMARY ----------------------------- */
   function summaryMonospace() {
     const items = getItems();
@@ -679,7 +680,7 @@
       const fQty = padEnd(fmtNoDecimal(qty), W.qty);
       const fRate = padEnd(fmtNoDecimal(rate), W.rate);
       const fAmt = padEnd(fmtNoDecimal(amount), W.amt);
-      return `${fIdx} ${fName} ${fQty} ${fRate} ${fAmt}`;
+      return `${fIdx} ${fName} ${fQty}X${fRate}=${fAmt}`;
     }
 
     const rows = items.map((it, i) => {
@@ -705,9 +706,9 @@
 
     /* COUPON LOGIC */
     let couponLine = "";
-    if (els.saleType.value === "Retail") {
+    if (els.saleType.value === "Retail" && couponEnabled) {
       const amount = grand;
-      const couponValue = amount >= 1000 ? 100 : amount >= 500 ? 50 : 0;
+      const couponValue = amount >= 1000 ? 50 : amount >= 500 ? 50 : 0;
       const couponNumber = els.invoiceNumber.value;
       const dt = new Date();
       dt.setMonth(dt.getMonth() + 2);
@@ -715,7 +716,7 @@
       couponLine = `Coupon: ${couponNumber} | Value: Rs ${couponValue} (Redeem before ${validTill})`;
     }
 
-    const columnHeader = "#  Name            Qty Rs Amt ";
+    const columnHeader = "#  Name           Qty Rs  Amt ";
 
     const lines = [
       "Nusrat Enterprises",
@@ -767,7 +768,7 @@
 
     /* COUPON TEXT */
     let couponText = "";
-    if (els.saleType.value === "Retail") {
+    if (els.saleType.value === "Retail" && couponEnabled) {
         const couponValue = grand > 1000 ? 100 : 50;
         const couponNumber = els.invoiceNumber.value;
         const p2d = n => (n < 10 ? "0" + n : n);
