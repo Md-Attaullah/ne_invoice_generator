@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nusrat Enterprises — Invoice (Vertical + WA Staged Flow + Fixed Sale Type)</title>
 
+  <!-- App CSS -->
   <link rel="stylesheet" href="style.css">
 
   <!-- PDF deps -->
@@ -34,7 +35,8 @@
     <div class="row" style="grid-template-columns:1fr; gap:12px">
       <!-- Invoice & Customer -->
       <div class="card">
-        <h2>Invoice & Customer</h2>
+        <h2>Invoice &amp; Customer</h2>
+
         <div class="row cols-2">
           <div>
             <label>Invoice #</label>
@@ -52,6 +54,7 @@
             <input id="customerName" placeholder="Enter customer name"/>
             <div class="error"></div>
           </div>
+
           <div>
             <label>Customer WhatsApp (10 digits)</label>
             <div class="phone-field">
@@ -75,14 +78,17 @@
                   </svg>
                 </button>
               </div>
-              <div id="phoneError" class="error">Enter exactly 10 digits.</div>
+              <div id="phoneError" class="error" style="display:none">Enter exactly 10 digits.</div>
             </div>
+
+            <!-- NEW: Visit stats line (inline, below phone) -->
+            <div id="inlineCustomerStats" class="print-meta" style="margin:6px 0;color:#4b5563; display:none;"></div>
           </div>
         </div>
 
         <!-- Sale Type -->
         <div class="row cols-2" style="margin-top:10px">
-          <div>            
+          <div>
             <label style="margin-bottom:15px">Sale Type</label>
             <div class="seg-raised" role="radiogroup" aria-label="Sale Type" id="saleTypeGroup">
               <label class="seg">
@@ -97,14 +103,14 @@
           </div>
           <input type="hidden" id="saleType" value="">
         </div>
+
         <div class="coupon-toggle">
           <span class="label-text">Give Coupon?</span>
           <label class="switch">
-          <input type="checkbox" id="couponToggle">
-          <span class="slider round"></span>
+            <input type="checkbox" id="couponToggle">
+            <span class="slider round"></span>
           </label>
-  
-</div>
+        </div>
       </div>
 
       <!-- Items -->
@@ -180,14 +186,13 @@
           </div>
         </div>
       </div>
-<!-- Actions -->
+
+      <!-- Actions -->
       <div class="card actions-card">
         <h2>Actions</h2>
         <div class="action-buttons">
-
-          <!-- Complete Invoice Process — Staged flow (icon removed as requested) -->
+          <!-- Complete Invoice Process — Staged flow -->
           <button id="whatsAppBtn" class="wa-btn btn-yellow" type="button" aria-live="polite">
-            <!-- Center: dynamic label -->
             <span class="wa-label">
               <span class="text-default">💼 Complete Invoice Process</span>
               <span class="text-saving" aria-hidden="true">Saving…</span>
@@ -195,27 +200,18 @@
               <span class="text-sending" aria-hidden="true">Sending…</span>
               <span class="text-success" aria-hidden="true">Sent!</span>
             </span>
-
-            <!-- Right: stage icon stack -->
             <span class="stage-icon" aria-hidden="true">
-              <!-- Saving -->
               <svg class="icon-save" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4ZM7 5h8v4H7V5Zm5 14a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/>
               </svg>
-              <!-- Downloading -->
               <svg class="icon-download" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42L11 12.6V4a1 1 0 0 1 1-1Zm-7 14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1a1 1 0 1 1 2 0v1Z"/>
               </svg>
-              <!-- Sending -->
               <svg class="icon-send" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M2.01 3.87a1 1 0 0 1 1.2-.16l18 10a1 1 0 0 1 0 1.78l-18 10a1 1 0 0 1-1.43-1.13l2.22-7.76 8.1-2-8.1-2-2.22-7.76a1 1 0 0 1 .23-.97Z"/>
               </svg>
             </span>
-
-            <!-- Furthest right: spinner -->
             <span class="spinner" aria-hidden="true"></span>
-
-            <!-- Success check -->
             <span class="success-check" aria-hidden="true">
               <svg viewBox="0 0 24 24" width="100%" height="100%">
                 <circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-opacity=".85" stroke-width="2"/>
@@ -241,13 +237,14 @@
             <span class="btn-text">Save to Google Sheet</span>
             <span class="spinner" aria-hidden="true" style="display:none"></span>
           </button>
-
         </div>
       </div>
 
       <!-- Preview -->
       <div class="card" id="previewCard" style="display:none">
         <h2>Invoice Preview</h2>
+        <!-- Visit stats in preview (kept, optional for display there too) -->
+        <div id="previewCustomerStats" class="print-meta" style="margin:6px 0;color:#4b5563;"></div>
         <div id="invoicePreview" aria-live="polite"></div>
       </div>
     </div>
@@ -258,10 +255,10 @@
 
   <!-- Floating Add button -->
   <button type="button" class="fab" id="fabAdd">+ Add</button>
+
   <!-- ================================
        APPLICATION SCRIPT
        ================================ -->
-       <script src="script.js"></script>
-
-  </body>
+  <script src="script.js"></script>
+</body>
 </html>
