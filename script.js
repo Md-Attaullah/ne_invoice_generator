@@ -73,22 +73,19 @@
   };
 
   /* ----------------------------- 3a) COUPON TOGGLE (FIX) ----------------------------- */
-  // Previously `couponEnabled` was referenced but not defined → ReferenceError.
-  // Now we wire it to the toggle element and expose a function.
   const couponToggle = document.getElementById('couponToggle');
   function couponIsOn() {
     return !!couponToggle && !!couponToggle.checked;
   }
   if (couponToggle) {
     couponToggle.addEventListener('change', () => {
-      // refresh preview if visible since coupon display is only visual (totals unchanged)
       if (els.previewCard && els.previewCard.style.display !== 'none') {
         renderPreview();
       }
     });
   }
   // Unified coupon value rule:
-  // >= 1000 → 100; >= 500 → 50; else 0
+  // >= 1000 → 50; >= 500 → 50; else 0
   function couponValueFor(grand) {
     if (grand >= 1000) return 50;
     if (grand >= 500) return 50;
@@ -228,16 +225,13 @@
   }
 
   async function pullAndRenderVisitStats(phone10){
-    // Update the inline/preferred element
     if (/^\d{10}$/.test(phone10)) showStatsLoading(preferInlineEl());
     else { hideStats(preferInlineEl()); }
 
     const stats = await fetchVisitStatsByPhone(phone10);
 
-    // Update inline/preferred
     setStats(preferInlineEl(), stats, phone10);
 
-    // Update preview stats & dataset with date-only
     if (els.previewCustomerStats){
       if (!stats){
         els.previewCustomerStats.textContent = '';
@@ -305,7 +299,6 @@
           else if (typeof c.name === 'string') els.customerName.value = c.name || els.customerName.value;
         }
 
-        // Fetch stats after filling phone
         const phone10 = els.customerPhone.value;
         if (/^\d{10}$/.test(phone10)) {
           showStatsLoading(preferInlineEl());
@@ -515,7 +508,7 @@
     validatePaid();
   }
 
-  // Paid validation
+  // Paid validation input constraints
   if (els.paidAmount){
     els.paidAmount.addEventListener('keydown', (e)=>{
       const blocked = ['e','E','+','-'];
@@ -531,12 +524,28 @@
       recalc(); persist();
     });
   }
+
+  // === MOD: Paid must be > 0 and <= Grand (global rule). For Preview, we skip enforcing in validateAll, not here.
   function validatePaid(){
     const paid = toNumber(els.paidAmount.value);
     const grand = toNumber(els.grandTotal.value);
-    if (els.paidAmount.value === '') { els.paidError.style.display='none'; return true; }
-    if (paid > grand) { els.paidError.textContent='Paid cannot exceed Grand Total.'; els.paidError.style.display='block'; return false; }
-    els.paidError.style.display='none'; return true;
+
+    if (els.paidAmount.value === '') {
+      els.paidError.style.display='none'; // leave to validateAll to decide if required
+      return false;
+    }
+    if (paid <= 0) {
+      els.paidError.textContent='Paid must be greater than 0.';
+      els.paidError.style.display='block';
+      return false;
+    }
+    if (paid > grand) {
+      els.paidError.textContent='Paid cannot exceed Grand Total.';
+      els.paidError.style.display='block';
+      return false;
+    }
+    els.paidError.style.display='none';
+    return true;
   }
 
   ['taxRate','flatDiscount','paidAmount','paymentMode','saleType'].forEach(id=>{
@@ -556,25 +565,37 @@
     const e=el.parentElement.querySelector('.error'); if(e) e.style.display='none';
   }
 
-  // UPDATED: Relaxed validation for preview/copy/WhatsApp Invoice-only
+  // === MOD: Validation policy
+  // ONLY for 'preview' we can ignore Payment Mode and Paid Amount;
+  // Phone remains strict for all actions.
   function validateAll(forAction='general'){
     let ok=true;
 
-    const relaxPreview = (forAction === 'preview' || forAction === 'copy');
-    const relaxWhatsappInvoice = (forAction === 'whatsappInvoice');
+    const isPreview = (forAction === 'preview'); // ONLY preview is relaxed for payment fields
 
     // Require name
-    if(!els.customerName.value.trim()){ showErrorBelow(els.customerName,'Customer name is required.'); ok=false; } else hideErrorBelow(els.customerName);
-
-    // Phone: strict for WA flows (both), optional for preview/copy
-    if (relaxPreview) {
-      els.phoneError.style.display = 'none';
+    if(!els.customerName.value.trim()){
+      showErrorBelow(els.customerName,'Customer name is required.');
+      ok=false;
     } else {
-      if(!/^\d{10}$/.test(els.customerPhone.value)){ els.phoneError.style.display='block'; ok=false; } else els.phoneError.style.display='none';
+      hideErrorBelow(els.customerName);
+    }
+
+    // Phone: strict for ALL actions (including preview)
+    if(!/^\d{10}$/.test(els.customerPhone.value)){
+      els.phoneError.style.display='block';
+      ok=false;
+    } else {
+      els.phoneError.style.display='none';
     }
 
     // Sale type required for all
-    if(!els.saleType.value){ showErrorBelow(els.saleType,'Select sale type.'); ok=false; } else { hideErrorBelow(els.saleType); }
+    if(!els.saleType.value){
+      showErrorBelow(els.saleType,'Select sale type.');
+      ok=false;
+    } else {
+      hideErrorBelow(els.saleType);
+    }
 
     // Items
     const rows = Array.from(els.itemsList.children);
@@ -596,14 +617,25 @@
     if(!hasValid) ok=false;
 
     // Payment Mode + Paid:
-    // Strict for print/save/staged WhatsApp; optional for preview/WA Invoice-only/copy
-    if (relaxPreview || relaxWhatsappInvoice) {
+    // === MOD: Relax ONLY for preview; for all other actions they are mandatory
+    if (isPreview) {
       hideErrorBelow(els.paymentMode);
       hideErrorBelow(els.paidAmount);
+      // We don't alert for paid/paymentMode in preview
     } else {
-      if(!els.paymentMode.value){ showErrorBelow(els.paymentMode,'Select payment mode.'); ok=false; } else hideErrorBelow(els.paymentMode);
-      if(els.paidAmount.value===''){ showErrorBelow(els.paidAmount,'Enter paid amount (0 allowed).'); ok=false; } else hideErrorBelow(els.paidAmount);
-      if(!validatePaid()) ok = false;
+      if(!els.paymentMode.value){
+        showErrorBelow(els.paymentMode,'Select payment mode.');
+        ok=false;
+      } else {
+        hideErrorBelow(els.paymentMode);
+      }
+      if(els.paidAmount.value===''){
+        showErrorBelow(els.paidAmount,'Enter paid amount (must be > 0).');
+        ok=false;
+      } else {
+        hideErrorBelow(els.paidAmount);
+        if(!validatePaid()) ok = false; // enforces >0 and <= grand
+      }
     }
 
     if(!ok && forAction!=='general'){ alert('Please correct highlighted fields.'); }
@@ -691,6 +723,7 @@
           <div><b>Date:</b> ${dateDisplay || ''}</div>
           <div><b>Customer:</b> ${els.customerName.value || ''}</div>
         </div>
+        
       </div>
 
       ${visitStatsHtml}
@@ -996,7 +1029,6 @@
     els.previewBtn.addEventListener('click', async ()=>{
       if (!validateAll('preview')) return;
       els.previewCard.style.display='block';
-      // ensure stats fetched before rendering (if phone present)
       if (/^\d{10}$/.test(els.customerPhone.value)) {
         await pullAndRenderVisitStats(els.customerPhone.value);
       } else {
@@ -1020,7 +1052,6 @@
       setBtnLoading(els.saveBtn, true, 'Saving…', null);
       try {
         const ok = await pushToGoogleSheet({ alertOnResult: true });
-        // Refresh visit stats after a successful save (server may update counters).
         if (ok && /^\d{10}$/.test(els.customerPhone.value)) {
           await pullAndRenderVisitStats(els.customerPhone.value);
           if (els.previewCard.style.display !== 'none') renderPreview();
@@ -1097,7 +1128,6 @@
         const saved = await pushToGoogleSheet({ alertOnResult: false });
         if (!saved) { setWaState(''); alert('Saving to Google Sheet failed. Please try again.'); return; }
 
-        // Non-blocking refresh of visit stats after save (server may bump count)
         if (/^\d{10}$/.test(els.customerPhone.value)) {
           pullAndRenderVisitStats(els.customerPhone.value).catch(()=>{});
         }
@@ -1126,7 +1156,6 @@
       const msg = summaryMonospace();
       window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener,noreferrer');
 
-      // Optional refresh (may not change without a save)
       if (/^\d{10}$/.test(els.customerPhone.value)) {
         pullAndRenderVisitStats(els.customerPhone.value).catch(()=>{});
       }
