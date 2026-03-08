@@ -28,7 +28,7 @@
     waChannel: "https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06",
     googleFeedback: "https://search.google.com/local/writereview?placeid=ChIJebZSWdmnGToRWa9S2iTwlgo"
   };
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwFcSGSZjTmUtxWtyxnK1fnRWH9uNPZA7VRdd1jr1uT73h-y-eHfOgTQ11u34Ambeyo/exec';
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwDh3hVYOpAOa12sOPpfpC0IORb6HswDBiAS-OMIZ9cu2GH4evGu5nld5_2HAC3ayOg/exec';
   const AUTH_TOKEN  = '9705322252';
   const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Cargo Pant","Formal Pant","Track","Half Pant","Under Wear","Vest"];
   const NAME_MAX = 15;
@@ -52,7 +52,7 @@
     taxRate:document.getElementById('taxRate'),
     flatDiscount:document.getElementById('flatDiscount'),
     grandTotal:document.getElementById('grandTotal'),
-    paymentMode:document.getElementById('paymentMode'),
+    paymentMode:document.getElementById('paymentMode'), // hidden input that stores selected mode
     paidAmount:document.getElementById('paidAmount'),
     paidError:document.getElementById('paidError'),
     dueAmount:document.getElementById('dueAmount'),
@@ -124,7 +124,7 @@
     // e.g., NEddyyyymmhhmm
     const d = new Date();
     const dd = pad2(d.getDate());
-    const mm = pad2(d.getMonth() + 1);
+       const mm = pad2(d.getMonth() + 1);
     const yyyy = d.getFullYear();
     const hh = pad2(d.getHours());
     const min = pad2(d.getMinutes());
@@ -166,6 +166,62 @@
   els.invoiceNumber.value = genInvoice();
   const today = new Date();
   els.invoiceDate.value = `${today.getFullYear()}-${pad2(today.getMonth()+1)}-${pad2(today.getDate())}`;
+
+  /* ----------------------------- Payment Mode (Emoji Icons) ------------- */
+  function initPaymentModeIcons(root = document) {
+    const group = root.querySelector('.pm-buttons');
+    const hidden = root.getElementById
+      ? root.getElementById('paymentMode')
+      : root.querySelector('#paymentMode');
+    if (!group || !hidden) return;
+
+    const buttons = Array.from(group.querySelectorAll('.pm-btn'));
+
+    function setSelected(btn) {
+      buttons.forEach(b => {
+        const sel = b === btn;
+        b.classList.toggle('selected', sel);
+        b.setAttribute('aria-checked', sel ? 'true' : 'false');
+        b.tabIndex = sel ? 0 : -1; // roving tabindex
+      });
+      hidden.value = btn.dataset.value || '';
+      // Fire a change so existing listeners (recalc/persist) react
+      hidden.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // Click selection
+    buttons.forEach(btn => btn.addEventListener('click', () => setSelected(btn)));
+
+    // Keyboard navigation (Arrow keys, Enter/Space)
+    group.addEventListener('keydown', (e) => {
+      const active = document.activeElement;
+      const i = buttons.indexOf(active);
+      if (i === -1) return;
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const next = buttons[(i + 1) % buttons.length];
+        next.focus();
+        setSelected(next);
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prev = buttons[(i - 1 + buttons.length) % buttons.length];
+        prev.focus();
+        setSelected(prev);
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        setSelected(active);
+      }
+    });
+
+    // Initialize focusability
+    buttons.forEach((b, idx) => (b.tabIndex = idx === 0 ? 0 : -1));
+
+    // Optional default selection:
+    // const def = buttons.find(b => b.dataset.value === 'UPI');
+    // if (def) setSelected(def);
+  }
+  initPaymentModeIcons();
 
   /* ----------------------------- 6a) VISIT STATS HELPERS ----------------------------- */
   const preferInlineEl = () => (els.inlineCustomerStats || els.previewCustomerStats || null);
@@ -525,13 +581,13 @@
     });
   }
 
-  // === MOD: Paid must be > 0 and <= Grand (global rule). For Preview, we skip enforcing in validateAll, not here.
+  // === MOD: Paid must be > 0 and <= Grand (global rule).
   function validatePaid(){
     const paid = toNumber(els.paidAmount.value);
     const grand = toNumber(els.grandTotal.value);
 
     if (els.paidAmount.value === '') {
-      els.paidError.style.display='none'; // leave to validateAll to decide if required
+      els.paidError.style.display='none';
       return false;
     }
     if (paid <= 0) {
@@ -581,7 +637,7 @@
       hideErrorBelow(els.customerName);
     }
 
-    // Phone: strict for ALL actions (including preview)
+    // Phone: strict for ALL actions
     if(!/^\d{10}$/.test(els.customerPhone.value)){
       els.phoneError.style.display='block';
       ok=false;
@@ -617,11 +673,9 @@
     if(!hasValid) ok=false;
 
     // Payment Mode + Paid:
-    // === MOD: Relax ONLY for preview; for all other actions they are mandatory
     if (isPreview) {
       hideErrorBelow(els.paymentMode);
       hideErrorBelow(els.paidAmount);
-      // We don't alert for paid/paymentMode in preview
     } else {
       if(!els.paymentMode.value){
         showErrorBelow(els.paymentMode,'Select payment mode.');
@@ -634,7 +688,7 @@
         ok=false;
       } else {
         hideErrorBelow(els.paidAmount);
-        if(!validatePaid()) ok = false; // enforces >0 and <= grand
+        if(!validatePaid()) ok = false;
       }
     }
 

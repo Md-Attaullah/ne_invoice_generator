@@ -168,11 +168,11 @@ textarea{resize:vertical;min-height:48px}
 .error { color: #dc2626; font-size: 12px; margin-top: 4px; display: none; }
 
 /* (These two below duplicate .item/.char-counter styles above; retained for compatibility but now theme-aware) */
-/* .item { already themed above } */
+.item { /* already themed above */ }
 .item .top { display:flex; gap:8px; align-items:center; }
 .item .bot { display:flex; gap:8px; align-items:center; justify-content:space-between; margin-top:6px; }
 .stepper { display:flex; align-items:center; gap:4px; }
-/* .sbtn { themed above } */
+.sbtn { /* themed above */ }
 .btn.danger { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; } /* Optional: keep pill danger look */
 .char-counter { font-size:11px; color:var(--muted); margin-top:2px; } /* changed to var(--muted) */
 
@@ -360,3 +360,67 @@ input:checked + .slider:before { transform: translateX(22px); }
 .print-title { font-weight: 700; font-size: 18px; }
 .print-meta { color: var(--muted); font-size: 13px; line-height: 1.35; } /* themed */
 .error { color: #dc2626; font-size: 12px; margin-top: 4px; display: none; }
+
+/* =========================
+   PAYMENT MODE (ICON BOXES)
+   ========================= */
+.pm-buttons{
+  display:grid;
+  grid-template-columns:repeat(4, 1fr); /* equal width */
+  gap: 12px;
+  padding: 4px;
+  padding-left: max(4px, env(safe-area-inset-left));
+  padding-right: max(4px, env(safe-area-inset-right));
+}
+
+.pm-btn{
+  height: 56px;
+  border: 1px solid var(--border);
+  border-radius: 12px;                 /* separate rounded rectangles */
+  background: var(--card);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease, transform .08s ease, box-shadow .15s ease;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+}
+.pm-btn:hover{
+  /* soft hover based on current theme */
+  background: color-mix(in lab, var(--card) 90%, var(--text) 10%);
+}
+:root[data-theme="dark"] .pm-btn:hover{
+  background: color-mix(in lab, var(--card) 85%, var(--text) 15%);
+}
+.pm-btn:active{ transform: translateY(1px); }
+.pm-btn:focus-visible{
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(10, 102, 255, 0.30);
+  border-color: color-mix(in lab, #0a66ff 60%, var(--border) 40%);
+}
+.pm-btn .emoji{
+  font-size: 22px; line-height: 1;
+}
+
+/* Selected state */
+.pm-btn.selected{
+  background: color-mix(in lab, var(--brand) 14%, var(--card) 86%); /* subtle brand tint */
+  border-color: color-mix(in lab, var(--brand) 60%, var(--border) 40%);
+  color: color-mix(in lab, var(--brand) 70%, var(--text) 30%);
+  box-shadow: 0 0 0 2px color-mix(in lab, var(--brand) 30%, transparent) inset;
+}
+
+/* Mobile tweaks */
+@media (max-width: 520px){
+  .pm-buttons{ gap: 14px; }
+  .pm-btn{ height: 64px; border-radius: 14px; }
+  .pm-btn .emoji{ font-size: 26px; }
+}
+
+/* Very small phones: switch to 2x2 */
+@media (max-width: 360px){
+  .pm-buttons{ grid-template-columns: repeat(2, 1fr); }
+}
