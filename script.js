@@ -72,6 +72,29 @@
     inlineCustomerStats: document.getElementById('inlineCustomerStats') // optional; if not present, we fall back to previewCustomerStats
   };
 
+  /* ----------------------------- 3a) COUPON TOGGLE (FIX) ----------------------------- */
+  // Previously `couponEnabled` was referenced but not defined → ReferenceError.
+  // Now we wire it to the toggle element and expose a function.
+  const couponToggle = document.getElementById('couponToggle');
+  function couponIsOn() {
+    return !!couponToggle && !!couponToggle.checked;
+  }
+  if (couponToggle) {
+    couponToggle.addEventListener('change', () => {
+      // refresh preview if visible since coupon display is only visual (totals unchanged)
+      if (els.previewCard && els.previewCard.style.display !== 'none') {
+        renderPreview();
+      }
+    });
+  }
+  // Unified coupon value rule:
+  // >= 1000 → 100; >= 500 → 50; else 0
+  function couponValueFor(grand) {
+    if (grand >= 1000) return 50;
+    if (grand >= 500) return 50;
+    return 0;
+  }
+
   /* ----------------------------- 4) SALE TYPE ----------------------------- */
   (function wireSaleTypeSegments(){
     const group = document.getElementById('saleTypeGroup');
@@ -101,16 +124,15 @@
   /* ----------------------------- 5) HELPERS ----------------------------- */
   const pad2=n=>String(n).padStart(2,'0');
   function genInvoice() {
+    // e.g., NEddyyyymmhhmm
     const d = new Date();
     const dd = pad2(d.getDate());
     const mm = pad2(d.getMonth() + 1);
     const yyyy = d.getFullYear();
     const hh = pad2(d.getHours());
     const min = pad2(d.getMinutes());
-
-
-    return `NE${dd}${yyyy}${mm}${hh}${min}`;  // NEddyyyymm
-}
+    return `NE${dd}${yyyy}${mm}${hh}${min}`;
+  }
   function toNumber(v){ const n=parseFloat(v); return Number.isFinite(n) ? n : 0; }
   function fit(text, len){ let t=String(text||'').replace(/\s+/g,' ').trim(); return t.length>len ? t.slice(0,len-1)+'…' : t.padEnd(len,' '); }
   function p2(n, width){ return String(n.toFixed(2)).padStart(width,' '); }
@@ -533,12 +555,28 @@
   function hideErrorBelow(el){
     const e=el.parentElement.querySelector('.error'); if(e) e.style.display='none';
   }
+
+  // UPDATED: Relaxed validation for preview/copy/WhatsApp Invoice-only
   function validateAll(forAction='general'){
     let ok=true;
+
+    const relaxPreview = (forAction === 'preview' || forAction === 'copy');
+    const relaxWhatsappInvoice = (forAction === 'whatsappInvoice');
+
+    // Require name
     if(!els.customerName.value.trim()){ showErrorBelow(els.customerName,'Customer name is required.'); ok=false; } else hideErrorBelow(els.customerName);
-    if(!/^\d{10}$/.test(els.customerPhone.value)){ els.phoneError.style.display='block'; ok=false; } else els.phoneError.style.display='none';
+
+    // Phone: strict for WA flows (both), optional for preview/copy
+    if (relaxPreview) {
+      els.phoneError.style.display = 'none';
+    } else {
+      if(!/^\d{10}$/.test(els.customerPhone.value)){ els.phoneError.style.display='block'; ok=false; } else els.phoneError.style.display='none';
+    }
+
+    // Sale type required for all
     if(!els.saleType.value){ showErrorBelow(els.saleType,'Select sale type.'); ok=false; } else { hideErrorBelow(els.saleType); }
 
+    // Items
     const rows = Array.from(els.itemsList.children);
     if(!rows.length){ ok=false; alert('Add at least one item.'); }
     let hasValid=false;
@@ -557,15 +595,22 @@
     });
     if(!hasValid) ok=false;
 
-    if(!els.paymentMode.value){ showErrorBelow(els.paymentMode,'Select payment mode.'); ok=false; } else hideErrorBelow(els.paymentMode);
-    if(els.paidAmount.value===''){ showErrorBelow(els.paidAmount,'Enter paid amount (0 allowed).'); ok=false; } else hideErrorBelow(els.paidAmount);
-    if(!validatePaid()) ok = false;
+    // Payment Mode + Paid:
+    // Strict for print/save/staged WhatsApp; optional for preview/WA Invoice-only/copy
+    if (relaxPreview || relaxWhatsappInvoice) {
+      hideErrorBelow(els.paymentMode);
+      hideErrorBelow(els.paidAmount);
+    } else {
+      if(!els.paymentMode.value){ showErrorBelow(els.paymentMode,'Select payment mode.'); ok=false; } else hideErrorBelow(els.paymentMode);
+      if(els.paidAmount.value===''){ showErrorBelow(els.paidAmount,'Enter paid amount (0 allowed).'); ok=false; } else hideErrorBelow(els.paidAmount);
+      if(!validatePaid()) ok = false;
+    }
 
     if(!ok && forAction!=='general'){ alert('Please correct highlighted fields.'); }
     return ok;
   }
 
-/* ----------------------------- 9) PREVIEW ----------------------------- */
+  /* ----------------------------- 9) PREVIEW ----------------------------- */
   function renderPreview(){
     const items = getItems();
 
@@ -597,20 +642,22 @@
     if (negotiated > 0)
       totalsHtml += `<tr><td><b>Negotiated</b></td><td style="text-align:right"><b>₹${negotiated.toFixed(2)}</b></td></tr>`;
 
-    // COUPON LOGIC
+    // COUPON (Unified rule)
     let couponHtml = "";
-    if (els.saleType.value === "Retail" && couponEnabled) {
-      const couponValue = grand > 1000 ? 50 : 50;
-      const couponNumber = els.invoiceNumber.value;
-      const p2d = n => (n < 10 ? "0" + n : n);
-      const dt = new Date(); dt.setMonth(dt.getMonth() + 2);
-      const validTill = `${p2d(dt.getDate())}-${p2d(dt.getMonth() + 1)}-${dt.getFullYear()}`;
-      couponHtml = `
-        <tr>
-          <td><b>Coupon (${couponNumber})</b><br><small>Valid till ${validTill}</small></td>
-          <td style="text-align:right"><b>₹${couponValue}</b></td>
-        </tr>
-      `;
+    if (els.saleType.value === "Retail" && couponIsOn()) {
+      const couponValue = couponValueFor(grand);
+      if (couponValue > 0) {
+        const couponNumber = els.invoiceNumber.value;
+        const p2d = n => (n < 10 ? "0" + n : n);
+        const dt = new Date(); dt.setMonth(dt.getMonth() + 2);
+        const validTill = `${p2d(dt.getDate())}-${p2d(dt.getMonth() + 1)}-${dt.getFullYear()}`;
+        couponHtml = `
+          <tr>
+            <td><b>Coupon (${couponNumber})</b><br><small>Valid till ${validTill}</small></td>
+            <td style="text-align:right"><b>₹${couponValue}</b></td>
+          </tr>
+        `;
+      }
     }
 
     // Visit stats from dataset (date-only already stored)
@@ -629,6 +676,8 @@
       }
     }
 
+    const dateDisplay = els.invoiceDate.value ? formatDateOnly(els.invoiceDate.value) : '';
+
     els.invoicePreview.innerHTML = `
       <div class="print-header">
         <div>
@@ -639,7 +688,7 @@
 
         <div style="text-align:right" class="print-meta">
           <div><b>Invoice #:</b> ${els.invoiceNumber.value}</div>
-          <div><b>Date:</b> ${els.invoiceDate.value || ''}</div>
+          <div><b>Date:</b> ${dateDisplay || ''}</div>
           <div><b>Customer:</b> ${els.customerName.value || ''}</div>
         </div>
       </div>
@@ -656,7 +705,6 @@
       </div>
     `;
   }
-
 
   /* ----------------------------- 10) WA SUMMARY ----------------------------- */
   function summaryMonospace() {
@@ -704,16 +752,17 @@
       ...(paid > 0 ? [`Paid: ₹${paid.toFixed(2)}`] : []),
     ];
 
-    /* COUPON LOGIC */
+    /* COUPON (Unified rule) */
     let couponLine = "";
-    if (els.saleType.value === "Retail" && couponEnabled) {
-      const amount = grand;
-      const couponValue = amount >= 1000 ? 50 : amount >= 500 ? 50 : 0;
-      const couponNumber = els.invoiceNumber.value;
-      const dt = new Date();
-      dt.setMonth(dt.getMonth() + 2);
-      const validTill = `${pad2(dt.getDate())}-${pad2(dt.getMonth() + 1)}-${dt.getFullYear()}`;
-      couponLine = `Coupon: ${couponNumber} | Value: Rs ${couponValue} (Redeem before ${validTill})`;
+    if (els.saleType.value === "Retail" && couponIsOn()) {
+      const cVal = couponValueFor(grand);
+      if (cVal > 0) {
+        const couponNumber = els.invoiceNumber.value;
+        const dt = new Date();
+        dt.setMonth(dt.getMonth() + 2);
+        const validTill = `${pad2(dt.getDate())}-${pad2(dt.getMonth() + 1)}-${dt.getFullYear()}`;
+        couponLine = `Coupon: ${couponNumber} | Value: Rs ${cVal} (Redeem before ${validTill})`;
+      }
     }
 
     const columnHeader = "#  Name           Qty Rs  Amt ";
@@ -766,10 +815,11 @@
     const paid=toNumber(els.paidAmount.value);
     function kv(k,v){ const key=(k+':').padEnd(13,' '); const val=String(v); return key + val; }
 
-    /* COUPON TEXT */
+    /* COUPON TEXT (Unified rule) */
     let couponText = "";
-    if (els.saleType.value === "Retail" && couponEnabled) {
-        const couponValue = grand > 1000 ? 100 : 50;
+    if (els.saleType.value === "Retail" && couponIsOn()) {
+      const cVal = couponValueFor(grand);
+      if (cVal > 0) {
         const couponNumber = els.invoiceNumber.value;
         const p2d = n => (n < 10 ? "0" + n : n);
         const dt = new Date();
@@ -777,8 +827,9 @@
         const validTill = `${p2d(dt.getDate())}-${p2d(dt.getMonth() + 1)}-${dt.getFullYear()}`;
         couponText =
           kv("Coupon", couponNumber) + "\n" +
-          kv("Value", `₹${couponValue}`) + "\n" +
+          kv("Value", `₹${cVal}`) + "\n" +
           kv("Valid Till", validTill) + "\n";
+      }
     }
 
     return `
