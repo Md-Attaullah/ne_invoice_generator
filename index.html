@@ -6,7 +6,7 @@
   <title>Nusrat Enterprises — Invoice (Vertical + WA Staged Flow + Fixed Sale Type)</title>
 
   <!-- App CSS -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 
   <!-- PDF deps -->
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -81,7 +81,7 @@
               <div id="phoneError" class="error" style="display:none">Enter exactly 10 digits.</div>
             </div>
 
-            <!-- NEW: Visit stats line (inline, below phone) -->
+            <!-- Visit stats (inline, optional) -->
             <div id="inlineCustomerStats" class="print-meta" style="margin:6px 0;color:#4b5563; display:none;"></div>
           </div>
         </div>
@@ -162,17 +162,63 @@
           <div><label>Grand Total (₹)</label><input id="grandTotal" disabled/></div>
 
           <div class="row cols-2" style="margin-top:8px">
+            <!-- LEFT: Payment Mode (updated) -->
             <div>
-              <label>Payment Mode</label>
-              <select id="paymentMode">
-                <option value="">Select</option>
-                <option value="Cash">Cash</option>
-                <option value="UPI">UPI</option>
-                <option value="Card">Card</option>
-                <option value="Bank Transfer">Bank Transfer</option>
-              </select>
+              <label style="margin-bottom:8px">Payment Mode</label>
+
+              <!-- Equal-width rectangular boxes with spacing -->
+              <div class="pm-buttons" role="radiogroup" aria-label="Payment Mode">
+                <button
+                  type="button"
+                  class="pm-btn"
+                  data-value="Cash"
+                  role="radio"
+                  aria-checked="false"
+                  title="Cash"
+                >
+                  <span class="emoji" aria-hidden="true">💵</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="pm-btn"
+                  data-value="UPI"
+                  role="radio"
+                  aria-checked="false"
+                  title="UPI"
+                >
+                  <span class="emoji" aria-hidden="true">📱</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="pm-btn"
+                  data-value="Card"
+                  role="radio"
+                  aria-checked="false"
+                  title="Card"
+                >
+                  <span class="emoji" aria-hidden="true">💳</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="pm-btn"
+                  data-value="Bank Transfer"
+                  role="radio"
+                  aria-checked="false"
+                  title="Bank Transfer"
+                >
+                  <span class="emoji" aria-hidden="true">🏦</span>
+                </button>
+              </div>
+
+              <!-- Keep the same id so existing logic keeps working -->
+              <input type="hidden" id="paymentMode" name="paymentMode" />
               <div class="error"></div>
             </div>
+
+            <!-- RIGHT: Paid -->
             <div>
               <label>Paid (₹)</label>
               <input id="paidAmount" type="text" inputmode="decimal" placeholder="0.00" />
@@ -192,7 +238,7 @@
         <h2>Actions</h2>
         <div class="action-buttons">
           <!-- Complete Invoice Process — Staged flow -->
-          <button id="whatsAppBtn" class="wa-btn btn-yellow" type="button" aria-live="polite">
+          <button id="whatsAppBtn" class="wa-btn btn-yellow btn" type="button" aria-live="polite">
             <span class="wa-label">
               <span class="text-default">💼 Complete Invoice Process</span>
               <span class="text-saving" aria-hidden="true">Saving…</span>
@@ -220,7 +266,7 @@
             </span>
           </button>
 
-          <!-- NEW: WhatsApp Invoice ONLY (ghost) -->
+          <!-- WhatsApp Invoice ONLY (ghost) -->
           <button type="button" class="btn ghost" id="waInvoiceBtn">📲 WhatsApp Invoice</button>
 
           <!-- Print / PDF -->
@@ -242,8 +288,6 @@
 
       <!-- Preview -->
       <div class="card" id="previewCard" style="display:none">
-        <!-- <h2>Invoice Preview</h2> -->
-        <!-- Visit stats in preview (kept, optional for display there too) -->
         <div id="previewCustomerStats" class="print-meta" style="margin:6px 0;color:#4b5563;"></div>
         <div id="invoicePreview" aria-live="polite"></div>
       </div>
@@ -256,9 +300,7 @@
   <!-- Floating Add button -->
   <button type="button" class="fab" id="fabAdd">+ Add</button>
 
-  <!-- ================================
-       APPLICATION SCRIPT
-       ================================ -->
+  <!-- App JS -->
   <script src="script.js"></script>
 </body>
 </html>
