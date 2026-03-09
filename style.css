@@ -168,11 +168,9 @@ textarea{resize:vertical;min-height:48px}
 .error { color: #dc2626; font-size: 12px; margin-top: 4px; display: none; }
 
 /* (These two below duplicate .item/.char-counter styles above; retained for compatibility but now theme-aware) */
-.item { /* already themed above */ }
 .item .top { display:flex; gap:8px; align-items:center; }
 .item .bot { display:flex; gap:8px; align-items:center; justify-content:space-between; margin-top:6px; }
 .stepper { display:flex; align-items:center; gap:4px; }
-.sbtn { /* themed above */ }
 .btn.danger { background:#fee2e2; color:#991b1b; border:1px solid #fecaca; } /* Optional: keep pill danger look */
 .char-counter { font-size:11px; color:var(--muted); margin-top:2px; } /* changed to var(--muted) */
 

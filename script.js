@@ -1036,9 +1036,30 @@
   }
 
   /* ----------------------------- 13) GOOGLE SHEET ----------------------------- */
+  const DEBUG_POST = false; // set true temporarily to see outgoing payload in console
+
+  function normalizeItemsForServer(rawItems) {
+    const arr = Array.isArray(rawItems) ? rawItems : (rawItems ? Object.values(rawItems) : []);
+    return arr.map(it => {
+      const qty  = Number(it?.qty ?? it?.quantity ?? 0);
+      const rate = Number(it?.rate ?? it?.price ?? 0);
+      const amount = Number.isFinite(Number(it?.amount)) ? Number(it.amount) : Math.max(0, qty * rate);
+      const nm = (it?.name || it?.itemName || it?.type || 'Item');
+      return {
+        type:   String(it?.type || ''),
+        name:   String(nm).slice(0, NAME_MAX),
+        qty:    Number.isFinite(qty) ? qty : 0,
+        rate:   Number.isFinite(rate) ? rate : 0,
+        amount: Number.isFinite(amount) ? amount : 0
+      };
+    });
+  }
+
   async function collectInvoicePayload() {
-    const items = getItems();
-    return {
+    const rawItems = getItems();        // your existing DOM -> items collector
+    const items = normalizeItemsForServer(rawItems);
+
+    const payload = {
       token: AUTH_TOKEN,
       invoiceNumber: els.invoiceNumber.value || '',
       invoiceDate: els.invoiceDate.value || '',
@@ -1056,19 +1077,32 @@
       saleType: els.saleType.value || '',
       items
     };
+
+    if (DEBUG_POST) {
+      console.log('[POST] payload:', JSON.stringify(payload, null, 2));
+      console.log('[POST] items: isArray=%s, len=%d', Array.isArray(items), items.length);
+    }
+
+    return payload;
   }
+
   async function pushToGoogleSheet(opts = {}) {
     const { alertOnResult = true } = opts;
     if (!validateAll('push')) { if (alertOnResult) alert('Please correct highlighted fields.'); return false; }
+
     const payload = await collectInvoicePayload();
     try {
-      const form = new FormData(); form.append('payload', JSON.stringify(payload));
-      const res = await fetch(WEB_APP_URL, { method:'POST', body: form });
-      let ok = false;
-      try { const json = await res.json(); ok = !!(json && json.ok); } catch (_) { ok = res.ok; }
+      const form = new FormData();
+      form.append('payload', JSON.stringify(payload));
+
+      const res = await fetch(WEB_APP_URL, { method: 'POST', body: form });
+
+      let ok = false, data = null;
+      try { data = await res.json(); ok = !!(data && data.ok); } catch (_) { ok = res.ok; }
+
       if (!ok && alertOnResult) {
-        const txt = await res.text().catch(()=> '');
-        alert('Failed to save to Google Sheet ❌' + (txt ? '\n' + txt.slice(0,500) : ''));
+        const txt = data?.error ? String(data.error) : (await res.text().catch(() => '')) || '';
+        alert('Failed to save to Google Sheet ❌' + (txt ? '\n' + txt.slice(0, 500) : ''));
       }
       return ok;
     } catch (err) {
@@ -1077,7 +1111,6 @@
       return false;
     }
   }
-
   /* ----------------------------- 14) ACTIONS ----------------------------- */
   if (els.previewBtn){
     els.previewBtn.addEventListener('click', async ()=>{
