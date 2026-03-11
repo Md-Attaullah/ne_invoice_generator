@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>8-Digit Login | Dial Pad</title>
+
+<style>
+  :root {
+    --primary: #0078ff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --bg: #f5f5f7;
+    --white: #ffffff;
+    --danger: #ef4444;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+    background: var(--bg);
+    height: 100vh;
+    display: grid;
+    place-items: center;
+    color: var(--text);
+  }
+
+  .login-wrapper {
+    width: 320px;
+    text-align: center;
+  }
+
+  h2 {
+    margin: 0 0 18px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  /* Dots/passcode display */
+  .display {
+    height: 60px;
+    margin: 0 auto 10px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #cbd5e1;
+    background: transparent;
+    transition: all .15s ease;
+  }
+
+  .dot.filled {
+    background: #0f172a;
+    border-color: #0f172a;
+  }
+
+  .error {
+    min-height: 20px;
+    color: var(--danger);
+    font-size: 13px;
+    margin-bottom: 8px;
+    visibility: hidden;
+  }
+
+  .error.show { visibility: visible; }
+
+  /* Dial pad */
+  .dial-pad {
+    margin-top: 6px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    justify-items: center;
+  }
+
+  .btn {
+    width: 80px;
+    height: 80px;
+    background: var(--white);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 4px 12px rgba(15,23,42,.12);
+    transition: transform .12s ease, background .12s ease;
+  }
+  .btn:active { transform: scale(0.92); background: #eef2ff; }
+
+  .num {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1;
+  }
+  .letters {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    letter-spacing: 1px;
+  }
+  .btn-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Bottom actions */
+  .actions {
+    margin-top: 20px;
+  }
+  .login {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--primary);
+    color: #fff;
+    cursor: pointer;
+    display: none;
+    transition: transform .12s ease, opacity .12s ease;
+  }
+  .login:active { transform: scale(0.98); }
+
+  /* Shake animation on error */
+  .shake {
+    animation: shake .3s ease;
+  }
+  @keyframes shake {
+    0%   { transform: translateX(0); }
+    25%  { transform: translateX(-6px); }
+    50%  { transform: translateX(6px); }
+    75%  { transform: translateX(-4px); }
+    100% { transform: translateX(0); }
+  }
+
+  /* Delete icon fallback */
+  .delete {
+    font-size: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="login-wrapper">
+  <h2>Enter Passcode</h2>
+
+  <!-- Dots -->
+  <div id="display" class="display" aria-label="passcode">
+    <!-- Dots will be rendered by JS -->
+  </div>
+  <div id="error" class="error" role="alert"></div>
+
+  <!-- Dial pad -->
+  <div class="dial-pad" id="pad">
+    <!-- Row 1 -->
+    <div class="btn" data-num="1">
+      <div class="btn-col">
+        <div class="num">1</div>
+      </div>
+    </div>
+    <div class="btn" data-num="2">
+      <div class="btn-col">
+        <div class="num">2</div>
+        <div class="letters">ABC</div>
+      </div>
+    </div>
+    <div class="btn" data-num="3">
+      <div class="btn-col">
+        <div class="num">3</div>
+        <div class="letters">DEF</div>
+      </div>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="btn" data-num="4">
+      <div class="btn-col">
+        <div class="num">4</div>
+        <div class="letters">GHI</div>
+      </div>
+    </div>
+    <div class="btn" data-num="5">
+      <div class="btn-col">
+        <div class="num">5</div>
+        <div class="letters">JKL</div>
+      </div>
+    </div>
+    <div class="btn" data-num="6">
+      <div class="btn-col">
+        <div class="num">6</div>
+        <div class="letters">MNO</div>
+      </div>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="btn" data-num="7">
+      <div class="btn-col">
+        <div class="num">7</div>
+        <div class="letters">PQRS</div>
+      </div>
+    </div>
+    <div class="btn" data-num="8">
+      <div class="btn-col">
+        <div class="num">8</div>
+        <div class="letters">TUV</div>
+      </div>
+    </div>
+    <div class="btn" data-num="9">
+      <div class="btn-col">
+        <div class="num">9</div>
+        <div class="letters">WXYZ</div>
+      </div>
+    </div>
+
+    <!-- Bottom row: empty, 0, delete -->
+    <div></div>
+    <div class="btn" data-num="0">
+      <div class="btn-col">
+        <div class="num">0</div>
+      </div>
+    </div>
+    <div class="btn" id="del">
+      <div class="btn-col">
+        <div class="delete">⌫</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="loginBtn" class="login">Login</button>
+  </div>
+</div>
+
+<script>
+  // ⚠️ Hardcoded passcode (as requested)
+  const HARDCODED = "00009999";
+
+  let code = "";
+
+  const display = document.getElementById("display");
+  const errorMsg = document.getElementById("error");
+  const loginBtn = document.getElementById("loginBtn");
+  const delBtn = document.getElementById("del");
+  const pad = document.getElementById("pad");
+
+  // Render 8 dots
+  function renderDots() {
+    display.innerHTML = "";
+    for (let i = 0; i < 8; i++) {
+      const dot = document.createElement("div");
+      dot.className = "dot" + (i < code.length ? " filled" : "");
+      display.appendChild(dot);
+    }
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.classList.add("show");
+    display.classList.add("shake");
+    setTimeout(() => display.classList.remove("shake"), 350);
+  }
+
+  function clearError() {
+    errorMsg.textContent = "";
+    errorMsg.classList.remove("show");
+  }
+
+  function press(num) {
+    if (code.length >= 8) return;
+    code += String(num);
+    clearError();
+    renderState();
+  }
+
+  function del() {
+    if (!code.length) return;
+    code = code.slice(0, -1);
+    clearError();
+    renderState();
+  }
+
+  function renderState() {
+    renderDots();
+    // Show Login only when exactly 8 digits entered
+    if (code.length === 8) {
+      loginBtn.style.display = "block";
+    } else {
+      loginBtn.style.display = "none";
+    }
+  }
+
+  function attemptLogin() {
+    if (code.length !== 8) {
+        showError("Enter all 8 digits.");
+        return;
+    }
+
+    if (code === HARDCODED) {
+        // Save login session
+        sessionStorage.setItem("loggedIn", "yes");
+
+        // Redirect to invoice page
+        window.location.href = "index.html";
+    } else {
+        showError("Incorrect passcode. Try again.");
+        code = "";
+        renderState();
+    }
+}
+
+  // Click handlers (event delegation)
+  pad.addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn");
+    if (!btn) return;
+    if (btn.id === "del") {
+      del();
+    } else {
+      const n = btn.getAttribute("data-num");
+      if (n !== null) press(n);
+    }
+  });
+
+  delBtn.addEventListener("contextmenu", (e) => {
+    // Long-press/right-click to clear all
+    e.preventDefault();
+    code = "";
+    clearError();
+    renderState();
+  });
+
+  loginBtn.addEventListener("click", attemptLogin);
+
+  // Keyboard support (optional)
+  window.addEventListener("keydown", (e) => {
+    if (e.key >= "0" && e.key <= "9") press(e.key);
+    if (e.key === "Backspace") del();
+    if (e.key === "Enter") attemptLogin();
+  });
+
+  // Initial render
+  renderState();
+</script>
+</body>
+</html>

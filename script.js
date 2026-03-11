@@ -1207,35 +1207,59 @@
       if(stateClass !== 'is-success'){ btn.setAttribute('aria-busy','true'); }
     }
   }
-  if (els.whatsAppBtn){
-    els.whatsAppBtn.addEventListener('click', async ()=>{
-      if (!validateAll('whatsapp')) return;
-      try {
-        setWaState('is-saving');
-        const saved = await pushToGoogleSheet({ alertOnResult: false });
-        if (!saved) { setWaState(''); alert('Saving to Google Sheet failed. Please try again.'); return; }
+  if (els.whatsAppBtn) {
+  els.whatsAppBtn.addEventListener('click', async () => {
+    if (!validateAll('whatsapp')) return;
 
-        if (/^\d{10}$/.test(els.customerPhone.value)) {
-          pullAndRenderVisitStats(els.customerPhone.value).catch(()=>{});
-        }
+    try {
+      setWaState('is-saving');
 
+      // 1) SAVE TO GOOGLE SHEET
+      const saved = await pushToGoogleSheet({ alertOnResult: false });
+      if (!saved) {
+        setWaState('');
+        alert('Saving to Google Sheet failed. Please try again.');
+        return;
+      }
+
+      // Since visit stats are already extracted earlier,
+      // we simply read them from previewCustomerStats dataset.
+      const visitCount = Number(els.previewCustomerStats?.dataset.count || 0);
+      const isReturningCustomer = visitCount > 0;
+
+      // 2) VCF DOWNLOAD
+      // NEW RULE: Download VCF ONLY for NEW customers
+      if (!isReturningCustomer) {
         setWaState('is-downloading');
         downloadVcfNow();
-        setWaState('is-sending');
-        const phone = `91${els.customerPhone.value}`;
-        const msg = summaryMonospace();
-        setTimeout(()=>{
-          window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank','noopener,noreferrer');
-          setWaState('is-success');
-          setTimeout(()=> setWaState(''), 1400);
-        }, 500);
-      } catch (err) {
-        console.error(err);
-        setWaState('');
-        alert('Something went wrong while processing the WhatsApp flow.');
       }
-    });
-  }
+
+      // 3) PREPARE WHATSAPP MESSAGE
+      setWaState('is-sending');
+
+      const phone = `91${els.customerPhone.value}`;
+      const msg = summaryMonospace();
+
+      // If returning customer, skip delay
+      const delay = isReturningCustomer ? 250 : 500;
+
+      setTimeout(() => {
+        window.open(
+          `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,
+          '_blank',
+          'noopener,noreferrer'
+        );
+        setWaState('is-success');
+        setTimeout(() => setWaState(''), 1400);
+      }, delay);
+
+    } catch (err) {
+      console.error(err);
+      setWaState('');
+      alert('Something went wrong while processing the WhatsApp flow.');
+    }
+  });
+}
   if (els.waInvoiceBtn){
     els.waInvoiceBtn.addEventListener('click', ()=>{
       if (!validateAll('whatsappInvoice')) return;
