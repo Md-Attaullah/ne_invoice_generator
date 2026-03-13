@@ -34,7 +34,7 @@
   const NAME_MAX = 15;
 
   // ✅ Seller GST number (used only when GST toggle is ON)
-  const GSTIN = '21ABCDE1234F1Z5'; // <-- replace with your real GSTIN or set '' to hide
+  const GSTIN = '21FCJPA3223D1ZG'; // <-- replace with your real GSTIN or set '' to hide
 
   /* ----------------------------- 3) EL REFS ----------------------------- */
   const els={
@@ -1300,4 +1300,5 @@
 
   // Boot
   load();
+
 })();
