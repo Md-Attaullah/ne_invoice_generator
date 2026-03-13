@@ -325,6 +325,19 @@ textarea{resize:vertical;min-height:48px}
 }
 
 /* Coupon toggle */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 30px; /* space between two toggles */
+}
+
+.gst-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  font-family: Arial, sans-serif;
+}
 .coupon-toggle {
   display: flex;
   align-items: center;

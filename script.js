@@ -33,6 +33,9 @@
   const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Cargo Pant","Formal Pant","Track","Half Pant","Under Wear","Vest"];
   const NAME_MAX = 15;
 
+  // ✅ Seller GST number (used only when GST toggle is ON)
+  const GSTIN = '21ABCDE1234F1Z5'; // <-- replace with your real GSTIN or set '' to hide
+
   /* ----------------------------- 3) EL REFS ----------------------------- */
   const els={
     itemsList:document.getElementById('itemsList'),
@@ -69,10 +72,12 @@
     vcfBtn: document.getElementById('vcfBtn'),
     /* Stats elements */
     previewCustomerStats: document.getElementById('previewCustomerStats'),
-    inlineCustomerStats: document.getElementById('inlineCustomerStats') // optional; if not present, we fall back to previewCustomerStats
+    inlineCustomerStats: document.getElementById('inlineCustomerStats')
   };
+  // GST toggle element
+  const gstToggle = document.getElementById('gstToggle');
 
-  /* ----------------------------- 3a) COUPON TOGGLE (FIX) ----------------------------- */
+  /* ----------------------------- 3a) COUPON TOGGLE ----------------------------- */
   const couponToggle = document.getElementById('couponToggle');
   function couponIsOn() {
     return !!couponToggle && !!couponToggle.checked;
@@ -84,12 +89,24 @@
       }
     });
   }
-  // Unified coupon value rule:
-  // >= 1000 → 50; >= 500 → 50; else 0
+  // Unified coupon value rule: >= 500 → 50 (including >= 1000)
   function couponValueFor(grand) {
-    if (grand >= 1000) return 50;
     if (grand >= 500) return 50;
     return 0;
+  }
+
+  /* ----------------------------- 3b) GST TOGGLE ----------------------------- */
+  if (gstToggle) {
+    gstToggle.addEventListener('change', () => {
+      // If user turns GST on and rate is 0 → set a friendly default (5%)
+      if (gstToggle.checked && Number(els.taxRate.value || 0) === 0) {
+        els.taxRate.value = '5';
+      }
+      recalc();
+      if (els.previewCard && els.previewCard.style.display !== 'none') {
+        renderPreview();
+      }
+    });
   }
 
   /* ----------------------------- 4) SALE TYPE ----------------------------- */
@@ -124,7 +141,7 @@
     // e.g., NEddyyyymmhhmm
     const d = new Date();
     const dd = pad2(d.getDate());
-       const mm = pad2(d.getMonth() + 1);
+    const mm = pad2(d.getMonth() + 1);
     const yyyy = d.getFullYear();
     const hh = pad2(d.getHours());
     const min = pad2(d.getMinutes());
@@ -216,10 +233,6 @@
 
     // Initialize focusability
     buttons.forEach((b, idx) => (b.tabIndex = idx === 0 ? 0 : -1));
-
-    // Optional default selection:
-    // const def = buttons.find(b => b.dataset.value === 'UPI');
-    // if (def) setSelected(def);
   }
   initPaymentModeIcons();
 
@@ -547,7 +560,11 @@
     const breakdown = buildItemsBreakdown(items);
 
     const subtotal=items.reduce((s,i)=> s + toNumber(i.amount), 0);
-    const gstRate=toNumber(els.taxRate.value);
+
+    // ✅ Apply GST only when toggle is ON
+    const gstOn = !!(gstToggle && gstToggle.checked);
+    const gstRate = gstOn ? toNumber(els.taxRate.value) : 0;
+
     const flat=toNumber(els.flatDiscount.value);
     const gstAmt=subtotal*(gstRate/100);
     let grand=subtotal+gstAmt-flat; if(grand<0) grand=0;
@@ -581,7 +598,7 @@
     });
   }
 
-  // === MOD: Paid must be > 0 and <= Grand (global rule).
+  // Paid must be > 0 and <= Grand (global rule).
   function validatePaid(){
     const paid = toNumber(els.paidAmount.value);
     const grand = toNumber(els.grandTotal.value);
@@ -621,7 +638,7 @@
     const e=el.parentElement.querySelector('.error'); if(e) e.style.display='none';
   }
 
-  // === MOD: Validation policy
+  // Validation policy
   // ONLY for 'preview' we can ignore Payment Mode and Paid Amount;
   // Phone remains strict for all actions.
   function validateAll(forAction='general'){
@@ -708,10 +725,14 @@
     `).join('');
 
     const subtotal = toNumber(els.subtotal.value);
-    const gstRate = toNumber(els.taxRate.value);
+
+    // ✅ Respect GST toggle here too
+    const gstOn = !!(gstToggle && gstToggle.checked);
+    const gstRate = gstOn ? toNumber(els.taxRate.value) : 0;
+
     const gstAmt = subtotal * (gstRate / 100);
     const flat = toNumber(els.flatDiscount.value);
-    const grand = toNumber(els.grandTotal.value);
+    const grand = Math.max(0, subtotal + gstAmt - flat);
     const paid = toNumber(els.paidAmount.value);
     const negotiated = toNumber(els.dueAmount.value);
 
@@ -728,7 +749,7 @@
     if (negotiated > 0)
       totalsHtml += `<tr><td><b>Negotiated</b></td><td style="text-align:right"><b>₹${negotiated.toFixed(2)}</b></td></tr>`;
 
-    // COUPON (Unified rule)
+    // COUPON
     let couponHtml = "";
     if (els.saleType.value === "Retail" && couponIsOn()) {
       const couponValue = couponValueFor(grand);
@@ -746,7 +767,7 @@
       }
     }
 
-    // Visit stats from dataset (date-only already stored)
+    // Visit stats from dataset
     let visitStatsHtml = '';
     if (els.previewCustomerStats) {
       const cnt = Number(els.previewCustomerStats.dataset.count || 0);
@@ -763,6 +784,7 @@
     }
 
     const dateDisplay = els.invoiceDate.value ? formatDateOnly(els.invoiceDate.value) : '';
+    const showGstin = !!(gstOn && GSTIN);
 
     els.invoicePreview.innerHTML = `
       <div class="print-header">
@@ -770,6 +792,7 @@
           <div class="print-title">Nusrat Enterprises</div>
           <div class="print-meta">📞 7978830017, 9330066455, 9040366455</div>
           <div class="print-meta">📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014</div>
+          ${showGstin ? `<div class="print-meta"><b>GSTIN:</b> ${GSTIN}</div>` : ''}
         </div>
 
         <div style="text-align:right" class="print-meta">
@@ -798,7 +821,6 @@
     const items = getItems();
     const toAscii = s => String(s || '').replace(/[^\x00-\x7F]/g, '');
     const padEnd = (s, n) => (s.length > n ? s.slice(0, n) : s.padEnd(n, ' '));
-    const padStart = (s, n) => (s.length > n ? s.slice(-n) : s.padStart(n, ' '));
 
     function fmtNoDecimal(n) {
       if (n == null || n === '') return '';
@@ -826,10 +848,11 @@
     });
 
     const subtotal = Number(els.subtotal.value || 0);
-    const gstRate = Number(els.taxRate.value || 0);
+    const gstOn = !!(gstToggle && gstToggle.checked);
+    const gstRate = gstOn ? Number(els.taxRate.value || 0) : 0;
     const flat = Number(els.flatDiscount.value || 0);
     const gstAmt = subtotal * (gstRate / 100);
-    const grand = Number(els.grandTotal.value || 0);
+    const grand = Math.max(0, subtotal + gstAmt - flat);
     const paid = Number(els.paidAmount.value || 0);
 
     const totals = [
@@ -839,7 +862,7 @@
       ...(paid > 0 ? [`Paid: ₹${paid.toFixed(2)}`] : []),
     ];
 
-    /* COUPON (Unified rule) */
+    // COUPON
     let couponLine = "";
     if (els.saleType.value === "Retail" && couponIsOn()) {
       const cVal = couponValueFor(grand);
@@ -854,10 +877,12 @@
 
     const columnHeader = "#  Name           Qty Rs  Amt ";
 
+    const showGstin = !!(gstOn && GSTIN);
     const lines = [
       "Nusrat Enterprises",
       "📞: 7978830017, 9330066455, 9040366455",
       "📍: Plot 53, Goutam Nagar, Bhubaneswar - 751014",
+      ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
       "Trusted Since 2008",
       "",
       `Invoice: ${els.invoiceNumber.value} | Date: ${els.invoiceDate.value}`,
@@ -884,6 +909,7 @@
     const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
     const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.amt);
     const header = [ fit('#',COLS.idx), fit('ITEM',COLS.name), fit('QTY',COLS.qty), fit('RATE',COLS.rate), fit('AMOUNT',COLS.amt) ].join(' ');
+
     const rows = items.map((it,i)=>{
       const idx=String(i+1).padStart(COLS.idx,' ');
       const nm =fit(it.name,COLS.name);
@@ -893,16 +919,18 @@
       return `${idx} ${nm} ${qt} ${rt} ${am}`;
     });
 
-    // totals
+    // Totals (respect GST toggle)
     const subtotal=toNumber(els.subtotal.value);
-    const gstRate=toNumber(els.taxRate.value);
+    const gstOn = !!(gstToggle && gstToggle.checked);
+    const gstRate= gstOn ? toNumber(els.taxRate.value) : 0;
     const gstAmt=subtotal*(gstRate/100);
     const flat=toNumber(els.flatDiscount.value);
-    const grand=toNumber(els.grandTotal.value);
+    const grand=Math.max(0, toNumber(els.grandTotal.value)); // already computed with gstOn
     const paid=toNumber(els.paidAmount.value);
+
     function kv(k,v){ const key=(k+':').padEnd(13,' '); const val=String(v); return key + val; }
 
-    /* COUPON TEXT (Unified rule) */
+    // COUPON TEXT (Unified rule)
     let couponText = "";
     if (els.saleType.value === "Retail" && couponIsOn()) {
       const cVal = couponValueFor(grand);
@@ -919,6 +947,7 @@
       }
     }
 
+    const showGstin = !!(gstOn && GSTIN);
     return `
       <div id="monoBox" style="
         width:${mmToPx(RECEIPT_MM)}px; padding:12px; border:1px solid #e5e7eb; border-radius:8px; background:#fff; color:#111827;
@@ -928,6 +957,7 @@
             'Nusrat Enterprises',
             '📞 7978830017, 9330066455, 9040366455',
             '📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014',
+            ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
             '',
             `Invoice: ${els.invoiceNumber.value}` + (els.invoiceDate.value ? ` | Date: ${els.invoiceDate.value}` : ''),
             els.customerName.value ? `Customer: ${els.customerName.value}` : '',
@@ -1056,7 +1086,7 @@
   }
 
   async function collectInvoicePayload() {
-    const rawItems = getItems();        // your existing DOM -> items collector
+    const rawItems = getItems();
     const items = normalizeItemsForServer(rawItems);
 
     const payload = {
@@ -1111,6 +1141,7 @@
       return false;
     }
   }
+
   /* ----------------------------- 14) ACTIONS ----------------------------- */
   if (els.previewBtn){
     els.previewBtn.addEventListener('click', async ()=>{
@@ -1156,14 +1187,26 @@
       lines.push('Nusrat Enterprises');
       lines.push('📞 7978830017, 9330066455, 9040366455');
       lines.push('📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014');
+
+      // Optional: include GSTIN in copied summary if GST is ON
+      const gstOn = !!(gstToggle && gstToggle.checked);
+      if (gstOn && GSTIN) lines.push(`GSTIN: ${GSTIN}`);
+
       lines.push('');
       lines.push(`Invoice: ${els.invoiceNumber.value}`);
       if(els.invoiceDate.value) lines.push(`Date: ${els.invoiceDate.value}`);
       if(els.customerName.value) lines.push(`Customer: ${els.customerName.value}`);
       lines.push(''); lines.push('Items:');
       items.forEach((it,i)=>lines.push(`${i+1}. ${it.name} — Qty ${it.qty} × ₹${toNumber(it.rate).toFixed(2)} = ₹${toNumber(it.amount).toFixed(2)}`));
-      const subtotal=toNumber(els.subtotal.value), gstRate=toNumber(els.taxRate.value), flat=toNumber(els.flatDiscount.value), grand=toNumber(els.grandTotal.value);
-      const gstAmt=subtotal*(gstRate/100); const paid=toNumber(els.paidAmount.value); const negotiated=toNumber(els.dueAmount.value);
+
+      const subtotal=toNumber(els.subtotal.value);
+      const gstRate=gstOn ? toNumber(els.taxRate.value) : 0;
+      const flat=toNumber(els.flatDiscount.value);
+      const gstAmt=subtotal*(gstRate/100);
+      const grand=toNumber(els.grandTotal.value);
+      const paid=toNumber(els.paidAmount.value);
+      const negotiated=toNumber(els.dueAmount.value);
+
       lines.push('');
       if(gstRate>0 && gstAmt>0) lines.push(`GST ${gstRate}%: ₹${gstAmt.toFixed(2)}`);
       if(flat>0) lines.push(`Discount: -₹${flat.toFixed(2)}`);
@@ -1183,20 +1226,6 @@
     });
   }
 
-  if (els.vcfBtn){
-    els.vcfBtn.addEventListener('click', ()=>{
-      const nameOk = !!els.customerName.value.trim();
-      const phoneOk = /^\d{10}$/.test(els.customerPhone.value || '');
-      const saleOk = !!els.saleType.value;
-      if (!nameOk || !phoneOk || !saleOk) {
-        validateAll('vcf');
-        alert('Please ensure Customer Name, 10-digit WhatsApp number, and Sale Type are filled.');
-        return;
-      }
-      downloadVcfNow();
-    });
-  }
-
   function setWaState(stateClass){
     const btn = els.whatsAppBtn;
     if(!btn) return;
@@ -1208,58 +1237,54 @@
     }
   }
   if (els.whatsAppBtn) {
-  els.whatsAppBtn.addEventListener('click', async () => {
-    if (!validateAll('whatsapp')) return;
+    els.whatsAppBtn.addEventListener('click', async () => {
+      if (!validateAll('whatsapp')) return;
 
-    try {
-      setWaState('is-saving');
+      try {
+        setWaState('is-saving');
 
-      // 1) SAVE TO GOOGLE SHEET
-      const saved = await pushToGoogleSheet({ alertOnResult: false });
-      if (!saved) {
+        // 1) SAVE TO GOOGLE SHEET
+        const saved = await pushToGoogleSheet({ alertOnResult: false });
+        if (!saved) {
+          setWaState('');
+          alert('Saving to Google Sheet failed. Please try again.');
+          return;
+        }
+
+        // Read returning customer info from previewCustomerStats dataset if available
+        const visitCount = Number(els.previewCustomerStats?.dataset.count || 0);
+        const isReturningCustomer = visitCount > 0;
+
+        // 2) VCF DOWNLOAD only for NEW customers
+        if (!isReturningCustomer) {
+          setWaState('is-downloading');
+          downloadVcfNow();
+        }
+
+        // 3) PREPARE WHATSAPP MESSAGE
+        setWaState('is-sending');
+
+        const phone = `91${els.customerPhone.value}`;
+        const msg = summaryMonospace();
+        const delay = isReturningCustomer ? 250 : 500;
+
+        setTimeout(() => {
+          window.open(
+            `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,
+            '_blank',
+            'noopener,noreferrer'
+          );
+          setWaState('is-success');
+          setTimeout(() => setWaState(''), 1400);
+        }, delay);
+
+      } catch (err) {
+        console.error(err);
         setWaState('');
-        alert('Saving to Google Sheet failed. Please try again.');
-        return;
+        alert('Something went wrong while processing the WhatsApp flow.');
       }
-
-      // Since visit stats are already extracted earlier,
-      // we simply read them from previewCustomerStats dataset.
-      const visitCount = Number(els.previewCustomerStats?.dataset.count || 0);
-      const isReturningCustomer = visitCount > 0;
-
-      // 2) VCF DOWNLOAD
-      // NEW RULE: Download VCF ONLY for NEW customers
-      if (!isReturningCustomer) {
-        setWaState('is-downloading');
-        downloadVcfNow();
-      }
-
-      // 3) PREPARE WHATSAPP MESSAGE
-      setWaState('is-sending');
-
-      const phone = `91${els.customerPhone.value}`;
-      const msg = summaryMonospace();
-
-      // If returning customer, skip delay
-      const delay = isReturningCustomer ? 250 : 500;
-
-      setTimeout(() => {
-        window.open(
-          `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,
-          '_blank',
-          'noopener,noreferrer'
-        );
-        setWaState('is-success');
-        setTimeout(() => setWaState(''), 1400);
-      }, delay);
-
-    } catch (err) {
-      console.error(err);
-      setWaState('');
-      alert('Something went wrong while processing the WhatsApp flow.');
-    }
-  });
-}
+    });
+  }
   if (els.waInvoiceBtn){
     els.waInvoiceBtn.addEventListener('click', ()=>{
       if (!validateAll('whatsappInvoice')) return;

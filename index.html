@@ -12,13 +12,12 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   
-<script>
-  // Prevent direct access
-  if (!sessionStorage.getItem("loggedIn")) {
-    window.location.href = "login.html";
-  }
-</script>
-
+  <script>
+    // Prevent direct access
+    if (!sessionStorage.getItem("loggedIn")) {
+      window.location.href = "login.html";
+    }
+  </script>
 </head>
 <body>
   <!-- ================================
@@ -112,13 +111,25 @@
           <input type="hidden" id="saleType" value="">
         </div>
 
-        <div class="coupon-toggle">
-          <span class="label-text">Give Coupon?</span>
-          <label class="switch">
-            <input type="checkbox" id="couponToggle">
-            <span class="slider round"></span>
-          </label>
-        </div>
+        <div class="toggle-row">
+  <!-- Coupon Toggle -->
+  <div class="coupon-toggle">
+    <span class="label-text">Give Coupon?</span>
+    <label class="switch">
+      <input type="checkbox" id="couponToggle">
+      <span class="slider round"></span>
+    </label>
+  </div>
+
+  <!-- GST Toggle -->
+  <div class="gst-toggle">
+    <span class="label-text">Add GST?</span>
+    <label class="switch">
+      <input type="checkbox" id="gstToggle">
+      <span class="slider round"></span>
+    </label>
+  </div>
+</div>
       </div>
 
       <!-- Items -->
