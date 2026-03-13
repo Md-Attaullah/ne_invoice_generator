@@ -34,7 +34,7 @@
   const NAME_MAX = 15;
 
   // ✅ Seller GST number (used only when GST toggle is ON)
-  const GSTIN = '21FCJPA3223D1ZG'; // <-- replace with your real GSTIN or set '' to hide
+  const GSTIN = '21ABCDE1234F1Z5'; // <-- replace with your real GSTIN or set '' to hide
 
   /* ----------------------------- 3) EL REFS ----------------------------- */
   const els={
@@ -738,7 +738,8 @@
 
     let totalsHtml = "";
     if (gstRate > 0 && gstAmt > 0)
-      totalsHtml += `<tr><td>GST ${gstRate}%</td><td style="text-align:right">₹${gstAmt.toFixed(2)}</td></tr>`;
+      totalsHtml += `<tr><td>CGST ${gstRate/2}%</td><td style="text-align:right">₹${(gstAmt/2).toFixed(2)}</td></tr>`;
+      totalsHtml += `<tr><td>SGST ${gstRate/2}%</td><td style="text-align:right">₹${(gstAmt/2).toFixed(2)}</td></tr>`;
     if (flat > 0)
       totalsHtml += `<tr><td>Discount</td><td style="text-align:right">-₹${flat.toFixed(2)}</td></tr>`;
     totalsHtml += `<tr><td><b>Grand Total</b></td><td style="text-align:right"><b>₹${grand.toFixed(2)}</b></td></tr>`;
@@ -856,7 +857,14 @@
     const paid = Number(els.paidAmount.value || 0);
 
     const totals = [
-      ...(gstRate > 0 ? [`GST ${gstRate}%: ₹${gstAmt.toFixed(2)}`] : []),
+      ...
+(gstRate > 0
+    ? [
+        `CGST ${gstRate/2}%: ₹${(gstAmt/2).toFixed(2)}`,
+        `SGST ${gstRate/2}%: ₹${(gstAmt/2).toFixed(2)}`
+      ]
+    : []),
+
       ...(flat > 0 ? [`Discount: -₹${flat.toFixed(2)}`] : []),
       `Grand Total: ₹${grand.toFixed(2)}`,
       ...(paid > 0 ? [`Paid: ₹${paid.toFixed(2)}`] : []),
@@ -963,7 +971,15 @@
             els.customerName.value ? `Customer: ${els.customerName.value}` : '',
             '',
             header, lineSep, ...rows, lineSep,
-            ...(gstRate>0 && gstAmt>0 ? [kv(`GST ${gstRate}%`, `₹${gstAmt.toFixed(2)}`)] : []),
+            ...
+(gstRate > 0 && gstAmt > 0
+  ? [
+      kv(`CGST ${gstRate / 2}%`, `₹${(gstAmt / 2).toFixed(2)}`),
+      kv(`SGST ${gstRate / 2}%`, `₹${(gstAmt / 2).toFixed(2)}`)
+    ]
+  : []
+),
+
             ...(flat>0 ? [kv('Discount', `-₹${flat.toFixed(2)}`)] : []),
             kv('Grand Total', `₹${grand.toFixed(2)}`),
             ...(els.paymentMode.value ? [kv('Payment Mode', els.paymentMode.value)] : []),
@@ -1300,5 +1316,4 @@
 
   // Boot
   load();
-
 })();
