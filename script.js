@@ -868,7 +868,7 @@ els.invoiceDate.value =
 
       ...(flat > 0 ? [`Discount: -₹${flat.toFixed(2)}`] : []),
       `Grand Total: ₹${grand.toFixed(2)}`,
-      ...(paid > 0 ? [`Paid: ₹${paid.toFixed(2)}`] : []),
+      ...(paid > 0 ? [`Paid: ₹${paid.toFixed(2)}(${els.paymentMode.value})`] : []),
     ];
 
     // COUPON
@@ -887,31 +887,35 @@ els.invoiceDate.value =
     const columnHeader = "#  Name           Qty Rs  Amt ";
 
     const showGstin = !!(gstOn && GSTIN);
-    const lines = [
-      "Nusrat Enterprises",
-      "📞: 7978830017, 9330066455, 9040366455",
-      "📍: Plot 53, Goutam Nagar, Bhubaneswar - 751014",
-      ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
-      "Trusted Since 2001",
-      "",
-      `Invoice: ${els.invoiceNumber.value} | Date: ${new Date().toLocaleDateString('en-GB')}`,
-      `Name: ${els.customerName.value}`,
-      "-------------------------------",
-      columnHeader,
-      ...rows,
-      "-------------------------------",
-      ...totals,
-      "",
-      "Thank you for shopping with Nusrat Enterprises!",
-      ...(couponLine ? [couponLine] : []),
-      "",
-      // `Review: ${LINKS.googleFeedback}`
-      // `WA Channel: ${LINKS.waChannel}`,
-      // `Instagram: ${LINKS.instagram}`
-    ];
+    
 
-    return "```\n" + lines.join("\n") + "\n```";
-  }
+const lines = [
+  "**Nusrat Enterprises**",
+  "📞: 7978830017, 9330066455, 9040366455",
+  "📍: Plot 53, Goutam Nagar, BBSR - 751014",
+  ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
+  "Trusted Since 2001",
+  "",
+  `Invoice: ${els.invoiceNumber.value} | Date: ${new Date().toLocaleDateString('en-GB')}`,
+  `Name: ${els.customerName.value}`,
+  "-----------------------------",
+  columnHeader,
+  ...rows,
+  "-----------------------------",
+  ...totals,
+  "",
+  "Thank you for shopping with Nusrat Enterprises!",
+  ...(couponLine ? [couponLine] : [])
+  // ,
+  // "",
+  // `Review: ${LINKS.googleFeedback}`
+  // `WA Channel: ${LINKS.waChannel}`,
+  // `Instagram: ${LINKS.instagram}`
+];
+
+return "```\n" + lines.join("\n") + "\n```";
+
+
 
   /* ----------------------------- 11) PDF (monospace) ----------------------------- */
   function buildMonospaceHTML() {
