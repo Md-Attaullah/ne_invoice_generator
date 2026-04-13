@@ -182,7 +182,7 @@
   /* ----------------------------- 6) INIT HEADER ----------------------------- */
   els.invoiceNumber.value = genInvoice();
   const today = new Date();
-  els.invoiceDate.value = `${today.getFullYear()}-${pad2(today.getMonth()+1)}-${pad2(today.getDate())}`;
+  els.invoiceDate.value = `${pad2(today.getDate())}/${pad2(today.getMonth() + 1)}/${today.getFullYear()}`;
 
   /* ----------------------------- Payment Mode (Emoji Icons) ------------- */
   function initPaymentModeIcons(root = document) {
@@ -891,21 +891,23 @@
       "📞: 7978830017, 9330066455, 9040366455",
       "📍: Plot 53, Goutam Nagar, Bhubaneswar - 751014",
       ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
-      "Trusted Since 2008",
+      "Trusted Since 2001",
       "",
       `Invoice: ${els.invoiceNumber.value} | Date: ${els.invoiceDate.value}`,
       `Name: ${els.customerName.value}`,
-      "-------------------------------",
+      "------------------------------",
       columnHeader,
       ...rows,
-      "-------------------------------",
+      "------------------------------",
       ...totals,
+      
       "Thank you for shopping with Nusrat Enterprises!",
       ...(couponLine ? [couponLine] : []),
       "",
-      `Review: ${LINKS.googleFeedback}`,
-      `WA Channel: ${LINKS.waChannel}`,
-      `Instagram: ${LINKS.instagram}`
+      // `Review: ${LINKS.googleFeedback}`
+      // ,
+      // `WA Channel: ${LINKS.waChannel}`,
+      // `Instagram: ${LINKS.instagram}`
     ];
 
     return "```\n" + lines.join("\n") + "\n```";
