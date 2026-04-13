@@ -890,7 +890,7 @@ els.invoiceDate.value =
     
 
 const lines = [
-  "**Nusrat Enterprises**",
+  "Nusrat Enterprises",
   "📞: 7978830017, 9330066455, 9040366455",
   "📍: Plot 53, Goutam Nagar, BBSR - 751014",
   ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
