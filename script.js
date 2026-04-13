@@ -30,7 +30,7 @@
   };
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwDh3hVYOpAOa12sOPpfpC0IORb6HswDBiAS-OMIZ9cu2GH4evGu5nld5_2HAC3ayOg/exec';
   const AUTH_TOKEN  = '9705322252';
-  const ITEM_OPTIONS=["Shirt","T-Shirt","Jean","Cargo Pant","Formal Pant","Track","Half Pant","Under Wear","Vest"];
+  const ITEM_OPTIONS=["Shirt","Tshirt","Jean","Cargo Pant","Formal Pant","Track","Half Pant","Under Wear","Vest"];
   const NAME_MAX = 15;
 
   // ✅ Seller GST number (used only when GST toggle is ON)
@@ -182,7 +182,8 @@
   /* ----------------------------- 6) INIT HEADER ----------------------------- */
   els.invoiceNumber.value = genInvoice();
   const today = new Date();
-  els.invoiceDate.value = `${pad2(today.getDate())}/${pad2(today.getMonth() + 1)}/${today.getFullYear()}`;
+els.invoiceDate.value =
+  `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
   /* ----------------------------- Payment Mode (Emoji Icons) ------------- */
   function initPaymentModeIcons(root = document) {
@@ -893,19 +894,18 @@
       ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
       "Trusted Since 2001",
       "",
-      `Invoice: ${els.invoiceNumber.value} | Date: ${els.invoiceDate.value}`,
+      `Invoice: ${els.invoiceNumber.value} | Date: ${new Date().toLocaleDateString('en-GB')}`,
       `Name: ${els.customerName.value}`,
-      "------------------------------",
+      "-------------------------------",
       columnHeader,
       ...rows,
-      "------------------------------",
+      "-------------------------------",
       ...totals,
-      
+      "",
       "Thank you for shopping with Nusrat Enterprises!",
       ...(couponLine ? [couponLine] : []),
       "",
       // `Review: ${LINKS.googleFeedback}`
-      // ,
       // `WA Channel: ${LINKS.waChannel}`,
       // `Instagram: ${LINKS.instagram}`
     ];
@@ -916,7 +916,7 @@
   /* ----------------------------- 11) PDF (monospace) ----------------------------- */
   function buildMonospaceHTML() {
     const items=getItems();
-    const COLS = { idx:3, name:22, qty:3, rate:8, amt:10 };
+    const COLS = { idx:3, name:24, qty:3, rate:8, amt:10 };
     const lineSep = '-'.repeat(COLS.idx+1+COLS.name+1+COLS.qty+1+COLS.rate+1+COLS.amt);
     const header = [ fit('#',COLS.idx), fit('ITEM',COLS.name), fit('QTY',COLS.qty), fit('RATE',COLS.rate), fit('AMOUNT',COLS.amt) ].join(' ');
 
@@ -969,7 +969,7 @@
             '📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014',
             ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
             '',
-            `Invoice: ${els.invoiceNumber.value}` + (els.invoiceDate.value ? ` | Date: ${els.invoiceDate.value}` : ''),
+            `Invoice: ${els.invoiceNumber.value}` + (els.invoiceDate.value ? ` | Date: ${new Date().toLocaleDateString('en-GB')}` : ''),
             els.customerName.value ? `Customer: ${els.customerName.value}` : '',
             '',
             header, lineSep, ...rows, lineSep,
