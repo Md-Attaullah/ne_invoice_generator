@@ -1031,10 +1031,52 @@ return "```\n" + lines.join("\n") + "\n```";
       </div>`;
   }
 
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+      document.head.appendChild(script);
+    });
+  }
+
+  async function ensurePdfLibraries() {
+    if (typeof html2canvas !== 'function') {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    }
+    if (!window.jspdf || typeof window.jspdf.jsPDF !== 'function') {
+      await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    }
+    if (typeof html2canvas !== 'function') {
+      throw new Error('html2canvas failed to load.');
+    }
+    if (!window.jspdf || typeof window.jspdf.jsPDF !== 'function') {
+      throw new Error('jsPDF failed to load.');
+    }
+  }
+
   async function generatePdf() {
+    if (!els.monoRender) {
+      throw new Error('Missing monoRender container. Add <div id="monoRender"></div> to the HTML.');
+    }
+    await ensurePdfLibraries();
+
+    if (typeof html2canvas !== 'function') {
+      throw new Error('html2canvas is not loaded.');
+    }
+    if (!window.jspdf || typeof window.jspdf.jsPDF !== 'function') {
+      throw new Error('jsPDF is not loaded.');
+    }
+
     els.monoRender.innerHTML = buildMonospaceHTML();
     await new Promise(r => setTimeout(r, 120));
     const box = els.monoRender.querySelector('#monoBox');
+    if (!box) {
+      throw new Error('PDF render target #monoBox was not created in monoRender.');
+    }
     const ig = els.monoRender.querySelector('#igLink');
     const wa = els.monoRender.querySelector('#waLink');
     const gl = els.monoRender.querySelector('#gLink');
@@ -1208,7 +1250,12 @@ return "```\n" + lines.join("\n") + "\n```";
     els.printBtn.addEventListener('click', async (e)=>{
       e.preventDefault();
       if (!validateAll('print')) return;
-      try { await generatePdf(); } catch (err) { console.error(err); alert('PDF generation failed. Please try again.'); }
+      try {
+        await generatePdf();
+      } catch (err) {
+        console.error(err);
+        alert('PDF generation failed. ' + (err && err.message ? err.message : 'Please try again.'));
+      }
     });
   }
 

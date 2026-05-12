@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Invoice App</title>
   <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
@@ -155,6 +157,10 @@
         </div>
       </div>
 
+    </div>
+
+    <div id="monoRender" style="position:absolute; left:-9999px; top:0; width:720px; height:auto; overflow:hidden; opacity:0; pointer-events:none;">
+      <!-- Hidden render target for PDF generation -->
     </div>
 
     <div class="hidden">
