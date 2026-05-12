@@ -459,28 +459,34 @@ els.invoiceDate.value =
         <span class="item-number">Item</span>
         <button type="button" class="btn danger del" title="Remove">Remove</button>
       </div>
-      <div class="type">
-        <select data-f="type">
-          <option value="" disabled ${obj.type?'':'selected'}>Select item</option>
-          ${ITEM_OPTIONS.map(x=>`<option value="${x}" ${x===obj.type?'selected':''}>${x}</option>`).join('')}
-        </select>
-      </div>
-      <div class="name name-wrap">
-        <input class="name" data-f="name" placeholder="Name" maxlength="15" value="${safeName}"/>
-        <div class="char-counter" data-f="cc" aria-live="polite">0/15</div>
-      </div>
-      <div class="bot">
-        <div class="field-col">
-          <span class="field-label">QTY</span>
-          <div class="stepper">
-            <button type="button" class="sbtn" data-act="minus">−</button>
-            <input class="qty" data-f="qty" type="number" min="1" step="1" value="${obj.qty||1}"/>
-            <button type="button" class="sbtn" data-act="plus">+</button>
+      <div class="item-fields">
+        <div class="field-row">
+          <div class="field-col wide">
+            <span class="field-label">TYPE</span>
+            <select data-f="type">
+              <option value="" disabled ${obj.type?'':'selected'}>Select item</option>
+              ${ITEM_OPTIONS.map(x=>`<option value="${x}" ${x===obj.type?'selected':''}>${x}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field-col narrow">
+            <span class="field-label">QTY</span>
+            <div class="stepper">
+              <button type="button" class="sbtn" data-act="minus">−</button>
+              <input class="qty" data-f="qty" type="number" min="1" step="1" value="${obj.qty||1}"/>
+              <button type="button" class="sbtn" data-act="plus">+</button>
+            </div>
           </div>
         </div>
-        <div class="field-col">
-          <span class="field-label">RATE (₹)</span>
-          <input class="rate" data-f="rate" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Rate" value="${obj.rate === '' ? '' : (obj.rate||0)}"/>
+        <div class="field-row">
+          <div class="field-col wide">
+            <span class="field-label">NAME</span>
+            <input class="name" data-f="name" placeholder="Name" maxlength="15" value="${safeName}"/>
+            <div class="char-counter" data-f="cc" aria-live="polite">0/15</div>
+          </div>
+          <div class="field-col narrow">
+            <span class="field-label">RATE (₹)</span>
+            <input class="rate" data-f="rate" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Rate" value="${obj.rate === '' ? '' : (obj.rate||0)}"/>
+          </div>
         </div>
         <div class="amt">₹ <span data-f="amt">0.00</span></div>
       </div>
