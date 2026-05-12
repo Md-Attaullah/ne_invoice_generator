@@ -1327,51 +1327,21 @@ return "```\n" + lines.join("\n") + "\n```";
     }
   }
   if (els.whatsAppBtn) {
-    els.whatsAppBtn.addEventListener('click', async () => {
+    els.whatsAppBtn.addEventListener('click', () => {
       if (!validateAll('whatsapp')) return;
 
       try {
-        setWaState('is-saving');
-
-        // 1) SAVE TO GOOGLE SHEET
-        const saved = await pushToGoogleSheet({ alertOnResult: false });
-        if (!saved) {
-          setWaState('');
-          alert('Saving to Google Sheet failed. Please try again.');
-          return;
-        }
-
-        // Read returning customer info from previewCustomerStats dataset if available
-        const visitCount = Number(els.previewCustomerStats?.dataset.count || 0);
-        const isReturningCustomer = visitCount > 0;
-
-        // 2) VCF DOWNLOAD only for NEW customers
-        if (!isReturningCustomer) {
-          setWaState('is-downloading');
-          downloadVcfNow();
-        }
-
-        // 3) PREPARE WHATSAPP MESSAGE
-        setWaState('is-sending');
-
         const phone = `91${els.customerPhone.value}`;
         const msg = summaryMonospace();
-        const delay = isReturningCustomer ? 250 : 500;
-
-        setTimeout(() => {
-          window.open(
-            `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,
-            '_blank',
-            'noopener,noreferrer'
-          );
-          setWaState('is-success');
-          setTimeout(() => setWaState(''), 1400);
-        }, delay);
-
+        
+        window.open(
+          `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,
+          '_blank',
+          'noopener,noreferrer'
+        );
       } catch (err) {
         console.error(err);
-        setWaState('');
-        alert('Something went wrong while processing the WhatsApp flow.');
+        alert('Error opening WhatsApp. Please try again.');
       }
     });
   }
