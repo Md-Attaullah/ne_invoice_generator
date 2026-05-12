@@ -1,325 +1,175 @@
-<!doctype html>
-<html lang="en" data-theme="light">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nusrat Enterprises — Invoice (Vertical + WA Staged Flow + Fixed Sale Type)</title>
-
-  <!-- App CSS -->
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- PDF deps -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  
-  <script>
-    // Prevent direct access
-    if (!sessionStorage.getItem("loggedIn")) {
-      window.location.href = "login.html";
-    }
-  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Invoice App</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <!-- ================================
-       HEADER
-       ================================ -->
-  <header>
-    <div class="hdr-row">
-      <div>
-        <h1>Nusrat Enterprises — Invoice</h1>
-        <div class="header-meta">📞 7978830017 • 9330066455 • 9040366455</div>
-        <div class="header-addr">📍Plot No. 53, Goutam Nagar, Bhubaneswar, Odisha — 751014</div>
-      </div>
-      <!-- Dark mode toggle -->
-      <button id="themeToggle" type="button" class="btn ghost" style="min-width:120px">🌙 Dark Mode</button>
+
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="title">Nusrat Enterprises</div>
+    <div class="header-row">
+      <span id="invoiceDateDisplay">11 May 2026</span>
+      <span class="invoice-id" id="invoiceNumberDisplay"># NE112026051316</span>
     </div>
-  </header>
-
-  <!-- ================================
-       MAIN CONTENT
-       ================================ -->
-  <div class="container">
-    <div class="row" style="grid-template-columns:1fr; gap:12px">
-      <!-- Invoice & Customer -->
-      <div class="card">
-        <h2>Invoice &amp; Customer</h2>
-
-        <div class="row cols-2">
-          <div>
-            <label>Invoice #</label>
-            <input id="invoiceNumber" readonly />
-          </div>
-          <div>
-            <label>Date</label>
-            <input id="invoiceDate" type="date" disabled />
-          </div>
-        </div>
-
-        <div class="row cols-2" style="margin-top:8px">
-          <div>
-            <label>Customer Name</label>
-            <input id="customerName" placeholder="Enter customer name"/>
-            <div class="error"></div>
-          </div>
-
-          <div>
-            <label>Customer WhatsApp (10 digits)</label>
-            <div class="phone-field">
-              <div class="phone-adorn">
-                <input
-                  id="customerPhone"
-                  class="phone-input"
-                  type="tel"
-                  inputmode="tel"
-                  autocomplete="tel"
-                  pattern="[0-9]*"
-                  maxlength="10"
-                  placeholder="e.g., 9876543210"
-                />
-                <button type="button" class="icon-btn inline" id="pickContactBtn" aria-label="Pick from contacts">
-                  <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M6 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M18 7h2M18 12h2M18 17h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                    <circle cx="11" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M14.8 16a3.8 3.8 0 0 0-7.6 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                  </svg>
-                </button>
-              </div>
-              <div id="phoneError" class="error" style="display:none">Enter exactly 10 digits.</div>
-            </div>
-
-            <!-- Visit stats (inline, optional) -->
-            <div id="inlineCustomerStats" class="print-meta" style="margin:6px 0;color:#4b5563; display:none;"></div>
-          </div>
-        </div>
-
-        <!-- Sale Type -->
-        <div class="row cols-2" style="margin-top:10px">
-          <div>
-            <label style="margin-bottom:15px">Sale Type</label>
-            <div class="seg-raised" role="radiogroup" aria-label="Sale Type" id="saleTypeGroup">
-              <label class="seg">
-                <input type="radio" name="saleTypeRadio" value="Retail" />
-                <span>Retail</span>
-              </label>
-              <label class="seg">
-                <input type="radio" name="saleTypeRadio" value="Wholesale" />
-                <span>Wholesale</span>
-              </label>
-            </div>
-          </div>
-          <input type="hidden" id="saleType" value="">
-        </div>
-
-        <div class="toggle-row">
-  <!-- Coupon Toggle -->
-  <div class="coupon-toggle">
-    <span class="label-text">Give Coupon?</span>
-    <label class="switch">
-      <input type="checkbox" id="couponToggle">
-      <span class="slider round"></span>
-    </label>
   </div>
 
-  <!-- GST Toggle -->
-  <div class="gst-toggle">
-    <span class="label-text">Add GST?</span>
-    <label class="switch">
-      <input type="checkbox" id="gstToggle">
-      <span class="slider round"></span>
-    </label>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button onclick="setTab('items')" id="tab-items">🛍 Items</button>
+    <button onclick="setTab('customer')" id="tab-customer">👤 Customer</button>
+    <button onclick="setTab('payment')" id="tab-payment">💳 Payment</button>
+  </div>
+
+  <div class="container">
+
+    <!-- ITEMS -->
+    <div id="items" class="tab">
+      <ul id="itemsList" class="items-list"></ul>
+
+      <button id="fabAdd" class="add-btn">+ Add Item</button>
+
+      <div class="items-summary">
+        <div class="summary-content">
+          <span class="summary-text" id="itemCountDisplay">0 items · 0 qty</span>
+          <span class="summary-total" id="subtotalDisplay">₹ 0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER -->
+    <div id="customer" class="tab hidden">
+
+      <div class="card">
+        <label class="label">Customer Name</label>
+        <input id="customerName" class="input-field" placeholder="Enter name"/>
+
+        <label class="label margin-top">WhatsApp Number</label>
+        <input id="customerPhone" class="input-field" type="tel" placeholder="10-digit number" maxlength="10"/>
+        <div id="phoneError" class="error" style="display:none;">Enter a valid 10-digit phone number.</div>
+        <div id="inlineCustomerStats" class="customer-stats"></div>
+      </div>
+
+      <div class="card sale-type-card">
+        <label class="label">Sale Type</label>
+        <div id="saleTypeGroup" class="sale-type-buttons">
+          <label class="seg"><input type="radio" name="saleTypeRadio" value="Retail" /><span>Retail</span></label>
+          <label class="seg"><input type="radio" name="saleTypeRadio" value="Wholesale" /><span>Wholesale</span></label>
+        </div>
+        <input type="hidden" id="saleType" value="">
+      </div>
+
+      <div class="card gst-card">
+        <div class="toggle-header">
+          <span class="toggle-label">Add GST (18%)</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="gstToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div id="gstAmount" class="gst-amount hidden">
+          <span class="gst-text">GST Amount: </span>
+          <span class="gst-value">₹ <span id="gstVal"></span></span>
+        </div>
+      </div>
+
+      <div class="card coupon-card">
+        <div class="toggle-header">
+          <span class="toggle-label">Give Coupon?</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="couponToggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div id="couponInput" class="coupon-input hidden">
+          <label class="coupon-label">Coupon Code</label>
+          <input id="couponCode" placeholder="Enter coupon code" oninput="this.value = this.value.toUpperCase()" class="coupon-input-field">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PAYMENT -->
+    <div id="payment" class="tab hidden">
+
+      <div class="card summary-card">
+        <div class="section-title">BILL SUMMARY</div>
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span>₹ <span id="subVal"></span></span>
+        </div>
+        <div class="summary-row gst-row hidden" id="gstRow">
+          <span>GST (18%)</span>
+          <span>₹ <span id="gstAmt"></span></span>
+        </div>
+        <div class="summary-row discount-row">
+          <span>Discount (₹)</span>
+          <input type="number" id="flatDiscount" class="discount-input">
+        </div>
+        <div class="grand-total">
+          <span>Grand Total</span>
+          <span>₹ <span id="grandVal"></span></span>
+        </div>
+      </div>
+
+      <div class="card payment-mode-card">
+        <div class="section-title">PAYMENT MODE</div>
+        <div class="payment-modes pm-buttons">
+          <button type="button" class="pay-mode-btn pm-btn" data-value="Cash"><div class="pay-icon">💵</div><div class="pay-label">Cash</div></button>
+          <button type="button" class="pay-mode-btn pm-btn" data-value="UPI"><div class="pay-icon">⚡</div><div class="pay-label">UPI</div></button>
+          <button type="button" class="pay-mode-btn pm-btn" data-value="Card"><div class="pay-icon">💳</div><div class="pay-label">Card</div></button>
+          <button type="button" class="pay-mode-btn pm-btn" data-value="Bank"><div class="pay-icon">🏦</div><div class="pay-label">Bank</div></button>
+        </div>
+        <input type="hidden" id="paymentMode" value="">
+      </div>
+
+      <div class="card paid-card">
+        <label class="paid-label">Amount Paid (₹)</label>
+        <input id="paidAmount" type="number" class="paid-input">
+        <div id="paidError" class="error" style="display:none; margin-top:8px;">Enter a valid paid amount.</div>
+        <div class="due-change" id="dueChange">
+          <span id="dueLabel">Due</span>
+          <span class="due-value">₹ <span id="dueVal"></span></span>
+        </div>
+      </div>
+
+      <button class="primary-btn complete-btn">✓ Complete Invoice</button>
+
+      <div class="action-buttons">
+        <button class="action-btn whatsapp-btn" id="whatsAppBtn">📱 WhatsApp</button>
+        <button class="action-btn print-btn" id="printBtn">🖨 Print</button>
+        <button class="action-btn preview-btn" id="previewBtn">👁 Preview</button>
+        <button class="action-btn copy-btn" id="copyBtn">📋 Copy</button>
+        <button class="action-btn" id="vcfBtn">📥 Download VCF</button>
+        <button class="action-btn" id="saveToSheetBtn">📊 Save to Sheet</button>
+      </div>
+
+      <div id="previewCard" class="preview-panel" style="display:none;">
+        <div class="preview-content">
+          <div id="invoicePreview"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="hidden">
+      <input type="hidden" id="subtotal" value="0">
+      <input type="hidden" id="grandTotal" value="0">
+      <input type="hidden" id="itemsBreakdown" value="">
+      <input type="hidden" id="itemsCountQty" value="0">
+      <input type="hidden" id="taxRate" value="18">
+      <input type="hidden" id="invoiceNumber" value="">
+      <input type="hidden" id="invoiceDate" value="">
+      <input type="hidden" id="dueAmount" value="0">
+    </div>
   </div>
 </div>
-      </div>
 
-      <!-- Items -->
-      <div class="card" style="margin-top:8px">
-        <div class="items-head">
-          <h2>Items</h2>
-          <button type="button" class="btn link" id="clearItemsBtn" style="margin-bottom: 8px;">🧹 Clear Items</button>
-        </div>
-
-        <!-- Quickline -->
-        <form id="quicklineForm" class="quickline" style="margin-bottom:8px; display:flex; gap:8px; align-items:center">
-          <input
-            id="quickline"
-            placeholder="Quick add: Item  Qty  Rate  →  e.g., Shirt 2 300"
-            autocomplete="off"
-            enterkeyhint="done"
-            aria-label="Quick add item line"
-            style="flex:1"
-          />
-          <button type="submit" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden">Submit</button>
-        </form>
-
-        <!-- Items list -->
-        <ul id="itemsList" class="items-list" aria-label="Invoice items"></ul>
-      </div>
-
-      <!-- Summary -->
-      <div class="card">
-        <h2>Summary</h2>
-        <div class="row">
-          <div><label>Subtotal (₹)</label><input id="subtotal" disabled/></div>
-
-          <div class="row cols-2">
-            <div>
-              <label>Items (breakdown)</label>
-              <textarea id="itemsBreakdown" disabled placeholder="e.g., 2x Shirt, 1x Jean"></textarea>
-            </div>
-            <div>
-              <label>Total Qty</label>
-              <input id="itemsCountQty" disabled/>
-            </div>
-          </div>
-
-          <div class="row cols-2">
-            <div><label>GST %</label><input id="taxRate" type="number" min="0" step="0.01" value="0" inputmode="decimal"/></div>
-            <div><label>Discount (₹)</label><input id="flatDiscount" type="number" min="0" step="0.01" value="0" inputmode="decimal"/></div>
-          </div>
-
-          <div><label>Grand Total (₹)</label><input id="grandTotal" disabled/></div>
-
-          <div class="row cols-2" style="margin-top:8px">
-            <!-- LEFT: Payment Mode (updated) -->
-            <div>
-              <label style="margin-bottom:8px">Payment Mode</label>
-
-              <!-- Equal-width rectangular boxes with spacing -->
-              <div class="pm-buttons" role="radiogroup" aria-label="Payment Mode">
-                <button
-                  type="button"
-                  class="pm-btn"
-                  data-value="Cash"
-                  role="radio"
-                  aria-checked="false"
-                  title="Cash"
-                >
-                  <span class="emoji" aria-hidden="true">💵</span>
-                </button>
-
-                <button
-                  type="button"
-                  class="pm-btn"
-                  data-value="UPI"
-                  role="radio"
-                  aria-checked="false"
-                  title="UPI"
-                >
-                  <span class="emoji" aria-hidden="true">📱</span>
-                </button>
-
-                <button
-                  type="button"
-                  class="pm-btn"
-                  data-value="Card"
-                  role="radio"
-                  aria-checked="false"
-                  title="Card"
-                >
-                  <span class="emoji" aria-hidden="true">💳</span>
-                </button>
-
-                <button
-                  type="button"
-                  class="pm-btn"
-                  data-value="Bank Transfer"
-                  role="radio"
-                  aria-checked="false"
-                  title="Bank Transfer"
-                >
-                  <span class="emoji" aria-hidden="true">🏦</span>
-                </button>
-              </div>
-
-              <!-- Keep the same id so existing logic keeps working -->
-              <input type="hidden" id="paymentMode" name="paymentMode" />
-              <div class="error"></div>
-            </div>
-
-            <!-- RIGHT: Paid -->
-            <div>
-              <label>Paid (₹)</label>
-              <input id="paidAmount" type="text" inputmode="decimal" placeholder="0.00" />
-              <div id="paidError" class="error"></div>
-            </div>
-          </div>
-
-          <div>
-            <label>Negotiated (₹)</label>
-            <input id="dueAmount" disabled/>
-          </div>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="card actions-card">
-        <h2>Actions</h2>
-        <div class="action-buttons">
-          <!-- Complete Invoice Process — Staged flow -->
-          <button id="whatsAppBtn" class="wa-btn btn-yellow btn" type="button" aria-live="polite">
-            <span class="wa-label">
-              <span class="text-default">💼 Complete Invoice Process</span>
-              <span class="text-saving" aria-hidden="true">Saving…</span>
-              <span class="text-downloading" aria-hidden="true">Downloading…</span>
-              <span class="text-sending" aria-hidden="true">Sending…</span>
-              <span class="text-success" aria-hidden="true">Sent!</span>
-            </span>
-            <span class="stage-icon" aria-hidden="true">
-              <svg class="icon-save" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7l-4-4ZM7 5h8v4H7V5Zm5 14a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/>
-              </svg>
-              <svg class="icon-download" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42L11 12.6V4a1 1 0 0 1 1-1Zm-7 14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1a1 1 0 1 1 2 0v1Z"/>
-              </svg>
-              <svg class="icon-send" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M2.01 3.87a1 1 0 0 1 1.2-.16l18 10a1 1 0 0 1 0 1.78l-18 10a1 1 0 0 1-1.43-1.13l2.22-7.76 8.1-2-8.1-2-2.22-7.76a1 1 0 0 1 .23-.97Z"/>
-              </svg>
-            </span>
-            <span class="spinner" aria-hidden="true"></span>
-            <span class="success-check" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="100%" height="100%">
-                <circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-opacity=".85" stroke-width="2"/>
-                <path d="M7 12.5l3.2 3.2L17 9.8" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-          </button>
-
-          <!-- WhatsApp Invoice ONLY (ghost) -->
-          <button type="button" class="btn ghost" id="waInvoiceBtn">📲 WhatsApp Invoice</button>
-
-          <!-- Print / PDF -->
-          <button type="button" class="btn ghost" id="printBtn">🖨️ Print / PDF</button>
-          <button type="button" class="btn ghost" id="previewBtn">👁️ Preview</button>
-          <button type="button" class="btn ghost" id="copyTextBtn">📋 Copy Summary</button>
-
-          <!-- Optional: Manual VCF download -->
-          <button type="button" class="btn ghost" id="vcfBtn">👤 Download .vcf</button>
-
-          <!-- Save to Google Sheet -->
-          <button type="button" class="btn ghost" id="saveToSheetBtn">
-            <span class="btn-icon" aria-hidden="true">📑</span>
-            <span class="btn-text">Save to Google Sheet</span>
-            <span class="spinner" aria-hidden="true" style="display:none"></span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Preview -->
-      <div class="card" id="previewCard" style="display:none">
-        <div id="previewCustomerStats" class="print-meta" style="margin:6px 0;color:#4b5563;"></div>
-        <div id="invoicePreview" aria-live="polite"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Offscreen PDF render target -->
-  <div id="monoRender" style="position:fixed; left:-10000px; top:0; opacity:0; pointer-events:none; visibility:visible; z-index:-1;"></div>
-
-  <!-- Floating Add button -->
-  <button type="button" class="fab" id="fabAdd">+ Add</button>
-
-  <!-- App JS -->
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

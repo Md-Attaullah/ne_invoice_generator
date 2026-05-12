@@ -67,9 +67,10 @@
     saveBtn: document.getElementById('saveToSheetBtn'),
     printBtn: document.getElementById('printBtn'),
     previewBtn: document.getElementById('previewBtn'),
-    copyBtn: document.getElementById('copyTextBtn'),
+    copyBtn: document.getElementById('copyBtn'),
     clearItemsBtn: document.getElementById('clearItemsBtn'),
     vcfBtn: document.getElementById('vcfBtn'),
+    completeBtn: document.querySelector('.complete-btn'),
     /* Stats elements */
     previewCustomerStats: document.getElementById('previewCustomerStats'),
     inlineCustomerStats: document.getElementById('inlineCustomerStats')
@@ -402,6 +403,12 @@ els.invoiceDate.value =
     const amt = liToObj(li).amount;
     li.querySelector('[data-f="amt"]').textContent = amt.toFixed(2);
   }
+  function updateItemNumbers(){
+    Array.from(els.itemsList.children).forEach((li, index) => {
+      const label = li.querySelector('.item-number');
+      if (label) label.textContent = `Item ${index + 1}`;
+    });
+  }
   function updateNameCounter(nameEl, ccEl){
     if(!nameEl) return;
     const len = nameEl.value.length;
@@ -442,38 +449,45 @@ els.invoiceDate.value =
     });
     li.addEventListener('change', ()=>{ updateLi(li); recalc(); persist(); });
 
-    li.querySelector('.del').addEventListener('click', ()=>{ li.remove(); recalc(); persist(); });
+    li.querySelector('.del').addEventListener('click', ()=>{ li.remove(); updateItemNumbers(); recalc(); persist(); });
   }
   function addItem(obj={type:'',name:'',qty:1,rate:''}, { atTop = true } = {}){
     const safeName = (obj.name || obj.type || '').slice(0, NAME_MAX).replace(/"/g,'&quot;');
     const li = document.createElement('li'); li.className='item';
     li.innerHTML = `
-      <div class="top">
-        <div class="type">
-          <select data-f="type">
-            <option value="" disabled ${obj.type?'':'selected'}>Select item</option>
-            ${ITEM_OPTIONS.map(x=>`<option value="${x}" ${x===obj.type?'selected':''}>${x}</option>`).join('')}
-          </select>
-        </div>
-        <div class="name name-wrap">
-          <input class="name" data-f="name" placeholder="Name" maxlength="15" value="${safeName}"/>
-          <div class="char-counter" data-f="cc" aria-live="polite">0/15</div>
-        </div>
-        <button type="button" class="btn danger del" title="Delete">✕</button>
+      <div class="item-header">
+        <span class="item-number">Item</span>
+        <button type="button" class="btn danger del" title="Remove">Remove</button>
+      </div>
+      <div class="type">
+        <select data-f="type">
+          <option value="" disabled ${obj.type?'':'selected'}>Select item</option>
+          ${ITEM_OPTIONS.map(x=>`<option value="${x}" ${x===obj.type?'selected':''}>${x}</option>`).join('')}
+        </select>
+      </div>
+      <div class="name name-wrap">
+        <input class="name" data-f="name" placeholder="Name" maxlength="15" value="${safeName}"/>
+        <div class="char-counter" data-f="cc" aria-live="polite">0/15</div>
       </div>
       <div class="bot">
-        <div class="stepper">
-          <button type="button" class="sbtn" data-act="minus">−</button>
-          <input class="qty" data-f="qty" type="number" min="1" step="1" value="${obj.qty||1}"/>
-          <button type="button" class="sbtn" data-act="plus">+</button>
+        <div class="field-col">
+          <span class="field-label">QTY</span>
+          <div class="stepper">
+            <button type="button" class="sbtn" data-act="minus">−</button>
+            <input class="qty" data-f="qty" type="number" min="1" step="1" value="${obj.qty||1}"/>
+            <button type="button" class="sbtn" data-act="plus">+</button>
+          </div>
         </div>
-        <input class="rate" data-f="rate" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Rate" value="${obj.rate === '' ? '' : (obj.rate||0)}"/>
+        <div class="field-col">
+          <span class="field-label">RATE (₹)</span>
+          <input class="rate" data-f="rate" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Rate" value="${obj.rate === '' ? '' : (obj.rate||0)}"/>
+        </div>
         <div class="amt">₹ <span data-f="amt">0.00</span></div>
       </div>
     `;
     if (atTop && els.itemsList.firstChild) els.itemsList.insertBefore(li, els.itemsList.firstChild);
     else els.itemsList.appendChild(li);
-    attachLi(li); updateLi(li); recalc();
+    attachLi(li); updateLi(li); updateItemNumbers(); recalc();
   }
 
   // Quickline parse & actions
@@ -578,6 +592,18 @@ els.invoiceDate.value =
     const paid=toNumber(els.paidAmount.value);
     let negotiated = grand - paid; if(negotiated < 0) negotiated = 0;
     els.dueAmount.value = negotiated.toFixed(2);
+
+    // Update displays
+    document.getElementById('itemCountDisplay').textContent = `${items.length} item${items.length !== 1 ? "s" : ""} · ${countQty} qty`;
+    document.getElementById('subtotalDisplay').textContent = `₹ ${subtotal.toFixed(2)}`;
+    document.getElementById('subVal').textContent = subtotal.toFixed(2);
+    document.getElementById('gstAmt').textContent = gstAmt.toFixed(2);
+    document.getElementById('grandVal').textContent = grand.toFixed(2);
+    document.getElementById('dueVal').textContent = negotiated.toFixed(2);
+
+    // Show/hide GST row
+    const gstRow = document.getElementById('gstRow');
+    if (gstRow) gstRow.classList.toggle('hidden', !gstOn);
 
     validatePaid();
   }
@@ -1202,6 +1228,48 @@ return "```\n" + lines.join("\n") + "\n```";
     });
   }
 
+  if (els.completeBtn){
+    els.completeBtn.addEventListener('click', async ()=>{
+      if (!validateAll('complete')) return;
+      setBtnLoading(els.completeBtn, true, 'Processing…', null);
+      try {
+        // 1) SAVE TO GOOGLE SHEET
+        const saved = await pushToGoogleSheet({ alertOnResult: true });
+        if (!saved) {
+          setBtnLoading(els.completeBtn, false, null, '✓ Complete Invoice');
+          return;
+        }
+
+        // 2) Check if new customer and download VCF
+        const visitCount = Number(els.previewCustomerStats?.dataset.count || 0);
+        const isNewCustomer = visitCount === 0;
+        if (isNewCustomer) {
+          downloadVcfNow();
+        }
+
+        // 3) Send WhatsApp notification
+        const phone = `91${els.customerPhone.value}`;
+        const msg = summaryMonospace();
+        const delay = isNewCustomer ? 500 : 250;
+
+        setTimeout(() => {
+          window.open(
+            `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,
+            '_blank',
+            'noopener,noreferrer'
+          );
+          alert('Invoice completed successfully! ✓');
+          setBtnLoading(els.completeBtn, false, null, '✓ Complete Invoice');
+        }, delay);
+
+      } catch (err) {
+        console.error(err);
+        alert('Error processing invoice. Please try again.');
+        setBtnLoading(els.completeBtn, false, null, '✓ Complete Invoice');
+      }
+    });
+  }
+
   if (els.copyBtn){
     els.copyBtn.addEventListener('click', ()=>{
       if (!validateAll('copy')) return;
@@ -1320,6 +1388,37 @@ return "```\n" + lines.join("\n") + "\n```";
     });
   }
 
+  /* ----------------------------- 15) TAB & DISPLAY INITIALIZATION ----------------------------- */
+  window.setTab = function(tab){
+    ['items','customer','payment'].forEach(id=>{
+      const section=document.getElementById(id);
+      const button=document.getElementById('tab-'+id);
+      if(section) section.classList.toggle('hidden', id!==tab);
+      if(button) button.classList.toggle('active', id===tab);
+    });
+  };
+
+  function initializeInvoiceDisplay(){
+    const invoiceNumberInput = document.getElementById('invoiceNumber');
+    const invoiceDateInput = document.getElementById('invoiceDate');
+    const invoiceNumberDisplay = document.getElementById('invoiceNumberDisplay');
+    const invoiceDateDisplay = document.getElementById('invoiceDateDisplay');
+    
+    if (invoiceNumberInput && invoiceNumberDisplay) {
+      invoiceNumberDisplay.textContent = `# ${invoiceNumberInput.value}`;
+    }
+    
+    if (invoiceDateInput && invoiceDateDisplay) {
+      const dateValue = invoiceDateInput.value;
+      if (dateValue) {
+        const d = new Date(dateValue);
+        invoiceDateDisplay.textContent = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      }
+    }
+  }
+
   // Boot
   load();
+  setTab('items');
+  initializeInvoiceDisplay();
 })();
