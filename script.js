@@ -39,6 +39,8 @@
   /* ----------------------------- 3) EL REFS ----------------------------- */
   const els={
     itemsList:document.getElementById('itemsList'),
+    itemsPreviewRows:document.getElementById('itemsPreviewRows'),
+    itemsLivePreview:document.getElementById('itemsLivePreview'),
     quickline:document.getElementById('quickline'),
     quicklineForm:document.getElementById('quicklineForm'),
     fabAdd:document.getElementById('fabAdd'),
@@ -575,6 +577,33 @@ els.invoiceDate.value =
     const parts=[]; for (const [name,qty] of map.entries()) parts.push(`${qty}x ${name}`);
     return parts.join(', ');
   }
+
+  function formatPreviewNumber(value){
+    const n = toNumber(value);
+    if (!Number.isFinite(n)) return '0';
+    if (Number.isInteger(n)) return String(n);
+    return n.toFixed(2).replace(/\.00$/, '');
+  }
+
+  function renderItemsLivePreview(){
+    if(!els.itemsPreviewRows || !els.itemsLivePreview) return;
+    const items = getItems();
+    if(!items.length){
+      els.itemsLivePreview.classList.add('hidden');
+      els.itemsPreviewRows.innerHTML = '';
+      return;
+    }
+    els.itemsLivePreview.classList.remove('hidden');
+    els.itemsPreviewRows.innerHTML = items.map(it => `
+      <div class="items-preview-row">
+        <span class="item-name">${fit(it.name || it.type || 'Item', 24)}</span>
+        <span>${formatPreviewNumber(it.qty)}</span>
+        <span>₹${formatPreviewNumber(it.rate)}</span>
+        <span class="item-amount">₹${formatPreviewNumber(it.amount)}</span>
+      </div>
+    `).join('');
+  }
+
   function recalc(){
     const items=getItems();
     const countQty = items.reduce((s,i)=> s + toNumber(i.qty), 0);
@@ -611,6 +640,7 @@ els.invoiceDate.value =
     const gstRow = document.getElementById('gstRow');
     if (gstRow) gstRow.classList.toggle('hidden', !gstOn);
 
+    renderItemsLivePreview();
     validatePaid();
   }
 
