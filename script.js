@@ -41,6 +41,11 @@
     itemsList:document.getElementById('itemsList'),
     itemsPreviewRows:document.getElementById('itemsPreviewRows'),
     itemsLivePreview:document.getElementById('itemsLivePreview'),
+    reviewModal:document.getElementById('reviewModal'),
+    reviewDetails:document.getElementById('reviewDetails'),
+    reviewProceedBtn:document.getElementById('reviewProceedBtn'),
+    reviewUpdateBtn:document.getElementById('reviewUpdateBtn'),
+    reviewClose:document.getElementById('reviewClose'),
     quickline:document.getElementById('quickline'),
     quicklineForm:document.getElementById('quicklineForm'),
     fabAdd:document.getElementById('fabAdd'),
@@ -1311,26 +1316,90 @@ return "```\n" + lines.join("\n") + "\n```";
     });
   }
 
-  if (els.completeBtn){
-    els.completeBtn.addEventListener('click', async ()=>{
+  function formatReviewDetails(){
+    const items = getItems();
+    const subtotal = toNumber(els.subtotal.value);
+    const gstOn = !!(gstToggle && gstToggle.checked);
+    const gstRate = gstOn ? toNumber(els.taxRate.value) : 0;
+    const gstAmt = subtotal * (gstRate / 100);
+    const discount = toNumber(els.flatDiscount.value);
+    const grand = toNumber(els.grandTotal.value);
+    const paid = toNumber(els.paidAmount.value);
+    const due = toNumber(els.dueAmount.value);
+    const count = items.length;
+    const qty = items.reduce((sum, item) => sum + toNumber(item.qty), 0);
+    const customer = els.customerName.value.trim() || '—';
+    const phone = els.customerPhone.value ? `+91 ${els.customerPhone.value}` : '—';
+    const invoiceNo = els.invoiceNumber.value || '—';
+    const date = els.invoiceDate.value ? formatDateOnly(els.invoiceDate.value) : '—';
+    const saleType = els.saleType.value || '—';
+    const paymentMode = els.paymentMode.value || '—';
+    const coupon = couponIsOn() ? 'Yes' : 'No';
+
+    let rows = `
+      <div><span>Invoice #</span><span>${invoiceNo}</span></div>
+      <div><span>Date</span><span>${date}</span></div>
+      <div><span>Customer</span><span>${customer}</span></div>
+      <div><span>Phone</span><span>${phone}</span></div>
+      <div><span>Sale Type</span><span>${saleType}</span></div>
+      <div><span>Payment Mode</span><span>${paymentMode}</span></div>
+      <div><span>Items</span><span>${count} item${count !== 1 ? 's' : ''} · ${qty} qty</span></div>
+    `;
+
+    if (gstOn) {
+      rows += `<div><span>GST ${gstRate}%</span><span>₹ ${gstAmt.toFixed(2)}</span></div>`;
+    }
+    if (discount > 0) {
+      rows += `<div><span>Discount</span><span>₹ ${discount.toFixed(2)}</span></div>`;
+    }
+    if (couponIsOn()) {
+      rows += `<div><span>Coupon</span><span>${coupon}</span></div>`;
+    }
+    rows += `
+      <div><span>Grand Total</span><span>₹ ${grand.toFixed(2)}</span></div>
+      <div><span>Paid</span><span>₹ ${paid.toFixed(2)}</span></div>
+      <div><span>Due</span><span>₹ ${due.toFixed(2)}</span></div>
+    `;
+
+    return rows;
+  }
+
+  function showReviewModal(){
+    if (!els.reviewModal || !els.reviewDetails) return;
+    els.reviewDetails.innerHTML = formatReviewDetails();
+    els.reviewModal.classList.remove('hidden');
+  }
+
+  function hideReviewModal(){
+    if (!els.reviewModal) return;
+    els.reviewModal.classList.add('hidden');
+  }
+
+  if (els.reviewClose){
+    els.reviewClose.addEventListener('click', hideReviewModal);
+  }
+  if (els.reviewUpdateBtn){
+    els.reviewUpdateBtn.addEventListener('click', hideReviewModal);
+  }
+
+  if (els.reviewProceedBtn){
+    els.reviewProceedBtn.addEventListener('click', async () => {
       if (!validateAll('complete')) return;
+      hideReviewModal();
       setBtnLoading(els.completeBtn, true, 'Processing…', null);
       try {
-        // 1) SAVE TO GOOGLE SHEET
         const saved = await pushToGoogleSheet({ alertOnResult: true });
         if (!saved) {
           setBtnLoading(els.completeBtn, false, null, '✓ Complete Invoice');
           return;
         }
 
-        // 2) Check if new customer and download VCF
         const visitCount = Number(els.previewCustomerStats?.dataset.count || 0);
         const isNewCustomer = visitCount === 0;
         if (isNewCustomer) {
           downloadVcfNow();
         }
 
-        // 3) Send WhatsApp notification
         const phone = `91${els.customerPhone.value}`;
         const msg = summaryMonospace();
         const delay = isNewCustomer ? 500 : 250;
@@ -1344,12 +1413,18 @@ return "```\n" + lines.join("\n") + "\n```";
           alert('Invoice completed successfully! ✓');
           setBtnLoading(els.completeBtn, false, null, '✓ Complete Invoice');
         }, delay);
-
       } catch (err) {
         console.error(err);
         alert('Error processing invoice. Please try again.');
         setBtnLoading(els.completeBtn, false, null, '✓ Complete Invoice');
       }
+    });
+  }
+
+  if (els.completeBtn){
+    els.completeBtn.addEventListener('click', async ()=>{
+      if (!validateAll('complete')) return;
+      showReviewModal();
     });
   }
 

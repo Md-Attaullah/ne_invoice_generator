@@ -49,13 +49,11 @@
           </div>
           <div id="itemsPreviewRows" class="items-table-body"></div>
         </div>
-      </div>
-
-
-      <div class="items-summary">
-        <div class="summary-content">
-          <span class="summary-text" id="itemCountDisplay">0 items · 0 qty</span>
-          <span class="summary-total" id="subtotalDisplay">₹ 0.00</span>
+        <div class="items-summary">
+          <div class="summary-content">
+            <span class="summary-text" id="itemCountDisplay">0 items · 0 qty</span>
+            <span class="summary-total" id="subtotalDisplay">₹ 0.00</span>
+          </div>
         </div>
       </div>
     </div>
@@ -170,6 +168,21 @@
       <div id="previewCard" class="preview-panel" style="display:none;">
         <div class="preview-content">
           <div id="invoicePreview"></div>
+        </div>
+      </div>
+
+      <div id="reviewModal" class="review-modal hidden" role="dialog" aria-modal="true" aria-labelledby="reviewTitle">
+        <div class="review-panel card">
+          <div class="review-header">
+            <div id="reviewTitle" class="review-title">Review Invoice</div>
+            <div id="reviewClose" class="review-close" title="Close">✕</div>
+          </div>
+          <div id="reviewDescription" class="review-description">Please confirm the invoice details before proceeding.</div>
+          <div id="reviewDetails" class="review-details"></div>
+          <div class="review-actions">
+            <button id="reviewProceedBtn" class="primary-btn">Proceed</button>
+            <button id="reviewUpdateBtn" class="action-btn">Update</button>
+          </div>
         </div>
       </div>
 
