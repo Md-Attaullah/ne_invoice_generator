@@ -153,6 +153,41 @@ input {
   margin-bottom: 0;
 }
 
+.phone-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.phone-input-group input {
+  flex: 1;
+  margin-top: 0;
+}
+
+.pick-contact-btn {
+  flex: 0 0 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1.5px solid #E8EAF0;
+  background: #F7F8FA;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.pick-contact-btn:hover {
+  border-color: #4F6EF7;
+  background: #F0F3FF;
+}
+
+.pick-contact-btn:active {
+  transform: scale(0.95);
+}
+
 /* Item Styles */
 .items-list {
   list-style: none;
@@ -972,10 +1007,16 @@ input:checked + .slider:before {
 [data-theme="dark"] .rate,
 [data-theme="dark"] .discount-input,
 [data-theme="dark"] .paid-input,
-[data-theme="dark"] .coupon-input-field {
+[data-theme="dark"] .coupon-input-field,
+[data-theme="dark"] .pick-contact-btn {
   background: #111827;
   border-color: #374151;
   color: #E5E7EB;
+}
+
+[data-theme="dark"] .pick-contact-btn:hover {
+  border-color: #93C5FD;
+  background: #1F2937;
 }
 
 .review-modal {

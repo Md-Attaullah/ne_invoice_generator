@@ -66,7 +66,10 @@
         <input id="customerName" class="input-field" placeholder="Enter name"/>
 
         <label class="label margin-top">WhatsApp Number</label>
-        <input id="customerPhone" class="input-field" type="tel" placeholder="10-digit number" maxlength="10"/>
+        <div class="phone-input-group">
+          <input id="customerPhone" class="input-field" type="tel" placeholder="10-digit number" maxlength="10"/>
+          <button id="pickContactBtn" class="pick-contact-btn" type="button" title="Browse Contacts">📇</button>
+        </div>
         <div id="phoneError" class="error" style="display:none;">Enter a valid 10-digit phone number.</div>
         <div id="inlineCustomerStats" class="customer-stats"></div>
       </div>
