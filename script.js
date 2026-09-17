@@ -77,7 +77,6 @@
     copyBtn: document.getElementById('copyBtn'),
     clearItemsBtn: document.getElementById('clearItemsBtn'),
     vcfBtn: document.getElementById('vcfBtn'),
-    waTextBtn: document.getElementById('waTextBtn'),
     completeBtn: document.querySelector('.complete-btn'),
     /* Stats elements */
     previewCustomerStats: document.getElementById('previewCustomerStats'),
@@ -393,14 +392,55 @@ els.invoiceDate.value =
     const matches = loadCustomerCache().filter(c => c.name.toLowerCase() === (name||'').trim().toLowerCase());
     return matches.length === 1 ? matches[0] : null; // only autofill on an unambiguous match
   }
+  function dedupeByPhone(list){
+    const seen = new Set(); const out = [];
+    list.forEach(c => { if (c.phone && !seen.has(c.phone)) { seen.add(c.phone); out.push(c); } });
+    return out;
+  }
+
+  // Real-time search against the actual sheet, via the Apps Script
+  // searchCustomers endpoint (works from any device, not just this one).
+  const SERVER_SEARCH_MIN_CHARS = 3;
+  async function fetchCustomerSuggestionsFromServer(q){
+    const url = `${WEB_APP_URL}?action=searchCustomers&token=${encodeURIComponent(AUTH_TOKEN)}&q=${encodeURIComponent(q)}`;
+    try{
+      const res = await fetch(url, { method: 'GET' });
+      const data = await res.json();
+      if (data && data.ok && Array.isArray(data.customers)) return data.customers;
+    }catch(e){
+      console.warn('Customer search: server unavailable, using local cache only.', e);
+    }
+    return [];
+  }
+
+  // Local cache gives an instant result while typing; once 3+ characters
+  // are entered the sheet is searched too, and results are merged in.
+  async function matchCustomersByName(q){
+    const needle = q.trim().toLowerCase();
+    const local = loadCustomerCache().filter(c => c.name.toLowerCase().includes(needle));
+    if (needle.length < SERVER_SEARCH_MIN_CHARS) return local;
+    const server = await fetchCustomerSuggestionsFromServer(q.trim());
+    server.forEach(c => upsertCustomerCache(c.name, c.phone)); // warm the local cache too
+    return dedupeByPhone([...server, ...local]);
+  }
+  async function matchCustomersByPhone(q){
+    const digits = q.replace(/\D/g,'');
+    if (!digits) return [];
+    const local = loadCustomerCache().filter(c => c.phone.includes(digits));
+    if (digits.length < SERVER_SEARCH_MIN_CHARS) return local;
+    const server = await fetchCustomerSuggestionsFromServer(digits);
+    server.forEach(c => upsertCustomerCache(c.name, c.phone));
+    return dedupeByPhone([...server, ...local]);
+  }
 
   /** Generic tap-to-select dropdown wired to one input.
-   *  match(list, query) -> filtered array of {name, phone}
+   *  match(query) -> Promise<array of {name, phone}>
    *  renderLine(item) -> {main, sub} strings shown in the row
    *  onPick(item) -> called when a row is tapped
    */
   function wireSuggestDropdown(inputEl, listEl, { match, renderLine, onPick }){
     if (!inputEl || !listEl) return;
+    let seq = 0; // guards against a slower, older request overwriting a newer one
 
     function close(){ listEl.classList.add('hidden'); listEl.innerHTML = ''; }
 
@@ -425,19 +465,21 @@ els.invoiceDate.value =
       });
     }
 
+    const runMatch = debounce(async (q) => {
+      const mySeq = ++seq;
+      const items = await match(q);
+      if (mySeq !== seq) return; // a newer keystroke already superseded this
+      open(items.slice(0, 8));
+    }, 300);
+
     inputEl.addEventListener('input', () => {
       const q = inputEl.value;
-      if (!q || !q.trim()){ close(); return; }
-      const cache = loadCustomerCache();
-      const items = match(cache, q).slice(0, 8);
-      open(items);
+      if (!q || !q.trim()){ seq++; close(); return; }
+      runMatch(q);
     });
     inputEl.addEventListener('focus', () => {
       const q = inputEl.value;
-      if (!q || !q.trim()) return;
-      const cache = loadCustomerCache();
-      const items = match(cache, q).slice(0, 8);
-      open(items);
+      if (q && q.trim()) runMatch(q);
     });
     inputEl.addEventListener('blur', () => {
       // slight delay so a row's mousedown-driven pick still lands first
@@ -449,10 +491,7 @@ els.invoiceDate.value =
     els.customerName,
     document.getElementById('customerNameSuggestions'),
     {
-      match: (cache, q) => {
-        const needle = q.trim().toLowerCase();
-        return cache.filter(c => c.name.toLowerCase().includes(needle));
-      },
+      match: matchCustomersByName,
       renderLine: (item) => ({ main: item.name, sub: item.phone }),
       onPick: (item) => {
         els.customerName.value = item.name;
@@ -470,11 +509,7 @@ els.invoiceDate.value =
     els.customerPhone,
     document.getElementById('customerPhoneSuggestions'),
     {
-      match: (cache, q) => {
-        const needle = q.replace(/\D/g,'');
-        if (!needle) return [];
-        return cache.filter(c => c.phone.includes(needle));
-      },
+      match: matchCustomersByPhone,
       renderLine: (item) => ({ main: item.phone, sub: item.name }),
       onPick: (item) => {
         els.customerPhone.value = item.phone;
@@ -514,6 +549,17 @@ els.invoiceDate.value =
       hideStats(preferInlineEl());
     }
   });
+
+  // Cache the pair the moment both fields are validly filled — independent of
+  // whether the invoice ever gets saved. This is what makes suggestions show
+  // up for repeat customers even before a "Save to Sheet" has succeeded.
+  function cacheIfBothValid(){
+    const name = els.customerName.value.trim();
+    const phone = els.customerPhone.value;
+    if (name && /^\d{10}$/.test(phone)) upsertCustomerCache(name, phone);
+  }
+  els.customerName.addEventListener('blur', cacheIfBothValid);
+  els.customerPhone.addEventListener('blur', cacheIfBothValid);
 
   function validatePhone(){
     const ok = /^\d{10}$/.test(els.customerPhone.value);
@@ -1678,25 +1724,6 @@ return "```\n" + lines.join("\n") + "\n```";
         console.error(err);
         alert('Error opening WhatsApp. Please try again.');
       }
-    });
-  }
-  if (els.waTextBtn){
-    els.waTextBtn.addEventListener('click', ()=>{
-      if (!validateAll('preview')) return;
-      const raw = summaryMonospace();
-      const stripped = raw.replace(/^```\n/, '').replace(/\n```$/, '');
-      const textEl = document.getElementById('waTextPreview');
-      const card = document.getElementById('waTextCard');
-      if (textEl) textEl.textContent = stripped;
-      if (card) card.style.display = 'block';
-    });
-  }
-  const waTextCopyBtn = document.getElementById('waTextCopyBtn');
-  if (waTextCopyBtn){
-    waTextCopyBtn.addEventListener('click', ()=>{
-      const textEl = document.getElementById('waTextPreview');
-      const txt = textEl ? textEl.textContent : '';
-      navigator.clipboard.writeText(txt).catch(()=>alert('Copy failed (permission denied).'));
     });
   }
 
