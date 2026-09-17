@@ -365,8 +365,9 @@ els.invoiceDate.value =
   const fetchVisitStatsDebounced = debounce(pullAndRenderVisitStats, 500);
 
   /* ----------------------------- 6c) CUSTOMER AUTOFILL / AUTOSUGGEST ----------------------------- */
-  // Local cache of {name, phone} the app has seen, used to power the
-  // <datalist> suggestions and to autofill the other field once one is known.
+  // Local cache of {name, phone} the app has seen. Powers a custom tap-friendly
+  // dropdown (native <datalist> is unreliable on mobile browsers) and autofills
+  // the other field once one side is picked or matched.
   const CUSTOMERS_KEY = 'nusrat.customers.v1';
   const CUSTOMERS_CAP = 500; // keep the cache from growing unbounded
 
@@ -384,15 +385,6 @@ els.invoiceDate.value =
     if (idx >= 0) list[idx].name = name;
     else list.push({ name, phone: phone10 });
     saveCustomerCache(list);
-    renderCustomerDatalists();
-  }
-  function renderCustomerDatalists(){
-    const list = loadCustomerCache();
-    const nameList = document.getElementById('customerNameSuggestions');
-    const phoneList = document.getElementById('customerPhoneSuggestions');
-    const esc = s => String(s).replace(/"/g,'&quot;');
-    if (nameList) nameList.innerHTML = list.map(c => `<option value="${esc(c.name)}"></option>`).join('');
-    if (phoneList) phoneList.innerHTML = list.map(c => `<option value="${esc(c.phone)}"></option>`).join('');
   }
   function findCustomerByPhone(phone10){
     return loadCustomerCache().find(c => c.phone === phone10) || null;
@@ -401,9 +393,101 @@ els.invoiceDate.value =
     const matches = loadCustomerCache().filter(c => c.name.toLowerCase() === (name||'').trim().toLowerCase());
     return matches.length === 1 ? matches[0] : null; // only autofill on an unambiguous match
   }
-  renderCustomerDatalists();
 
-  // Typing a known name autofills the phone (only if phone is still empty).
+  /** Generic tap-to-select dropdown wired to one input.
+   *  match(list, query) -> filtered array of {name, phone}
+   *  renderLine(item) -> {main, sub} strings shown in the row
+   *  onPick(item) -> called when a row is tapped
+   */
+  function wireSuggestDropdown(inputEl, listEl, { match, renderLine, onPick }){
+    if (!inputEl || !listEl) return;
+
+    function close(){ listEl.classList.add('hidden'); listEl.innerHTML = ''; }
+
+    function open(items){
+      if (!items.length){ close(); return; }
+      listEl.innerHTML = items.map((item, i) => {
+        const { main, sub } = renderLine(item);
+        const escMain = String(main).replace(/"/g,'&quot;');
+        const escSub  = String(sub || '').replace(/"/g,'&quot;');
+        return `<div class="suggest-item" data-idx="${i}"><span>${escMain}</span>${sub ? `<span class="suggest-sub">${escSub}</span>` : ''}</div>`;
+      }).join('');
+      listEl.classList.remove('hidden');
+
+      Array.from(listEl.children).forEach((row, i) => {
+        // mousedown fires before the input's blur, so the tap registers
+        // before the dropdown would otherwise get hidden.
+        row.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          onPick(items[i]);
+          close();
+        });
+      });
+    }
+
+    inputEl.addEventListener('input', () => {
+      const q = inputEl.value;
+      if (!q || !q.trim()){ close(); return; }
+      const cache = loadCustomerCache();
+      const items = match(cache, q).slice(0, 8);
+      open(items);
+    });
+    inputEl.addEventListener('focus', () => {
+      const q = inputEl.value;
+      if (!q || !q.trim()) return;
+      const cache = loadCustomerCache();
+      const items = match(cache, q).slice(0, 8);
+      open(items);
+    });
+    inputEl.addEventListener('blur', () => {
+      // slight delay so a row's mousedown-driven pick still lands first
+      setTimeout(close, 120);
+    });
+  }
+
+  wireSuggestDropdown(
+    els.customerName,
+    document.getElementById('customerNameSuggestions'),
+    {
+      match: (cache, q) => {
+        const needle = q.trim().toLowerCase();
+        return cache.filter(c => c.name.toLowerCase().includes(needle));
+      },
+      renderLine: (item) => ({ main: item.name, sub: item.phone }),
+      onPick: (item) => {
+        els.customerName.value = item.name;
+        els.customerPhone.value = item.phone;
+        validatePhone();
+        if (/^\d{10}$/.test(item.phone)) {
+          showStatsLoading(preferInlineEl());
+          fetchVisitStatsDebounced(item.phone);
+        }
+      }
+    }
+  );
+
+  wireSuggestDropdown(
+    els.customerPhone,
+    document.getElementById('customerPhoneSuggestions'),
+    {
+      match: (cache, q) => {
+        const needle = q.replace(/\D/g,'');
+        if (!needle) return [];
+        return cache.filter(c => c.phone.includes(needle));
+      },
+      renderLine: (item) => ({ main: item.phone, sub: item.name }),
+      onPick: (item) => {
+        els.customerPhone.value = item.phone;
+        els.customerName.value = item.name;
+        validatePhone();
+        showStatsLoading(preferInlineEl());
+        fetchVisitStatsDebounced(item.phone);
+      }
+    }
+  );
+
+  // Typing a known name autofills the phone (only if phone is still empty) —
+  // separate from the dropdown pick, for an exact unambiguous match.
   els.customerName.addEventListener('input', ()=>{
     const match = findCustomerByName(els.customerName.value);
     if (match && !els.customerPhone.value) {
