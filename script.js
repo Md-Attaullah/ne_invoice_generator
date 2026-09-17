@@ -77,6 +77,7 @@
     copyBtn: document.getElementById('copyBtn'),
     clearItemsBtn: document.getElementById('clearItemsBtn'),
     vcfBtn: document.getElementById('vcfBtn'),
+    waTextBtn: document.getElementById('waTextBtn'),
     completeBtn: document.querySelector('.complete-btn'),
     /* Stats elements */
     previewCustomerStats: document.getElementById('previewCustomerStats'),
@@ -188,7 +189,41 @@
   }
 
   /* ----------------------------- 6) INIT HEADER ----------------------------- */
-  els.invoiceNumber.value = genInvoice();
+  /* Sequential NE-prefixed invoice numbers.
+     Tries the backend first (so the whole shop shares one counter);
+     falls back to a device-local counter if the backend call fails
+     or hasn't been added yet (see server snippet in project notes). */
+  const INVOICE_COUNTER_KEY = 'nusrat.invoiceCounter';
+  const INVOICE_PAD = 5; // NE00001, NE00002, ...
+
+  function padInvoiceNum(n){ return String(n).padStart(INVOICE_PAD, '0'); }
+
+  function getLocalNextInvoiceNumber(){
+    let counter = parseInt(localStorage.getItem(INVOICE_COUNTER_KEY) || '0', 10);
+    if (!Number.isFinite(counter)) counter = 0;
+    counter += 1;
+    try { localStorage.setItem(INVOICE_COUNTER_KEY, String(counter)); } catch(_){}
+    return `NE${padInvoiceNum(counter)}`;
+  }
+
+  async function fetchNextInvoiceNumberFromServer(){
+    const url = `${WEB_APP_URL}?action=getNextInvoiceNumber&token=${encodeURIComponent(AUTH_TOKEN)}`;
+    try{
+      const res = await fetch(url, { method:'GET' });
+      const data = await res.json();
+      if (data && data.ok && data.invoiceNumber) return String(data.invoiceNumber);
+    }catch(e){
+      console.warn('Invoice number: falling back to local counter.', e);
+    }
+    return null;
+  }
+
+  async function initInvoiceNumber(){
+    const serverNum = await fetchNextInvoiceNumberFromServer();
+    els.invoiceNumber.value = serverNum || getLocalNextInvoiceNumber();
+    initializeInvoiceDisplay();
+  }
+
   const today = new Date();
 els.invoiceDate.value =
   `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -308,6 +343,8 @@ els.invoiceDate.value =
 
     const stats = await fetchVisitStatsByPhone(phone10);
 
+    if (stats && stats.name) upsertCustomerCache(stats.name, phone10);
+
     setStats(preferInlineEl(), stats, phone10);
 
     if (els.previewCustomerStats){
@@ -327,6 +364,54 @@ els.invoiceDate.value =
 
   const fetchVisitStatsDebounced = debounce(pullAndRenderVisitStats, 500);
 
+  /* ----------------------------- 6c) CUSTOMER AUTOFILL / AUTOSUGGEST ----------------------------- */
+  // Local cache of {name, phone} the app has seen, used to power the
+  // <datalist> suggestions and to autofill the other field once one is known.
+  const CUSTOMERS_KEY = 'nusrat.customers.v1';
+  const CUSTOMERS_CAP = 500; // keep the cache from growing unbounded
+
+  function loadCustomerCache(){
+    try{ return JSON.parse(localStorage.getItem(CUSTOMERS_KEY) || '[]'); }catch(_){ return []; }
+  }
+  function saveCustomerCache(list){
+    try{ localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(list.slice(-CUSTOMERS_CAP))); }catch(_){}
+  }
+  function upsertCustomerCache(name, phone10){
+    name = (name || '').trim();
+    if (!name || !/^\d{10}$/.test(phone10)) return;
+    const list = loadCustomerCache();
+    const idx = list.findIndex(c => c.phone === phone10);
+    if (idx >= 0) list[idx].name = name;
+    else list.push({ name, phone: phone10 });
+    saveCustomerCache(list);
+    renderCustomerDatalists();
+  }
+  function renderCustomerDatalists(){
+    const list = loadCustomerCache();
+    const nameList = document.getElementById('customerNameSuggestions');
+    const phoneList = document.getElementById('customerPhoneSuggestions');
+    const esc = s => String(s).replace(/"/g,'&quot;');
+    if (nameList) nameList.innerHTML = list.map(c => `<option value="${esc(c.name)}"></option>`).join('');
+    if (phoneList) phoneList.innerHTML = list.map(c => `<option value="${esc(c.phone)}"></option>`).join('');
+  }
+  function findCustomerByPhone(phone10){
+    return loadCustomerCache().find(c => c.phone === phone10) || null;
+  }
+  function findCustomerByName(name){
+    const matches = loadCustomerCache().filter(c => c.name.toLowerCase() === (name||'').trim().toLowerCase());
+    return matches.length === 1 ? matches[0] : null; // only autofill on an unambiguous match
+  }
+  renderCustomerDatalists();
+
+  // Typing a known name autofills the phone (only if phone is still empty).
+  els.customerName.addEventListener('input', ()=>{
+    const match = findCustomerByName(els.customerName.value);
+    if (match && !els.customerPhone.value) {
+      els.customerPhone.value = match.phone;
+      validatePhone();
+    }
+  });
+
   // Phone input (10 digits strict)
   els.customerPhone.addEventListener('input', (e)=>{
     e.target.value = e.target.value.replace(/\D/g,'').slice(0,10);
@@ -334,6 +419,11 @@ els.invoiceDate.value =
 
     const phone10 = e.target.value;
     if (/^\d{10}$/.test(phone10)) {
+      // Instant local autofill while the server visit-stats call is in flight.
+      const cached = findCustomerByPhone(phone10);
+      if (cached && !els.customerName.value.trim()) {
+        els.customerName.value = cached.name;
+      }
       showStatsLoading(preferInlineEl());
       fetchVisitStatsDebounced(phone10);
     } else {
@@ -1307,6 +1397,7 @@ return "```\n" + lines.join("\n") + "\n```";
       try {
         const ok = await pushToGoogleSheet({ alertOnResult: true });
         if (ok && /^\d{10}$/.test(els.customerPhone.value)) {
+          upsertCustomerCache(els.customerName.value, els.customerPhone.value);
           await pullAndRenderVisitStats(els.customerPhone.value);
           if (els.previewCard.style.display !== 'none') renderPreview();
         }
@@ -1393,6 +1484,8 @@ return "```\n" + lines.join("\n") + "\n```";
           setBtnLoading(els.completeBtn, false, null, '✓ Complete Invoice');
           return;
         }
+
+        upsertCustomerCache(els.customerName.value, els.customerPhone.value);
 
         const visitCount = Number(els.previewCustomerStats?.dataset.count || 0);
         const isNewCustomer = visitCount === 0;
@@ -1503,6 +1596,26 @@ return "```\n" + lines.join("\n") + "\n```";
       }
     });
   }
+  if (els.waTextBtn){
+    els.waTextBtn.addEventListener('click', ()=>{
+      if (!validateAll('preview')) return;
+      const raw = summaryMonospace();
+      const stripped = raw.replace(/^```\n/, '').replace(/\n```$/, '');
+      const textEl = document.getElementById('waTextPreview');
+      const card = document.getElementById('waTextCard');
+      if (textEl) textEl.textContent = stripped;
+      if (card) card.style.display = 'block';
+    });
+  }
+  const waTextCopyBtn = document.getElementById('waTextCopyBtn');
+  if (waTextCopyBtn){
+    waTextCopyBtn.addEventListener('click', ()=>{
+      const textEl = document.getElementById('waTextPreview');
+      const txt = textEl ? textEl.textContent : '';
+      navigator.clipboard.writeText(txt).catch(()=>alert('Copy failed (permission denied).'));
+    });
+  }
+
   if (els.waInvoiceBtn){
     els.waInvoiceBtn.addEventListener('click', ()=>{
       if (!validateAll('whatsappInvoice')) return;
@@ -1549,4 +1662,5 @@ return "```\n" + lines.join("\n") + "\n```";
   load();
   setTab('items');
   initializeInvoiceDisplay();
+  initInvoiceNumber();
 })();

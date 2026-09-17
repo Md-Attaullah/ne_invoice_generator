@@ -63,13 +63,15 @@
 
       <div class="card">
         <label class="label">Customer Name</label>
-        <input id="customerName" class="input-field" placeholder="Enter name"/>
+        <input id="customerName" class="input-field" placeholder="Enter name" list="customerNameSuggestions" autocomplete="off"/>
+        <datalist id="customerNameSuggestions"></datalist>
 
         <label class="label margin-top">WhatsApp Number</label>
         <div class="phone-input-group">
-          <input id="customerPhone" class="input-field" type="tel" placeholder="10-digit number" maxlength="10"/>
+          <input id="customerPhone" class="input-field" type="tel" placeholder="10-digit number" maxlength="10" list="customerPhoneSuggestions" autocomplete="off"/>
           <button id="pickContactBtn" class="pick-contact-btn" type="button" title="Browse Contacts">📇</button>
         </div>
+        <datalist id="customerPhoneSuggestions"></datalist>
         <div id="phoneError" class="error" style="display:none;">Enter a valid 10-digit phone number.</div>
         <div id="inlineCustomerStats" class="customer-stats"></div>
       </div>
@@ -166,11 +168,20 @@
         <button class="action-btn copy-btn" id="copyBtn">📋 Copy</button>
         <button class="action-btn" id="vcfBtn">📥 Download VCF</button>
         <button class="action-btn" id="saveToSheetBtn">📊 Save to Sheet</button>
+        <button class="action-btn" id="waTextBtn">💬 WA Text Preview</button>
       </div>
 
       <div id="previewCard" class="preview-panel" style="display:none;">
         <div class="preview-content">
           <div id="invoicePreview"></div>
+        </div>
+      </div>
+
+      <div id="waTextCard" class="preview-panel" style="display:none;">
+        <div class="preview-content">
+          <div class="section-title">WHATSAPP MESSAGE PREVIEW</div>
+          <pre id="waTextPreview" style="white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;font-size:13px;background:#F7F8FA;padding:12px;border-radius:10px;margin-top:8px;"></pre>
+          <button id="waTextCopyBtn" class="action-btn" style="width:100%;margin-top:8px;">📋 Copy This Text</button>
         </div>
       </div>
 
