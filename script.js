@@ -1193,7 +1193,10 @@ els.invoiceDate.value =
       ...(couponLine ? [couponLine] : [])
     ];
 
-    return "```\n" + lines.join("\n") + "\n```";
+    // No ``` wrapper here on purpose: WhatsApp treats a ``` block as
+    // monospace/code and does NOT parse *bold*/_italic_ markers inside it —
+    // wrapping the whole message would silently break every bold marker above.
+    return lines.join("\n");
   }
 
 
