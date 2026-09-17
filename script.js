@@ -1148,12 +1148,12 @@ els.invoiceDate.value =
       ...(showSubtotal ? [`Subtotal: ₹${subtotal.toFixed(2)}`] : []),
       ...(gstRate > 0 && gstAmt > 0 ? [`GST (${gstRate}%): ₹${gstAmt.toFixed(2)}`] : []),
       ...(flat > 0 ? [`Discount: -₹${flat.toFixed(2)}`] : []),
-      `*Grand Total: ₹${grand.toFixed(2)}*`,
+      `Grand Total: ₹${grand.toFixed(2)}`,
     ];
 
     // Payment mode folded into the Paid line itself, e.g. "Paid: ₹900.00 (Cash) ✅"
     const paidLine = paid > 0
-      ? `Paid: ₹${paid.toFixed(2)}${els.paymentMode.value ? `(${els.paymentMode.value})` : ''} ✅`
+      ? `*Paid: ₹${paid.toFixed(2)}${els.paymentMode.value ? `(${els.paymentMode.value})` : ''} ✅*`
       : '';
 
     // COUPON
@@ -1181,17 +1181,17 @@ els.invoiceDate.value =
       `Invoice: *${els.invoiceNumber.value}*`,
       `Date: ${new Date().toLocaleDateString('en-GB')}`,
       `Customer: *${els.customerName.value}*`,
-      "-----------------------------",
+      "------------------------------------",
       ...rows,
-      "-----------------------------",
+      "------------------------------------",
       ...totals,
       // "",
       ...(paidLine ? [paidLine] : []),
-      "-----------------------------",
-      "🙂 Thanks for shopping with us!",
+      "------------------------------------",
       `⭐ Rate us: ${LINKS.googleFeedback}`,
       ...(couponLine ? [couponLine] : []),
       `⚠️ No Return.Exchange only within 7 days of purchase.`,
+      "🙂 Thanks for shopping with us!",
     ];
 
     // No ``` wrapper here on purpose: WhatsApp treats a ``` block as
