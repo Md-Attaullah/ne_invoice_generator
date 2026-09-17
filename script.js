@@ -1174,8 +1174,8 @@ els.invoiceDate.value =
     const lines = [
       "*🧾 NUSRAT ENTERPRISES*",
       "_Trusted Since 2001_",
-      "📞 7978830017, 9330066455",
-      "📍 Goutam Nagar, BBSR",
+      "📞 7978830017, 9330066455, 9040366455",
+      "📍 53, Goutam Nagar, BBSR",
       ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
       "",
       `Invoice: *${els.invoiceNumber.value}*`,
@@ -1185,12 +1185,13 @@ els.invoiceDate.value =
       ...rows,
       "-----------------------------",
       ...totals,
-      "",
+      // "",
       ...(paidLine ? [paidLine] : []),
       "-----------------------------",
-      "🙏 Thanks for shopping with us!",
+      "🙂 Thanks for shopping with us!",
       `⭐ Rate us: ${LINKS.googleFeedback}`,
-      ...(couponLine ? [couponLine] : [])
+      ...(couponLine ? [couponLine] : []),
+      `⚠️ No Return.Exchange only within 7 days of purchase.`,
     ];
 
     // No ``` wrapper here on purpose: WhatsApp treats a ``` block as
