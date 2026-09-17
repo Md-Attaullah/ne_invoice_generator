@@ -26,7 +26,7 @@
   const LINKS = {
     instagram: "https://www.instagram.com/nusrat_enterprises/",
     waChannel: "https://whatsapp.com/channel/0029VaTqsgN5Ui2gpzD62D06",
-    googleFeedback: "https://search.google.com/local/writereview?placeid=ChIJebZSWdmnGToRWa9S2iTwlgo"
+    googleFeedback: "https://tinyurl.com/NeRating"
   };
   const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwDh3hVYOpAOa12sOPpfpC0IORb6HswDBiAS-OMIZ9cu2GH4evGu5nld5_2HAC3ayOg/exec';
   const AUTH_TOKEN  = '9705322252';
@@ -1119,21 +1119,17 @@ els.invoiceDate.value =
       return toAscii(raw);
     }
 
-    function makeLine40(idx, name, qty, rate, amount) {
-      const W = { idx: 2, name: 14, qty: 3, rate: 3, amt: 5 };
-      const fIdx = padEnd(toAscii(idx), W.idx);
-      const fName = padEnd(toAscii(name).slice(0, W.name), W.name);
-      const fQty = padEnd(fmtNoDecimal(qty), W.qty);
-      const fRate = padEnd(fmtNoDecimal(rate), W.rate);
-      const fAmt = padEnd(fmtNoDecimal(amount), W.amt);
-      return `${fIdx} ${fName} ${fQty}X${fRate}=${fAmt}`;
+    // "1. Shirt          2 x Rs450 = Rs900"
+    function formatItemLine(idx, name, qty, rate, amount) {
+      const nm = padEnd(toAscii(name).slice(0, 14), 14);
+      return `${idx}. ${nm} ${fmtNoDecimal(qty)} x ₹${fmtNoDecimal(rate)} = ₹${fmtNoDecimal(amount)}`;
     }
 
     const rows = items.map((it, i) => {
       const qty = Number(it.qty) || 0;
       const rate = Number(it.rate) || 0;
       const amount = qty * rate;
-      return makeLine40(i + 1, it.name, qty, rate, amount);
+      return formatItemLine(i + 1, it.name, qty, rate, amount);
     });
 
     const subtotal = Number(els.subtotal.value || 0);
@@ -1144,19 +1140,21 @@ els.invoiceDate.value =
     const grand = Math.max(0, subtotal + gstAmt - flat);
     const paid = Number(els.paidAmount.value || 0);
 
-    const totals = [
-      ...
-(gstRate > 0
-    ? [
-        `CGST ${gstRate/2}%: ₹${(gstAmt/2).toFixed(2)}`,
-        `SGST ${gstRate/2}%: ₹${(gstAmt/2).toFixed(2)}`
-      ]
-    : []),
+    // Subtotal only earns its own line when GST or a discount is actually
+    // changing the total — otherwise Subtotal === Grand Total and it's noise.
+    const showSubtotal = (gstRate > 0 && gstAmt > 0) || flat > 0;
 
+    const totals = [
+      ...(showSubtotal ? [`Subtotal: ₹${subtotal.toFixed(2)}`] : []),
+      ...(gstRate > 0 && gstAmt > 0 ? [`GST (${gstRate}%): ₹${gstAmt.toFixed(2)}`] : []),
       ...(flat > 0 ? [`Discount: -₹${flat.toFixed(2)}`] : []),
-      `Grand Total: ₹${grand.toFixed(2)}`,
-      ...(paid > 0 ? [`Paid: ₹${paid.toFixed(2)}(${els.paymentMode.value})`] : []),
+      `*Grand Total: ₹${grand.toFixed(2)}*`,
     ];
+
+    // Payment mode folded into the Paid line itself, e.g. "Paid: ₹900.00 (Cash) ✅"
+    const paidLine = paid > 0
+      ? `Paid: ₹${paid.toFixed(2)}${els.paymentMode.value ? `(${els.paymentMode.value})` : ''} ✅`
+      : '';
 
     // COUPON
     let couponLine = "";
@@ -1171,37 +1169,32 @@ els.invoiceDate.value =
       }
     }
 
-    const columnHeader = "#  Name           Qty Rs  Amt ";
-
     const showGstin = !!(gstOn && GSTIN);
-    
 
-const lines = [
-  "Nusrat Enterprises",
-  "📞: 7978830017, 9330066455, 9040366455",
-  "📍: Plot 53, Goutam Nagar, BBSR - 751014",
-  ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
-  "Trusted Since 2001",
-  "",
-  `Invoice: ${els.invoiceNumber.value} | Date: ${new Date().toLocaleDateString('en-GB')}`,
-  `Name: ${els.customerName.value}`,
-  "-----------------------------",
-  columnHeader,
-  ...rows,
-  "-----------------------------",
-  ...totals,
-  "",
-  "Thank you for shopping with Nusrat Enterprises!",
-  ...(couponLine ? [couponLine] : [])
-  // ,
-  // "",
-  // `Review: ${LINKS.googleFeedback}`
-  // `WA Channel: ${LINKS.waChannel}`,
-  // `Instagram: ${LINKS.instagram}`
-];
+    const lines = [
+      "*🧾 NUSRAT ENTERPRISES*",
+      "_Trusted Since 2001_",
+      "📞 7978830017, 9330066455",
+      "📍 Goutam Nagar, BBSR",
+      ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
+      "",
+      `Invoice: *${els.invoiceNumber.value}*`,
+      `Date: ${new Date().toLocaleDateString('en-GB')}`,
+      `Customer: *${els.customerName.value}*`,
+      "-----------------------------",
+      ...rows,
+      "-----------------------------",
+      ...totals,
+      "",
+      ...(paidLine ? [paidLine] : []),
+      "-----------------------------",
+      "🙏 Thanks for shopping with us!",
+      `⭐ Rate us: ${LINKS.googleFeedback}`,
+      ...(couponLine ? [couponLine] : [])
+    ];
 
-return "```\n" + lines.join("\n") + "\n```";
-        }
+    return "```\n" + lines.join("\n") + "\n```";
+  }
 
 
   /* ----------------------------- 11) PDF (monospace) ----------------------------- */
