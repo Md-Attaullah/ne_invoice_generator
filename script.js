@@ -1191,7 +1191,7 @@ els.invoiceDate.value =
       "📍 Goutam Nagar, BBSR",
       ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
       "",
-      `Invoice: *${els.invoiceNumber.value}* | DT: ${new Date().toLocaleDateString('en-GB')}`,
+      `Inv: *${els.invoiceNumber.value}* | DT: ${new Date().toLocaleDateString('en-GB')}`,
       `Customer: *${els.customerName.value}*`,
       "------------------------------------",
       tableBlock,
