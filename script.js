@@ -1109,7 +1109,6 @@ els.invoiceDate.value =
   function summaryMonospace() {
     const items = getItems();
     const toAscii = s => String(s || '').replace(/[^\x00-\x7F]/g, '');
-    const padEnd = (s, n) => (s.length > n ? s.slice(0, n) : s.padEnd(n, ' '));
 
     function fmtNoDecimal(n) {
       if (n == null || n === '') return '';
@@ -1118,19 +1117,28 @@ els.invoiceDate.value =
       const raw = Number.isInteger(num) ? String(num) : num.toFixed(2).replace(/\.?0+$/, '');
       return toAscii(raw);
     }
+    function padR(s, n){ s = String(s); return s.length >= n ? s.slice(0, n) : s + ' '.repeat(n - s.length); }
+    function padL(s, n){ s = String(s); return s.length >= n ? s.slice(-n) : ' '.repeat(n - s.length) + s; }
 
-    // "1. Shirt          2 x Rs450 = Rs900"
-    function formatItemLine(idx, name, qty, rate, amount) {
-      const nm = padEnd(toAscii(name).slice(0, 14), 14);
-      return `${idx}. ${nm} ${fmtNoDecimal(qty)} x ₹${fmtNoDecimal(rate)} = ₹${fmtNoDecimal(amount)}`;
-    }
-
-    const rows = items.map((it, i) => {
+    // Item table columns. Kept narrow (name capped at 13 here, on top of the
+    // 15-char cap already enforced when the item is entered) so the whole
+    // row fits on one line on virtually any phone — a row that's too wide
+    // for the screen will wrap mid-line inside WhatsApp and break alignment,
+    // same as any monospace text.
+    const COL = { idx: 2, name: 13, qty: 3, rate: 6, amt: 7 };
+    const tableHeader = `${padR('#', COL.idx)} ${padR('Item', COL.name)} ${padL('Qty', COL.qty)} ${padL('Rate', COL.rate)} ${padL('Amt', COL.amt)}`;
+    const tableRows = items.map((it, i) => {
       const qty = Number(it.qty) || 0;
       const rate = Number(it.rate) || 0;
       const amount = qty * rate;
-      return formatItemLine(i + 1, it.name, qty, rate, amount);
+      const nm = toAscii(it.name || it.type || 'Item').slice(0, COL.name);
+      return `${padR(String(i + 1), COL.idx)} ${padR(nm, COL.name)} ${padL(fmtNoDecimal(qty), COL.qty)} ${padL(fmtNoDecimal(rate), COL.rate)} ${padL(fmtNoDecimal(amount), COL.amt)}`;
     });
+    // Wrapped in ``` on purpose — ONLY this block needs true monospace so the
+    // columns line up. Everything outside it stays normal text so *bold*/
+    // _italic_ still render (a ``` block disables all other formatting
+    // inside it, but has no effect on text outside its own pair of fences).
+    const tableBlock = ['```', tableHeader, ...tableRows, '```'].join('\n');
 
     const subtotal = Number(els.subtotal.value || 0);
     const gstOn = !!(gstToggle && gstToggle.checked);
@@ -1148,12 +1156,17 @@ els.invoiceDate.value =
       ...(showSubtotal ? [`Subtotal: ₹${subtotal.toFixed(2)}`] : []),
       ...(gstRate > 0 && gstAmt > 0 ? [`GST (${gstRate}%): ₹${gstAmt.toFixed(2)}`] : []),
       ...(flat > 0 ? [`Discount: -₹${flat.toFixed(2)}`] : []),
-      `Grand Total: ₹${grand.toFixed(2)}`,
+      `*Grand Total: ₹${grand.toFixed(2)}*`,
     ];
 
-    // Payment mode folded into the Paid line itself, e.g. "Paid: ₹900.00 (Cash) ✅"
+    // Payment mode folded into the Paid line, and the whole line bolded.
     const paidLine = paid > 0
       ? `*Paid: ₹${paid.toFixed(2)}${els.paymentMode.value ? `(${els.paymentMode.value})` : ''} ✅*`
+      : '';
+
+    // Retail-only return policy note.
+    const noReturnLine = els.saleType.value === 'Retail'
+      ? '⚠️ No Return. Exchange only within 7 days of purchase.'
       : '';
 
     // COUPON
@@ -1175,28 +1188,27 @@ els.invoiceDate.value =
       "*🧾 NUSRAT ENTERPRISES*",
       "_Trusted Since 2001_",
       "📞 7978830017, 9330066455, 9040366455",
-      "📍 53, Goutam Nagar, BBSR",
+      "📍 Goutam Nagar, BBSR",
       ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
       "",
-      `Invoice: *${els.invoiceNumber.value}*`,
-      `Date: ${new Date().toLocaleDateString('en-GB')}`,
+      `Invoice: *${els.invoiceNumber.value}* | Date: ${new Date().toLocaleDateString('en-GB')}`,
       `Customer: *${els.customerName.value}*`,
       "------------------------------------",
-      ...rows,
+      tableBlock,
       "------------------------------------",
       ...totals,
-      // "",
+      "",
       ...(paidLine ? [paidLine] : []),
       "------------------------------------",
       `⭐ Rate us: ${LINKS.googleFeedback}`,
-      ...(couponLine ? [couponLine] : []),
-      `⚠️ No Return.Exchange only within 7 days of purchase.`,
+      ...(noReturnLine ? [noReturnLine] : []),
       "🙂 Thanks for shopping with us!",
+      ...(couponLine ? [couponLine] : [])
     ];
 
-    // No ``` wrapper here on purpose: WhatsApp treats a ``` block as
-    // monospace/code and does NOT parse *bold*/_italic_ markers inside it —
-    // wrapping the whole message would silently break every bold marker above.
+    // No outer ``` wrapper around the whole message on purpose: WhatsApp
+    // treats a ``` block as monospace/code and does NOT parse *bold*/
+    // _italic_ markers inside it — only the item table above is wrapped.
     return lines.join("\n");
   }
 
