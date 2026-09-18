@@ -1126,7 +1126,7 @@ els.invoiceDate.value =
     // for the screen will wrap mid-line inside WhatsApp and break alignment,
     // same as any monospace text.
     const COL = { idx: 2, name: 13, qty: 3, rate: 3, amt: 7 };
-    const tableHeader = `${padR('#', COL.idx)} ${padR('Item', COL.name)} ${padL('Qty', COL.qty)} ${padL('Rate', COL.rate)} ${padL('Amt', COL.amt)}`;
+    const tableHeader = `${padR('#', COL.idx)} ${padR('Item', COL.name)} ${padL('Qty', COL.qty)} ${padL('₹', COL.rate)} ${padL('Amt', COL.amt)}`;
     const tableRows = items.map((it, i) => {
       const qty = Number(it.qty) || 0;
       const rate = Number(it.rate) || 0;
@@ -1191,15 +1191,15 @@ els.invoiceDate.value =
       "📍 Goutam Nagar, BBSR",
       ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
       "",
-      `Invoice: *${els.invoiceNumber.value}* | Date: ${new Date().toLocaleDateString('en-GB')}`,
+      `Invoice: *${els.invoiceNumber.value}* | DT: ${new Date().toLocaleDateString('en-GB')}`,
       `Customer: *${els.customerName.value}*`,
       "------------------------------------",
       tableBlock,
       "------------------------------------",
       ...totals,
-      "",
+      // "",
       ...(paidLine ? [paidLine] : []),
-      "------------------------------------",
+      // "------------------------------------",
       `⭐ Rate us: ${LINKS.googleFeedback}`,
       ...(noReturnLine ? [noReturnLine] : []),
       "🙂 Thanks for shopping with us!",
