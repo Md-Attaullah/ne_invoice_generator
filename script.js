@@ -1125,7 +1125,7 @@ els.invoiceDate.value =
     // row fits on one line on virtually any phone — a row that's too wide
     // for the screen will wrap mid-line inside WhatsApp and break alignment,
     // same as any monospace text.
-    const COL = { idx: 2, name: 13, qty: 3, rate: 6, amt: 7 };
+    const COL = { idx: 2, name: 13, qty: 3, rate: 3, amt: 7 };
     const tableHeader = `${padR('#', COL.idx)} ${padR('Item', COL.name)} ${padL('Qty', COL.qty)} ${padL('Rate', COL.rate)} ${padL('Amt', COL.amt)}`;
     const tableRows = items.map((it, i) => {
       const qty = Number(it.qty) || 0;
