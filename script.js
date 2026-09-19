@@ -1144,7 +1144,7 @@ els.invoiceDate.value =
     // columns line up. Everything outside it stays normal text so *bold*/
     // _italic_ still render (a ``` block disables all other formatting
     // inside it, but has no effect on text outside its own pair of fences).
-    const tableBlock = ['```', tableHeader,"------------------------------------", ...tableRows,"------------------------------------", '```'].join('\n');
+    const tableBlock = ['```', tableHeader, ...tableRows, '```'].join('\n');
 
     const subtotal = Number(els.subtotal.value || 0);
     const gstOn = !!(gstToggle && gstToggle.checked);
@@ -1199,9 +1199,7 @@ els.invoiceDate.value =
       "",
       `Inv: *${els.invoiceNumber.value}* | DT: ${new Date().toLocaleDateString('en-GB')}`,
       `Customer: *${els.customerName.value}*`,
-      // "------------------------------------",
       tableBlock,
-      // "------------------------------------",
       ...totals,
       ...(paidLine ? [paidLine] : []),
       `⭐ Rate us: ${LINKS.googleFeedback}`,
