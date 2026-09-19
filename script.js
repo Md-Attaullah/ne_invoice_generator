@@ -1128,10 +1128,10 @@ els.invoiceDate.value =
     // digits the numbers have — that's what actually produces a straight
     // table in a proportional-width table (rather than relying on Qty/Rate/
     // Amt matching in length, which they never will).
-    const W = { idx: 3, name: 12, qty: 3, rate: 5, amt: 7 };
+    const W = { idx: 3, name: 15, qty: 3, rate: 3, amt: 5 };
 
     const tableHeader =
-      `${padR('#', W.idx)}${padR('Item', W.name)} ${padL('Qty', W.qty)} ${padL('Rate', W.rate)} ${padL('Amt', W.amt)}`;
+      `${padR('#', W.idx)}${padR('Item', W.name)} ${padL('Qty', W.qty)} ${padL('Rs', W.rate)} ${padL('Amt', W.amt)}`;
 
     const tableRows = items.map((it, i) => {
       const qty = Number(it.qty) || 0;
