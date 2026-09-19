@@ -1162,7 +1162,7 @@ els.invoiceDate.value =
       ...(showSubtotal ? [`Subtotal: ₹${subtotal.toFixed(2)}`] : []),
       ...(gstRate > 0 && gstAmt > 0 ? [`GST (${gstRate}%): ₹${gstAmt.toFixed(2)}`] : []),
       ...(flat > 0 ? [`Discount: -₹${flat.toFixed(2)}`] : []),
-      ````Grand Total: ₹${grand.toFixed(2)}````,
+      `*Grand Total: ₹${grand.toFixed(2)}*`,
     ];
 
     // Payment mode folded into the Paid line, and the whole line bolded.
@@ -1172,7 +1172,7 @@ els.invoiceDate.value =
 
     // Retail-only return policy note.
     const noReturnLine = els.saleType.value === 'Retail'
-      ? '```⚠️ No Return. Exchange only within 7 days of purchase.```'
+      ? '⚠️ No Return. Exchange only within 7 days of purchase.'
       : '';
 
     // COUPON
@@ -1202,9 +1202,9 @@ els.invoiceDate.value =
       tableBlock,
       ...totals,
       ...(paidLine ? [paidLine] : []),
-      ````⭐ Rate us: ${LINKS.googleFeedback}````,
+      `⭐ Rate us: ${LINKS.googleFeedback}`,
       ...(noReturnLine ? [noReturnLine] : []),
-      "```🙂 Thanks for shopping with us!```",
+      "🙂 Thanks for shopping with us!",
       ...(couponLine ? [couponLine] : [])
     ];
 
