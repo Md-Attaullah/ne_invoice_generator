@@ -1120,19 +1120,26 @@ els.invoiceDate.value =
     function padR(s, n){ s = String(s); return s.length >= n ? s.slice(0, n) : s + ' '.repeat(n - s.length); }
     function padL(s, n){ s = String(s); return s.length >= n ? s.slice(-n) : ' '.repeat(n - s.length) + s; }
 
-    // Item table columns. Kept narrow (name capped at 13 here, on top of the
-    // 15-char cap already enforced when the item is entered) so the whole
-    // row fits on one line on virtually any phone — a row that's too wide
-    // for the screen will wrap mid-line inside WhatsApp and break alignment,
-    // same as any monospace text.
-    const COL = { idx: 2, name: 13, qty: 3, rate: 3, amt: 5 };
-    const tableHeader = `${padR('#', COL.idx)} ${padR('Item', COL.name)} ${padL('Qty', COL.qty)} ${padL('Rs', COL.rate)} ${padL('Amt', COL.amt)}`;
+    // Item table columns. "idx" already includes the trailing "." plus the
+    // gap before the name — nothing extra is joined in between, which is
+    // what was causing the stray double-space before each item name.
+    // Qty/Rate/Amt are right-aligned into FIXED widths so the "x" and "="
+    // symbols land in the exact same column on every row, however many
+    // digits the numbers have — that's what actually produces a straight
+    // table in a proportional-width table (rather than relying on Qty/Rate/
+    // Amt matching in length, which they never will).
+    const W = { idx: 3, name: 12, qty: 3, rate: 5, amt: 7 };
+
+    const tableHeader =
+      `${padR('#', W.idx)}${padR('Item', W.name)} ${padL('Qty', W.qty)} ${padL('Rate', W.rate)} ${padL('Amt', W.amt)}`;
+
     const tableRows = items.map((it, i) => {
       const qty = Number(it.qty) || 0;
       const rate = Number(it.rate) || 0;
       const amount = qty * rate;
-      const nm = toAscii(it.name || it.type || 'Item').slice(0, COL.name);
-      return `${padR(String(i + 1), COL.idx)} ${padR(nm, COL.name)} ${padL(fmtNoDecimal(qty), COL.qty)} ${padL(fmtNoDecimal(rate), COL.rate)} ${padL(fmtNoDecimal(amount), COL.amt)}`;
+      const nm = toAscii(it.name || it.type || 'Item').slice(0, W.name);
+      const idxPart = padR(`${i + 1}.`, W.idx);
+      return `${idxPart}${padR(nm, W.name)} ${padL(fmtNoDecimal(qty), W.qty)}x${padL(fmtNoDecimal(rate), W.rate)}=${padL(fmtNoDecimal(amount), W.amt)}`;
     });
     // Wrapped in ``` on purpose — ONLY this block needs true monospace so the
     // columns line up. Everything outside it stays normal text so *bold*/
@@ -1197,9 +1204,7 @@ els.invoiceDate.value =
       tableBlock,
       "------------------------------------",
       ...totals,
-      // "",
       ...(paidLine ? [paidLine] : []),
-      // "------------------------------------",
       `⭐ Rate us: ${LINKS.googleFeedback}`,
       ...(noReturnLine ? [noReturnLine] : []),
       "🙂 Thanks for shopping with us!",
