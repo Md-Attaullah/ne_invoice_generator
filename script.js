@@ -1120,25 +1120,24 @@ els.invoiceDate.value =
     function padR(s, n){ s = String(s); return s.length >= n ? s.slice(0, n) : s + ' '.repeat(n - s.length); }
     function padL(s, n){ s = String(s); return s.length >= n ? s.slice(-n) : ' '.repeat(n - s.length) + s; }
 
-    // Item table columns. "idx" already includes the trailing "." plus the
-    // gap before the name — nothing extra is joined in between, which is
-    // what was causing the stray double-space before each item name.
-    // Qty/Rate/Amt are right-aligned into FIXED widths so the "x" and "="
-    // symbols land in the exact same column on every row, however many
-    // digits the numbers have — that's what actually produces a straight
-    // table in a proportional-width table (rather than relying on Qty/Rate/
-    // Amt matching in length, which they never will).
-    const W = { idx: 3, name: 14, qty: 3, rate: 3, amt: 5 };
+    // Exactly 30 characters per line, fixed-width fields so "x"/"=" always
+    // land in the same column:
+    //   Id(2)+"."(1) + Name(13) + " "(1) + Qty(3)+"x"(1) + Rate(3)+"="(1) + Amt(5)
+    //   =    3       +   13     +   1    +      4        +      4        +  5    = 30
+    // No space between Id and Name on purpose. Values wider than their max
+    // digits (Qty>999, Rate>999, Amt>99999) truncate from the left rather
+    // than breaking the line width.
+    const W = { idxDigits: 2, name: 13, qty: 3, rate: 3, amt: 5 };
 
     const tableHeader =
-      `${padR('#', W.idx)}${padR('Item', W.name)} ${padL('Qty', W.qty)} ${padL('Rs', W.rate)} ${padL('Amt', W.amt)}`;
+      `${padR('#', W.idxDigits + 1)}${padR('Item', W.name)} ${padL('Qty', W.qty)} ${padL('Rs', W.rate)} ${padL('Amt', W.amt)}`;
 
     const tableRows = items.map((it, i) => {
       const qty = Number(it.qty) || 0;
       const rate = Number(it.rate) || 0;
       const amount = qty * rate;
       const nm = toAscii(it.name || it.type || 'Item').slice(0, W.name);
-      const idxPart = padR(`${i + 1}.`, W.idx);
+      const idxPart = padL(String(i + 1), W.idxDigits) + '.';
       return `${idxPart}${padR(nm, W.name)} ${padL(fmtNoDecimal(qty), W.qty)}x${padL(fmtNoDecimal(rate), W.rate)}=${padL(fmtNoDecimal(amount), W.amt)}`;
     });
     // Wrapped in ``` on purpose — ONLY this block needs true monospace so the
