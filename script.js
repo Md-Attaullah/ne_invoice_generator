@@ -1172,7 +1172,7 @@ els.invoiceDate.value =
 
     // Retail-only return policy note.
     const noReturnLine = els.saleType.value === 'Retail'
-      ? '⚠️ No Return. Exchange only within 7 days of purchase.'
+      ? '⚠️ No Return. Exchange only.'
       : '';
 
     // COUPON
@@ -1194,7 +1194,7 @@ els.invoiceDate.value =
       "*🧾 NUSRAT ENTERPRISES*",
       "_Trusted Since 2001_",
       "📞 7978830017, 9330066455, 9040366455",
-      "📍 Goutam Nagar, BBSR",
+      "📍 53, Goutam Nagar, BBSR",
       ...(showGstin ? [`GSTIN: ${GSTIN}`] : []),
       "",
       `Inv: *${els.invoiceNumber.value}* | DT: ${new Date().toLocaleDateString('en-GB')}`,
