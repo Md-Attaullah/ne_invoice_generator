@@ -193,6 +193,59 @@ input {
   position: relative;
 }
 
+/* Offer eligibility banner (Retail-only spend offers) */
+.offer-banner {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.offer-banner.tier-ready {
+  background: #FFF7E0;
+  border: 1.5px solid #F5C542;
+  color: #7A5B00;
+}
+
+.offer-banner.tier-progress {
+  background: #F0F3FF;
+  border: 1.5px solid #C4CAFC;
+  color: #3B4BA8;
+}
+
+.offer-banner .offer-title {
+  font-weight: 800;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.offer-banner .redeem-btn {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  background: #F5C542;
+  color: #4a3900;
+  font-weight: 800;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .offer-banner.tier-ready {
+  background: #3a2f00;
+  border-color: #8a6d1a;
+  color: #FFE49B;
+}
+
+[data-theme="dark"] .offer-banner.tier-progress {
+  background: #1E3A8A;
+  border-color: #3B4BA8;
+  color: #C7D2FE;
+}
+
 .suggest-list {
   position: absolute;
   left: 0;

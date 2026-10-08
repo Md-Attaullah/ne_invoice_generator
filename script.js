@@ -138,7 +138,11 @@
     labels.forEach(l => l.classList.remove('active'));
     radios.forEach(radio => {
       radio.addEventListener('change', () =>{
-        if (radio.checked){ setActiveByValue(radio.value); persist(); }
+        if (radio.checked){
+          setActiveByValue(radio.value);
+          persist();
+          if (typeof renderOfferBanner === 'function') renderOfferBanner(els.customerPhone.value);
+        }
       });
     });
   })();
@@ -363,6 +367,99 @@ els.invoiceDate.value =
 
   const fetchVisitStatsDebounced = debounce(pullAndRenderVisitStats, 500);
 
+  /* ----------------------------- 6d) OFFER BANNER (Retail-only spend offers) ----------------------------- */
+  // Reads live offer status from the Apps Script getOfferStatus endpoint
+  // (backed by the Offers + OfferRedemptions sheet tabs). currentOfferStatus
+  // holds the last-fetched result for whichever phone is currently entered,
+  // so both the banner and the WhatsApp invoice text can read it without
+  // re-fetching.
+  let currentOfferStatus = [];
+  const offerBannerEl = document.getElementById('offerBanner');
+
+  async function fetchOfferStatus(phone10){
+    if (!/^\d{10}$/.test(phone10)) return [];
+    const url = `${WEB_APP_URL}?action=getOfferStatus&token=${encodeURIComponent(AUTH_TOKEN)}&phone=${encodeURIComponent(phone10)}&saleType=${encodeURIComponent(els.saleType.value || 'Retail')}`;
+    try{
+      const res = await fetch(url, { method: 'GET' });
+      const data = await res.json();
+      if (data && data.ok && Array.isArray(data.offers)) return data.offers;
+    }catch(e){
+      console.warn('Offer status: server unavailable.', e);
+    }
+    return [];
+  }
+
+  async function redeemOffer(phone10, offerID){
+    try{
+      const form = new FormData();
+      form.append('payload', JSON.stringify({
+        token: AUTH_TOKEN,
+        action: 'redeemOffer',
+        phone: phone10,
+        offerID: offerID,
+        invoiceNumber: els.invoiceNumber.value,
+        customerName: els.customerName.value
+      }));
+      const res = await fetch(WEB_APP_URL, { method: 'POST', body: form });
+      let ok = false, data = null;
+      try { data = await res.json(); ok = !!(data && data.ok); } catch(_) { ok = res.ok; }
+      if (ok) {
+        await renderOfferBanner(phone10); // refresh counts immediately
+      } else {
+        alert('Could not mark redeemed — please try again.');
+      }
+    }catch(e){
+      console.error(e);
+      alert('Network error marking redeemed.');
+    }
+  }
+
+  async function renderOfferBanner(phone10){
+    if (!offerBannerEl) return;
+
+    // Retail-only, per shop policy — Wholesale never sees or earns offers.
+    if (els.saleType.value !== 'Retail' || !/^\d{10}$/.test(phone10)) {
+      offerBannerEl.classList.add('hidden');
+      currentOfferStatus = [];
+      return;
+    }
+
+    currentOfferStatus = await fetchOfferStatus(phone10);
+
+    if (!currentOfferStatus.length) {
+      offerBannerEl.classList.add('hidden');
+      return;
+    }
+
+    // Show whichever offer has an unclaimed reward first; otherwise the
+    // first offer with any progress at all.
+    const ready = currentOfferStatus.find(o => o.owed > 0);
+    const inProgress = currentOfferStatus.find(o => o.spend > 0);
+
+    if (ready) {
+      offerBannerEl.className = 'offer-banner tier-ready';
+      offerBannerEl.innerHTML = `
+        <span class="offer-title">🎁 ${ready.name} — ${ready.owed} unclaimed reward${ready.owed > 1 ? 's' : ''}!</span>
+        ₹${Number(ready.spend).toLocaleString('en-IN')} spent this offer period · reward: ${ready.rewardDesc}
+        <button type="button" class="redeem-btn" id="offerRedeemBtn">Mark 1 Redeemed</button>
+      `;
+      offerBannerEl.classList.remove('hidden');
+      const btn = document.getElementById('offerRedeemBtn');
+      if (btn) btn.addEventListener('click', () => redeemOffer(phone10, ready.offerID));
+    } else if (inProgress) {
+      offerBannerEl.className = 'offer-banner tier-progress';
+      offerBannerEl.innerHTML = `
+        <span class="offer-title">🎁 ${inProgress.name}</span>
+        ₹${Number(inProgress.spend).toLocaleString('en-IN')} spent · ₹${Number(inProgress.remaining).toLocaleString('en-IN')} more for ${inProgress.rewardDesc}
+      `;
+      offerBannerEl.classList.remove('hidden');
+    } else {
+      offerBannerEl.classList.add('hidden');
+    }
+  }
+
+  const renderOfferBannerDebounced = debounce(renderOfferBanner, 500);
+
   /* ----------------------------- 6c) CUSTOMER AUTOFILL / AUTOSUGGEST ----------------------------- */
   // Local cache of {name, phone} the app has seen. Powers a custom tap-friendly
   // dropdown (native <datalist> is unreliable on mobile browsers) and autofills
@@ -545,8 +642,10 @@ els.invoiceDate.value =
       }
       showStatsLoading(preferInlineEl());
       fetchVisitStatsDebounced(phone10);
+      renderOfferBannerDebounced(phone10);
     } else {
       hideStats(preferInlineEl());
+      if (offerBannerEl) offerBannerEl.classList.add('hidden');
     }
   });
 
@@ -1175,6 +1274,28 @@ els.invoiceDate.value =
       ? '⚠️ No Return. Exchange only.'
       : '';
 
+    // OFFER MESSAGE — Retail only. Uses spend-so-far (from the last
+    // renderOfferBanner fetch) PLUS this invoice's own Grand Total, so
+    // crossing the threshold on this very purchase still shows the
+    // congratulations line rather than only reflecting past visits.
+    let offerLine = '';
+    if (els.saleType.value === 'Retail' && currentOfferStatus.length) {
+      const withThisInvoice = currentOfferStatus.map(o => {
+        const effectiveSpend = Number(o.spend) + grand;
+        const eligibleTiers = o.threshold > 0 ? Math.floor(effectiveSpend / o.threshold) : 0;
+        const owed = eligibleTiers - Number(o.redeemed);
+        const remaining = o.threshold > 0 ? (o.threshold - (effectiveSpend % o.threshold)) : 0;
+        return { ...o, effectiveSpend, owed, remaining };
+      });
+      const ready = withThisInvoice.find(o => o.owed > 0);
+      const inProgress = withThisInvoice.find(o => o.effectiveSpend > 0);
+      if (ready) {
+        offerLine = `🎉 Congratulations! You're eligible for *${ready.rewardDesc}* — free! Ask in-store to claim.`;
+      } else if (inProgress) {
+        offerLine = `🎁 Spend ₹${Number(inProgress.remaining).toLocaleString('en-IN')} more this season for *${inProgress.rewardDesc}* free!`;
+      }
+    }
+
     // COUPON
     let couponLine = "";
     if (els.saleType.value === "Retail" && couponIsOn()) {
@@ -1202,6 +1323,7 @@ els.invoiceDate.value =
       tableBlock,
       ...totals,
       ...(paidLine ? [paidLine] : []),
+      ...(offerLine ? [offerLine] : []),
       `⭐ Rate us: ${LINKS.googleFeedback}`,
       ...(noReturnLine ? [noReturnLine] : []),
       "🙂 Thanks for shopping with us!",
@@ -1620,6 +1742,14 @@ els.invoiceDate.value =
       hideReviewModal();
       setBtnLoading(els.completeBtn, true, 'Processing…', null);
       try {
+        // Refresh BEFORE saving — summaryMonospace() below adds this
+        // invoice's own Grand Total on top of currentOfferStatus.spend, so
+        // spend here must still be the pre-save historical total, not
+        // include this invoice a second time.
+        if (/^\d{10}$/.test(els.customerPhone.value) && els.saleType.value === 'Retail') {
+          await renderOfferBanner(els.customerPhone.value);
+        }
+
         const saved = await pushToGoogleSheet({ alertOnResult: true });
         if (!saved) {
           setBtnLoading(els.completeBtn, false, null, '✓ Complete Invoice');
