@@ -1737,10 +1737,23 @@ els.invoiceDate.value =
   }
 
   if (els.reviewProceedBtn){
+    // Hard guard against a fast double-tap: both click events can land
+    // before the modal visually hides (it has no disabled state of its
+    // own), which previously let the invoice — and its offer spend — get
+    // saved twice. Checked synchronously as the very first thing in the
+    // handler, before any await, so a near-simultaneous second tap is a
+    // guaranteed no-op rather than a race.
+    let isSubmittingInvoice = false;
+
     els.reviewProceedBtn.addEventListener('click', async () => {
+      if (isSubmittingInvoice) return;
       if (!validateAll('complete')) return;
+
+      isSubmittingInvoice = true;
+      els.reviewProceedBtn.disabled = true;
       hideReviewModal();
       setBtnLoading(els.completeBtn, true, 'Processing…', null);
+
       try {
         // Refresh BEFORE saving — summaryMonospace() below adds this
         // invoice's own Grand Total on top of currentOfferStatus.spend, so
@@ -1781,6 +1794,9 @@ els.invoiceDate.value =
         console.error(err);
         alert('Error processing invoice. Please try again.');
         setBtnLoading(els.completeBtn, false, null, '✓ Complete Invoice');
+      } finally {
+        isSubmittingInvoice = false;
+        els.reviewProceedBtn.disabled = false;
       }
     });
   }
