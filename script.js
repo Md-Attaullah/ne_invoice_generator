@@ -440,7 +440,7 @@ els.invoiceDate.value =
       offerBannerEl.className = 'offer-banner tier-ready';
       offerBannerEl.innerHTML = `
         <span class="offer-title">🎁 ${ready.name} — ${ready.owed} unclaimed reward${ready.owed > 1 ? 's' : ''}!</span>
-        ₹${Number(ready.spend).toLocaleString('en-IN')} spent this offer period · reward: ${ready.rewardDesc}
+        ₹${Number(ready.spend).toLocaleString('en-IN')} counted this offer period · reward: ${ready.rewardDesc}
         <button type="button" class="redeem-btn" id="offerRedeemBtn">Mark 1 Redeemed</button>
       `;
       offerBannerEl.classList.remove('hidden');
@@ -450,7 +450,7 @@ els.invoiceDate.value =
       offerBannerEl.className = 'offer-banner tier-progress';
       offerBannerEl.innerHTML = `
         <span class="offer-title">🎁 ${inProgress.name}</span>
-        ₹${Number(inProgress.spend).toLocaleString('en-IN')} spent · ₹${Number(inProgress.remaining).toLocaleString('en-IN')} more for ${inProgress.rewardDesc}
+        ₹${Number(inProgress.spend).toLocaleString('en-IN')} counted · ₹${Number(inProgress.remaining).toLocaleString('en-IN')} more for ${inProgress.rewardDesc}
       `;
       offerBannerEl.classList.remove('hidden');
     } else {
@@ -1274,25 +1274,32 @@ els.invoiceDate.value =
       ? '⚠️ No Return. Exchange only.'
       : '';
 
-    // OFFER MESSAGE — Retail only. Uses spend-so-far (from the last
-    // renderOfferBanner fetch) PLUS this invoice's own Grand Total, so
-    // crossing the threshold on this very purchase still shows the
-    // congratulations line rather than only reflecting past visits.
+    // OFFER MESSAGE — Retail only. Credit for this invoice = Paid MINUS
+    // Bargain (Grand Total − Paid) — not just excluding the bargained
+    // amount, but subtracting it again as a deliberate penalty, so heavy
+    // haggling actively costs reward progress rather than merely not
+    // helping it. Added on top of net-credit-so-far (from the last
+    // renderOfferBanner fetch, itself computed the same way server-side),
+    // so crossing the threshold on this very purchase still shows the
+    // congratulations line immediately. Clamped at 0 so a single very
+    // heavily-bargained invoice can't push total credit negative.
     let offerLine = '';
     if (els.saleType.value === 'Retail' && currentOfferStatus.length) {
+      const bargain = Math.max(0, grand - paid);
+      const thisInvoiceCredit = paid - bargain;
       const withThisInvoice = currentOfferStatus.map(o => {
-        const effectiveSpend = Number(o.spend) + grand;
-        const eligibleTiers = o.threshold > 0 ? Math.floor(effectiveSpend / o.threshold) : 0;
+        const effectiveCredit = Math.max(0, Number(o.spend) + thisInvoiceCredit);
+        const eligibleTiers = o.threshold > 0 ? Math.floor(effectiveCredit / o.threshold) : 0;
         const owed = eligibleTiers - Number(o.redeemed);
-        const remaining = o.threshold > 0 ? (o.threshold - (effectiveSpend % o.threshold)) : 0;
-        return { ...o, effectiveSpend, owed, remaining };
+        const remaining = o.threshold > 0 ? (o.threshold - (effectiveCredit % o.threshold)) : 0;
+        return { ...o, effectiveCredit, owed, remaining };
       });
       const ready = withThisInvoice.find(o => o.owed > 0);
-      const inProgress = withThisInvoice.find(o => o.effectiveSpend > 0);
+      const inProgress = withThisInvoice.find(o => o.effectiveCredit > 0);
       if (ready) {
         offerLine = `🎉 Congratulations! You're eligible for *${ready.rewardDesc}* — free! Ask in-store to claim.`;
       } else if (inProgress) {
-        offerLine = `🎁 Spend ₹${Number(inProgress.remaining).toLocaleString('en-IN')} more this season for *${inProgress.rewardDesc}* free!`;
+        offerLine = `🎁 Pay ₹${Number(inProgress.remaining).toLocaleString('en-IN')} more this season for *${inProgress.rewardDesc}* free!`;
       }
     }
 
