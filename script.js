@@ -1872,10 +1872,19 @@ els.invoiceDate.value =
     }
   }
   if (els.whatsAppBtn) {
-    els.whatsAppBtn.addEventListener('click', () => {
+    els.whatsAppBtn.addEventListener('click', async () => {
       if (!validateAll('whatsapp')) return;
 
       try {
+        // Unlike Complete Invoice, this button doesn't save anything, so
+        // there's no double-count risk in refreshing here — just make sure
+        // currentOfferStatus is actually populated before building the
+        // message, rather than relying on whatever the debounced
+        // phone-typing fetch last happened to leave it as.
+        if (/^\d{10}$/.test(els.customerPhone.value) && els.saleType.value === 'Retail') {
+          await renderOfferBanner(els.customerPhone.value);
+        }
+
         const phone = `91${els.customerPhone.value}`;
         const msg = summaryMonospace();
         
