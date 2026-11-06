@@ -928,6 +928,84 @@ els.invoiceDate.value =
     `).join('');
   }
 
+  /* ----------------------------- UPI QR (Amount Paid) ----------------------------- */
+  var UPI_ID = 'Q002318308@ybl';
+  var UPI_PAYEE = 'Nusrat Enterprises';
+  var upiQrOpen = false;
+  var upiQrLastUrl = '';
+
+  function refreshUpiQr(){
+    const btn  = document.getElementById('showUpiQrBtn');
+    const card = document.getElementById('upiQrCard');
+    const err  = document.getElementById('upiQrError');
+    const box  = document.getElementById('upiQrBox');
+    if (!btn || !card || !err || !box) return;
+
+    // Button is only available for UPI mode
+    const isUpi = els.paymentMode.value === 'UPI';
+    btn.style.display = isUpi ? 'block' : 'none';
+    if (!isUpi) {
+      upiQrOpen = false;
+      card.style.display = 'none';
+      err.style.display = 'none';
+      return;
+    }
+
+    btn.textContent = upiQrOpen ? 'Hide UPI QR' : '📱 Show UPI QR';
+    if (!upiQrOpen) {
+      card.style.display = 'none';
+      err.style.display = 'none';
+      return;
+    }
+
+    // QR amount = Amount Paid
+    const paid  = toNumber(els.paidAmount.value);
+    const grand = toNumber(els.grandTotal.value);
+    if (!(paid > 0) || paid > grand) {
+      card.style.display = 'none';
+      err.textContent = !(paid > 0)
+        ? 'Enter Amount Paid to generate the QR.'
+        : 'Paid cannot exceed Grand Total.';
+      err.style.display = 'block';
+      return;
+    }
+    err.style.display = 'none';
+    card.style.display = 'block';
+
+    const inv = (els.invoiceNumber && els.invoiceNumber.value) ? els.invoiceNumber.value : '';
+    const note = ('Invoice ' + inv).trim();
+    const url = 'upi://pay?pa=' + encodeURIComponent(UPI_ID)
+      + '&pn=' + encodeURIComponent(UPI_PAYEE)
+      + '&am=' + paid.toFixed(2)
+      + '&cu=INR&tn=' + encodeURIComponent(note);
+
+    document.getElementById('upiQrAmt').textContent = paid.toFixed(2);
+    document.getElementById('upiPayLink').href = url;
+
+    if (url === upiQrLastUrl && box.firstChild) return; // nothing changed
+    upiQrLastUrl = url;
+    box.innerHTML = '';
+    try {
+      new QRCode(box, { text: url, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+    } catch (e) {
+      box.textContent = 'QR could not load. Check internet connection.';
+    }
+  }
+
+  (function initUpiQrUi(){
+    const btn = document.getElementById('showUpiQrBtn');
+    const save = document.getElementById('upiSaveQrBtn');
+    if (btn) btn.addEventListener('click', () => { upiQrOpen = !upiQrOpen; refreshUpiQr(); });
+    if (save) save.addEventListener('click', () => {
+      const canvas = document.querySelector('#upiQrBox canvas');
+      if (!canvas) return;
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = 'upi-qr-' + toNumber(els.paidAmount.value).toFixed(2) + '.png';
+      a.click();
+    });
+  })();
+
   function recalc(){
     const items=getItems();
     const countQty = items.reduce((s,i)=> s + toNumber(i.qty), 0);
@@ -966,6 +1044,7 @@ els.invoiceDate.value =
 
     renderItemsLivePreview();
     validatePaid();
+    refreshUpiQr();
   }
 
   // Paid validation input constraints
