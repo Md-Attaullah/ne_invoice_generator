@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
 
@@ -161,6 +162,20 @@
         <div class="due-change" id="dueChange">
           <span id="dueLabel">Due</span>
           <span class="due-value">₹ <span id="dueVal"></span></span>
+        </div>
+      </div>
+
+      <!-- UPI QR (shown only when payment mode = UPI) -->
+      <button type="button" id="showUpiQrBtn" class="upi-show-btn" style="display:none;">📱 Show UPI QR</button>
+      <div id="upiQrError" class="error" style="display:none; margin-bottom:12px;"></div>
+      <div id="upiQrCard" class="card upi-qr-card" style="display:none;">
+        <div class="section-title">SCAN TO PAY (UPI)</div>
+        <div id="upiQrBox" class="upi-qr-box"></div>
+        <div class="upi-qr-amount">₹ <span id="upiQrAmt">0.00</span></div>
+        <div class="upi-qr-id">Q002318308@ybl · Nusrat Enterprises</div>
+        <div class="upi-qr-actions">
+          <a id="upiPayLink" class="upi-qr-link" href="#">Open UPI app</a>
+          <button type="button" id="upiSaveQrBtn" class="upi-qr-save">Save QR</button>
         </div>
       </div>
 
